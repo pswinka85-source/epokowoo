@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { epochs } from "@/data/epochs";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import EpochCard from "@/components/EpochCard";
 import { CheckCircle, Brain, TrendingUp } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const { user } = useAuth();
@@ -45,12 +46,14 @@ const Index = () => {
     fetchStats();
   }, [user]);
 
+  const isMobile = useIsMobile();
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero */}
       <header className="relative overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+        <div className="absolute top-10 -left-20 w-[28rem] h-[28rem] bg-primary/8 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute -bottom-10 -right-20 w-[32rem] h-[32rem] bg-accent/6 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="relative max-w-6xl mx-auto px-6 pt-12 pb-10 md:pt-20 md:pb-14">
           {user ? (
@@ -131,14 +134,26 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Epochs grid */}
-      <main className="max-w-6xl mx-auto px-6 pb-16">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {epochs.map((epoch, index) => (
-            <EpochCard key={epoch.id} epoch={epoch} index={index} />
-          ))}
-        </div>
-
+      {/* Epochs */}
+      <main className="max-w-6xl mx-auto pb-16">
+        {isMobile ? (
+          <div className="px-4">
+            <h2 className="font-display text-lg font-bold text-foreground mb-3">Epoki literackie</h2>
+            <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
+              {epochs.map((epoch, index) => (
+                <div key={epoch.id} className="min-w-[75vw] snap-start">
+                  <EpochCard epoch={epoch} index={index} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="px-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {epochs.map((epoch, index) => (
+              <EpochCard key={epoch.id} epoch={epoch} index={index} />
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
