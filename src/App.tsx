@@ -7,7 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Header from "./components/Header";
 import ScrollToTop from "./components/ScrollToTop";
 
-import MobileBlock from "./components/MobileBlock";
+
 import Index from "./pages/Index";
 import EpochDetail from "./pages/EpochDetail";
 import Auth from "./pages/Auth";
@@ -23,7 +23,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <MobileBlock />
+        
         <AuthProvider>
           <ScrollToTop />
           <Header />
