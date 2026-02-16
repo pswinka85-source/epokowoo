@@ -139,11 +139,6 @@ const Index = () => {
           ))}
         </div>
 
-        <footer className="mt-20 pt-8 text-center">
-          <p className="text-sm text-muted-foreground font-body">
-            Epochowo · Materiały do matury z języka polskiego · Powodzenia! 🎓
-          </p>
-        </footer>
       </main>
     </div>
   );
