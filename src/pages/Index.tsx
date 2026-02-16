@@ -1,141 +1,175 @@
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { epochs } from "@/data/epochs";
 import { useAuth } from "@/hooks/useAuth";
-import { BookOpen, Brain, FileText, CheckCircle, ArrowRight } from "lucide-react";
-
-const features = [
-  {
-    icon: <BookOpen size={24} />,
-    title: "Interaktywne lekcje",
-    desc: "Przystępne materiały do każdej epoki literackiej, podzielone na przejrzyste bloki.",
-  },
-  {
-    icon: <Brain size={24} />,
-    title: "Quizy i e-testy",
-    desc: "Sprawdź swoją wiedzę dzięki quizom dopasowanym do każdego tematu.",
-  },
-  {
-    icon: <FileText size={24} />,
-    title: "Karty pracy",
-    desc: "Pobieraj gotowe materiały do druku i ćwicz offline.",
-  },
-  {
-    icon: <CheckCircle size={24} />,
-    title: "Śledzenie postępów",
-    desc: "Monitoruj swoje wyniki i wracaj do tematów, które wymagają powtórki.",
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
+import EpochCard from "@/components/EpochCard";
+import { CheckCircle, Brain, TrendingUp } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const { user } = useAuth();
+  const [stats, setStats] = useState<{
+    completedLessons: number;
+    totalLessonsWithTest: number;
+    averageScore: number;
+    totalAttempts: number;
+  } | null>(null);
 
-  if (user) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-16">
-        <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground text-center mb-3">
-          Cześć! 👋
-        </h1>
-        <p className="text-muted-foreground font-body text-center mb-8 max-w-md">
-          Wybierz epokę i rozpocznij naukę — wszystko czego potrzebujesz jest w zakładce Epoki.
-        </p>
-        <Link
-          to="/epoka/antyk"
-          className="h-12 px-8 rounded-xl bg-primary text-primary-foreground text-sm font-body font-semibold flex items-center gap-2 hover:bg-primary/90 transition-colors"
-        >
-          Przejdź do nauki
-          <ArrowRight size={16} />
-        </Link>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!user) return;
+      const { data: results } = await supabase
+        .from("lesson_test_results")
+        .select("best_score, total_questions, attempts")
+        .eq("user_id", user.id);
+
+      if (results && results.length > 0) {
+        const totalScore = results.reduce((sum, r) => sum + (r.total_questions > 0 ? (r.best_score / r.total_questions) * 100 : 0), 0);
+        const avgScore = Math.round(totalScore / results.length);
+        const totalAttempts = results.reduce((sum, r) => sum + r.attempts, 0);
+        setStats({
+          completedLessons: results.length,
+          totalLessonsWithTest: results.length,
+          averageScore: avgScore,
+          totalAttempts,
+        });
+      } else {
+        setStats({
+          completedLessons: 0,
+          totalLessonsWithTest: 0,
+          averageScore: 0,
+          totalAttempts: 0,
+        });
+      }
+    };
+    fetchStats();
+  }, [user]);
+
+  const isMobile = useIsMobile();
 
   return (
     <div className="min-h-screen bg-background">
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="absolute top-0 -left-32 w-[36rem] h-[36rem] bg-primary/8 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 -right-32 w-[40rem] h-[40rem] bg-accent/6 rounded-full blur-[140px] pointer-events-none" />
+      <header className="relative overflow-hidden">
+        <div className="absolute top-10 -left-20 w-[28rem] h-[28rem] bg-primary/8 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute -bottom-10 -right-20 w-[32rem] h-[32rem] bg-accent/6 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="relative max-w-3xl mx-auto px-6 pt-20 pb-16 md:pt-32 md:pb-24 text-center">
-          <span className="inline-block text-xs font-body font-semibold uppercase tracking-[0.15em] text-primary bg-primary/10 px-3 py-1 rounded-full mb-6">
-            Matura z polskiego
-          </span>
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground leading-[1.08] mb-5">
-            Epoki literackie
-            <br />
-            <span className="text-primary">bez stresu</span>
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground font-body leading-relaxed max-w-xl mx-auto mb-10">
-            Interaktywne lekcje, quizy i materiały do nauki — wszystko czego
-            potrzebujesz, by zdać maturę z polskiego.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              to="/auth"
-              className="h-12 px-8 rounded-xl bg-primary text-primary-foreground text-sm font-body font-semibold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
-            >
-              Zacznij za darmo
-              <ArrowRight size={16} />
-            </Link>
-            <Link
-              to="/auth"
-              className="h-12 px-8 rounded-xl bg-secondary text-secondary-foreground text-sm font-body font-semibold flex items-center justify-center hover:bg-secondary/80 transition-colors"
-            >
-              Mam już konto
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="max-w-4xl mx-auto px-6 pb-20 md:pb-28">
-        <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground text-center mb-3">
-          Wszystko w jednym miejscu
-        </h2>
-        <p className="text-muted-foreground font-body text-center mb-10 max-w-lg mx-auto">
-          Platforma stworzona z myślą o uczniach przygotowujących się do matury.
-        </p>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {features.map((f) => (
-            <div
-              key={f.title}
-              className="rounded-2xl border border-border bg-card p-6 flex gap-4 items-start hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5 transition-all duration-300"
-            >
-              <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                {f.icon}
-              </div>
-              <div>
-                <h3 className="font-display text-base font-bold text-foreground mb-1">
-                  {f.title}
-                </h3>
-                <p className="text-sm text-muted-foreground font-body leading-relaxed">
-                  {f.desc}
+        <div className="relative max-w-6xl mx-auto px-6 pt-12 pb-10 md:pt-20 md:pb-14">
+          {user ? (
+            <div>
+              <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2">
+                Cześć! 👋
+              </h1>
+              <p className="text-lg text-muted-foreground font-body leading-relaxed mb-8">
+                Oto Twoje postępy w nauce.
+              </p>
+              {stats && (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <StatCard
+                    icon={<CheckCircle size={20} />}
+                    value={stats.completedLessons}
+                    label="Opracowanych tematów"
+                    sublabel={`${stats.totalAttempts} prób łącznie`}
+                    color="primary"
+                  />
+                  <StatCard
+                    icon={<Brain size={20} />}
+                    value={`${stats.averageScore}%`}
+                    label="Średni wynik"
+                    sublabel="z e-testów"
+                    color="accent"
+                  />
+                  <StatCard
+                    icon={<TrendingUp size={20} />}
+                    value={epochs.length}
+                    label="Epok"
+                    sublabel="do nauki"
+                    color="primary"
+                  />
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+              <div className="max-w-2xl">
+                <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground leading-[1.1] mb-5">
+                  Epoki literackie<br />
+                  <span className="text-foreground">bez stresu</span>
+                </h1>
+                <p className="text-lg text-muted-foreground font-body leading-relaxed max-w-lg">
+                  Interaktywne lekcje, quizy i materiały do nauki — wszystko czego potrzebujesz, by zdać maturę z polskiego.
                 </p>
+                <div className="flex flex-col sm:flex-row gap-3 mt-6 md:hidden">
+                  <Link
+                    to="/auth"
+                    className="h-11 px-6 rounded-xl bg-primary text-primary-foreground text-sm font-body font-semibold flex items-center justify-center hover:bg-primary/90 transition-colors"
+                  >
+                    Zaloguj się
+                  </Link>
+                  <Link
+                    to="/auth"
+                    className="h-11 px-6 rounded-xl bg-secondary text-secondary-foreground text-sm font-body font-semibold flex items-center justify-center hover:bg-secondary/80 transition-colors"
+                  >
+                    Zarejestruj się
+                  </Link>
+                </div>
+              </div>
+              <div className="hidden md:flex flex-col gap-3 shrink-0">
+                <Link
+                  to="/auth"
+                  className="h-11 px-6 rounded-xl bg-primary text-primary-foreground text-sm font-body font-semibold flex items-center justify-center hover:bg-primary/90 transition-colors"
+                >
+                  Zaloguj się
+                </Link>
+                <Link
+                  to="/auth"
+                  className="h-11 px-6 rounded-xl bg-secondary text-secondary-foreground text-sm font-body font-semibold flex items-center justify-center hover:bg-secondary/80 transition-colors"
+                >
+                  Zarejestruj się
+                </Link>
               </div>
             </div>
-          ))}
+          )}
         </div>
-      </section>
+      </header>
 
-      {/* CTA */}
-      <section className="max-w-3xl mx-auto px-6 pb-20 md:pb-28 text-center">
-        <div className="rounded-3xl bg-primary/5 border border-primary/10 p-10 md:p-14">
-          <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">
-            Gotowy na maturę?
-          </h2>
-          <p className="text-muted-foreground font-body mb-8 max-w-md mx-auto">
-            Dołącz do platformy i zacznij naukę epok literackich już teraz.
-          </p>
-          <Link
-            to="/auth"
-            className="inline-flex h-12 px-8 rounded-xl bg-primary text-primary-foreground text-sm font-body font-semibold items-center gap-2 hover:bg-primary/90 transition-colors"
-          >
-            Zarejestruj się
-            <ArrowRight size={16} />
-          </Link>
-        </div>
-      </section>
+      {/* Epochs */}
+      <main className="max-w-6xl mx-auto pb-16">
+        {isMobile ? (
+          <div className="px-4">
+            <h2 className="font-display text-lg font-bold text-foreground mb-3">Epoki literackie</h2>
+            <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
+              {epochs.map((epoch, index) => (
+                <div key={epoch.id} className="min-w-[75vw] snap-start">
+                  <EpochCard epoch={epoch} index={index} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="px-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {epochs.map((epoch, index) => (
+              <EpochCard key={epoch.id} epoch={epoch} index={index} />
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
 };
+
+const StatCard = ({ icon, value, label, sublabel, color }: { icon: React.ReactNode; value: number | string; label: string; sublabel?: string; color: "primary" | "accent" }) => (
+  <div className="rounded-2xl border border-border bg-card p-5 flex items-center gap-4">
+    <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${color === "primary" ? "bg-primary/10 text-primary" : "bg-accent/10 text-accent"}`}>
+      {icon}
+    </div>
+    <div>
+      <p className="font-display text-2xl font-bold text-foreground leading-none">{value}</p>
+      <p className="text-sm text-muted-foreground font-body mt-0.5">{label}</p>
+      {sublabel && <p className="text-xs text-muted-foreground/70 font-body">{sublabel}</p>}
+    </div>
+  </div>
+);
 
 export default Index;
