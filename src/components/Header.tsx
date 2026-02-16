@@ -65,7 +65,7 @@ const Header = () => {
 
         {/* Dropdown menu */}
         <div
-          className={`absolute right-0 top-[calc(100%-8px)] w-60 rounded-2xl bg-card shadow-[var(--shadow-elevated)] py-2 z-[5] transition-all duration-300 origin-top-right ${
+          className={`absolute right-0 top-full mt-3 w-60 rounded-2xl bg-card shadow-[var(--shadow-elevated)] py-2 z-[5] transition-all duration-300 origin-top-right ${
             menuOpen
               ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
               : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
