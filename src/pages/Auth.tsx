@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
-import logo from "@/assets/logo.png";
+import { Eye, EyeOff } from "lucide-react";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -64,10 +63,6 @@ const Auth = () => {
           mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
         }`}
       >
-        {/* Logo */}
-        <div className="flex justify-center mb-10">
-          <img src={logo} alt="Epokowo" className="h-8 opacity-90" />
-        </div>
 
         {/* Card */}
         <div className="rounded-3xl border border-border bg-card p-8 md:p-10 shadow-[var(--shadow-elevated)]">
@@ -164,15 +159,12 @@ const Auth = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-body font-semibold text-sm hover:bg-primary/90 transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 group mt-2"
+              className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-body font-semibold text-sm hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 mt-2 shadow-md hover:shadow-lg"
             >
               {submitting ? (
                 <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
               ) : (
-                <>
-                  {isLogin ? "Zaloguj się" : "Zarejestruj się"}
-                  <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
-                </>
+                isLogin ? "Zaloguj się" : "Zarejestruj się"
               )}
             </button>
           </form>
