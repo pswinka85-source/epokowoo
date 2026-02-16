@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, Shield, LogIn, LogOut, Menu, X } from "lucide-react";
+import { BookOpen, Shield, LogIn, LogOut, Menu, X, User, Mail } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/logo.png";
 
@@ -35,6 +35,27 @@ const Header = () => {
             <BookOpen size={16} className="text-primary" />
             Epoki
           </Link>
+
+          {user && (
+            <>
+              <Link
+                to="/profil"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 text-sm font-body font-medium text-foreground hover:bg-secondary transition-colors"
+              >
+                <User size={16} className="text-primary" />
+                Profil
+              </Link>
+              <Link
+                to="/kontakt"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 text-sm font-body font-medium text-foreground hover:bg-secondary transition-colors"
+              >
+                <Mail size={16} className="text-primary" />
+                Kontakt
+              </Link>
+            </>
+          )}
 
           {hasAdminRole && (
             <Link
