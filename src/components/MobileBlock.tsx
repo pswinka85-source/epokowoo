@@ -1,22 +1,22 @@
-import { Monitor, Tablet } from "lucide-react";
+import { Monitor } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const MobileBlock = () => (
-  <div className="fixed inset-0 z-[9999] bg-background flex items-center justify-center p-8 md:hidden">
-    <div className="text-center max-w-sm">
-      <img src={logo} alt="Epochowo" className="h-8 mx-auto mb-8" />
-      <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
-        <Monitor size={32} className="text-primary" />
+  <div className="fixed inset-0 z-[9999] bg-background flex flex-col items-center justify-center p-8 lg:hidden">
+    <div className="text-center max-w-xs">
+      <img src={logo} alt="Epochowo" className="h-7 mx-auto mb-10 opacity-80" />
+
+      <div className="w-14 h-14 rounded-xl bg-primary/8 flex items-center justify-center mx-auto mb-5">
+        <Monitor size={26} className="text-primary" />
       </div>
-      <h1 className="font-display text-2xl font-bold text-foreground mb-3">
-        Strona niedostępna na telefonie
+
+      <h1 className="font-display text-xl font-semibold text-foreground mb-2">
+        Otwórz na komputerze
       </h1>
-      <p className="text-muted-foreground font-body leading-relaxed mb-6">
-        Epochowo działa wyłącznie na tabletach i komputerach. Otwórz stronę na większym ekranie, aby korzystać z platformy.
+
+      <p className="text-muted-foreground font-body text-sm leading-relaxed">
+        Epochowo wymaga większego ekranu. Przełącz się na komputer lub włącz widok pulpitu w przeglądarce.
       </p>
-      <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground font-body">
-        <Tablet size={16} /> Tablet lub komputer
-      </div>
     </div>
   </div>
 );
