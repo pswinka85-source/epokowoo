@@ -58,9 +58,21 @@ const Index = () => {
               <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2">
                 Cześć! 👋
               </h1>
-              <p className="text-lg text-muted-foreground font-body leading-relaxed mb-8">
+              <p className="text-lg text-muted-foreground font-body leading-relaxed mb-4">
                 Oto Twoje postępy w nauce.
               </p>
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-sm font-body text-muted-foreground">Postęp e-testów</span>
+                  <span className="text-sm font-body font-semibold text-foreground">{stats ? `${stats.averageScore}%` : '0%'}</span>
+                </div>
+                <div className="h-3 w-full rounded-full bg-white overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{ width: `${stats?.averageScore ?? 0}%`, backgroundColor: 'hsl(265, 60%, 55%)' }}
+                  />
+                </div>
+              </div>
               {stats && (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <StatCard
