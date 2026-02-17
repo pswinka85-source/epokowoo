@@ -56,13 +56,9 @@
     --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
     --font-body: 'DM Sans', system-ui, sans-serif;
 
-    --shadow-card: 0 1px 4px 0 rgb(0 0 0 / 0.03), 0 1px 2px -1px rgb(0 0 0 / 0.02);
-    --shadow-card-hover: 0 12px 28px -6px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.04);
-    --shadow-elevated: 0 24px 48px -12px rgb(0 0 0 / 0.15);
-
-    --gradient-primary: linear-gradient(135deg, hsl(245 58% 51%), hsl(280 65% 55%));
-    --gradient-accent: linear-gradient(135deg, hsl(30 90% 55%), hsl(350 80% 58%));
-    --gradient-hero: linear-gradient(160deg, hsl(245 58% 51% / 0.08), hsl(280 65% 55% / 0.04), transparent);
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+    --shadow-card-hover: 0 10px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+    --shadow-elevated: 0 20px 40px -8px rgb(0 0 0 / 0.12);
   }
 
   .dark {
@@ -95,12 +91,8 @@
     --ring: 250 65% 65%;
 
     --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.2);
-    --shadow-card-hover: 0 12px 28px -6px rgb(0 0 0 / 0.35);
-    --shadow-elevated: 0 24px 48px -12px rgb(0 0 0 / 0.45);
-
-    --gradient-primary: linear-gradient(135deg, hsl(250 65% 65%), hsl(280 70% 70%));
-    --gradient-accent: linear-gradient(135deg, hsl(30 85% 58%), hsl(350 75% 62%));
-    --gradient-hero: linear-gradient(160deg, hsl(250 65% 65% / 0.1), hsl(280 70% 70% / 0.05), transparent);
+    --shadow-card-hover: 0 10px 25px -5px rgb(0 0 0 / 0.3);
+    --shadow-elevated: 0 20px 40px -8px rgb(0 0 0 / 0.4);
   }
 }
 
@@ -127,27 +119,5 @@
   }
   .font-body {
     font-family: var(--font-body);
-  }
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-  .text-gradient-primary {
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .bg-gradient-primary {
-    background: var(--gradient-primary);
-  }
-  .bg-gradient-accent {
-    background: var(--gradient-accent);
-  }
-  .bg-gradient-hero {
-    background: var(--gradient-hero);
   }
 }
