@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Plus, Trash2, Save, GripVertical, ChevronDown, ChevronUp, Image, Video, Type, AlertCircle, Brain, Heading, ClipboardList, Clock } from "lucide-react";
 import type { Json } from "@/integrations/supabase/types";
 import { toast } from "sonner";
+import AdminETestEditor from "./AdminETestEditor";
 
 type AdvancedQuestionType = "abcd" | "fill_blank" | "matching" | "table_gap" | "ordering";
 
@@ -64,15 +65,7 @@ export default function AdminLessonEditor({ epochId, epochName, initialEditId, o
   const [editPublished, setEditPublished] = useState(false);
   const [editRequiresAuth, setEditRequiresAuth] = useState(false);
   const [editTestQuizId, setEditTestQuizId] = useState<string | null>(null);
-  const [availableQuizzes, setAvailableQuizzes] = useState<{ id: string; title: string }[]>([]);
   const [saving, setSaving] = useState(false);
-
-  // Fetch available quizzes for this epoch
-  useEffect(() => {
-    supabase.from("quizzes").select("id, title").eq("epoch_id", epochId).then(({ data }) => {
-      if (data) setAvailableQuizzes(data);
-    });
-  }, [epochId]);
 
   const fetchLessons = async () => {
     const { data } = await supabase.from("lessons").select("*").eq("epoch_id", epochId).order("sort_order");
@@ -205,20 +198,14 @@ export default function AdminLessonEditor({ epochId, epochName, initialEditId, o
           <input value={editTitle} onChange={e => setEditTitle(e.target.value)} placeholder="Tytuł lekcji" className="w-full h-10 px-3 rounded-md border border-input bg-background text-foreground font-display text-lg font-bold focus:outline-none focus:ring-2 focus:ring-ring" />
           <textarea value={editDesc} onChange={e => setEditDesc(e.target.value)} placeholder="Opis lekcji" rows={2} className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
           
-          {/* Test quiz selector */}
-          <div className="flex items-center gap-3">
-            <label className="text-sm font-body font-medium text-foreground whitespace-nowrap">E-test (quiz testowy):</label>
-            <select
-              value={editTestQuizId || ""}
-              onChange={e => setEditTestQuizId(e.target.value || null)}
-              className="flex-1 h-9 px-3 rounded-md border border-input bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="">Brak</option>
-              {availableQuizzes.map(q => (
-                <option key={q.id} value={q.id}>{q.title}</option>
-              ))}
-            </select>
-          </div>
+          {/* E-test editor */}
+          <AdminETestEditor
+            lessonId={editingId}
+            lessonTitle={editTitle}
+            epochId={epochId}
+            testQuizId={editTestQuizId}
+            onTestQuizIdChange={setEditTestQuizId}
+          />
         </div>
 
         {/* Blocks */}
