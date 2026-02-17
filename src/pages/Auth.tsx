@@ -7,8 +7,11 @@ import { Eye, EyeOff } from "lucide-react";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgot, setIsForgot] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -31,15 +34,33 @@ const Auth = () => {
     setMessage("");
     setSubmitting(true);
 
+    if (isForgot) {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) setError(error.message);
+      else setMessage("Sprawdź swoją skrzynkę e-mail — wysłaliśmy link do resetowania hasła.");
+      setSubmitting(false);
+      return;
+    }
+
     if (isLogin) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setError(error.message);
       else navigate("/");
     } else {
+      if (!firstName.trim() || !lastName.trim()) {
+        setError("Podaj imię i nazwisko.");
+        setSubmitting(false);
+        return;
+      }
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: window.location.origin },
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: { display_name: `${firstName.trim()} ${lastName.trim()}` },
+        },
       });
       if (error) setError(error.message);
       else setMessage("Sprawdź swoją skrzynkę e-mail, aby potwierdzić rejestrację.");
@@ -49,6 +70,7 @@ const Auth = () => {
 
   const toggleMode = () => {
     setIsLogin(!isLogin);
+    setIsForgot(false);
     setError("");
     setMessage("");
   };
@@ -68,42 +90,78 @@ const Auth = () => {
         {/* Card */}
         <div className="rounded-3xl border border-border bg-card p-8 md:p-10 shadow-[var(--shadow-elevated)]">
           {/* Tab switcher */}
-          <div className="flex rounded-2xl bg-secondary p-1 mb-8">
-            <button
-              onClick={() => toggleMode()}
-              className={`flex-1 h-10 rounded-xl text-sm font-body font-semibold transition-all duration-300 ${
-                isLogin
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Logowanie
-            </button>
-            <button
-              onClick={() => toggleMode()}
-              className={`flex-1 h-10 rounded-xl text-sm font-body font-semibold transition-all duration-300 ${
-                !isLogin
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Rejestracja
-            </button>
-          </div>
+          {!isForgot && (
+            <div className="flex rounded-2xl bg-secondary p-1 mb-8">
+              <button
+                onClick={() => { setIsLogin(true); setIsForgot(false); setError(""); setMessage(""); }}
+                className={`flex-1 h-10 rounded-xl text-sm font-body font-semibold transition-all duration-300 ${
+                  isLogin
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Logowanie
+              </button>
+              <button
+                onClick={() => { setIsLogin(false); setIsForgot(false); setError(""); setMessage(""); }}
+                className={`flex-1 h-10 rounded-xl text-sm font-body font-semibold transition-all duration-300 ${
+                  !isLogin
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Rejestracja
+              </button>
+            </div>
+          )}
 
           {/* Heading */}
           <div className="mb-6">
             <h1 className="font-display text-2xl font-bold text-foreground">
-              {isLogin ? "Witaj ponownie" : "Stwórz konto"}
+              {isForgot ? "Resetowanie hasła" : isLogin ? "Witaj ponownie" : "Stwórz konto"}
             </h1>
             <p className="text-muted-foreground font-body text-sm mt-1.5">
-              {isLogin
+              {isForgot
+                ? "Podaj adres e-mail, a wyślemy Ci link do resetowania"
+                : isLogin
                 ? "Zaloguj się, aby kontynuować naukę"
                 : "Dołącz i zacznij naukę już dziś"}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Name fields for registration */}
+            {!isLogin && !isForgot && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground font-body block mb-2 uppercase tracking-wider">
+                    Imię
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="flex h-12 w-full rounded-xl border border-input bg-background px-4 text-sm font-body ring-offset-background placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-all duration-200"
+                    placeholder="Jan"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground font-body block mb-2 uppercase tracking-wider">
+                    Nazwisko
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="flex h-12 w-full rounded-xl border border-input bg-background px-4 text-sm font-body ring-offset-background placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-all duration-200"
+                    placeholder="Kowalski"
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Email */}
             <div>
               <label className="text-xs font-medium text-muted-foreground font-body block mb-2 uppercase tracking-wider">
@@ -120,29 +178,40 @@ const Auth = () => {
             </div>
 
             {/* Password */}
-            <div>
-              <label className="text-xs font-medium text-muted-foreground font-body block mb-2 uppercase tracking-wider">
-                Hasło
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  minLength={6}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="flex h-12 w-full rounded-xl border border-input bg-background px-4 pr-11 text-sm font-body ring-offset-background placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-all duration-200"
-                  placeholder="Min. 6 znaków"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+            {!isForgot && (
+              <div>
+                <label className="text-xs font-medium text-muted-foreground font-body block mb-2 uppercase tracking-wider">
+                  Hasło
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="flex h-12 w-full rounded-xl border border-input bg-background px-4 pr-11 text-sm font-body ring-offset-background placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-all duration-200"
+                    placeholder="Min. 6 znaków"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {isLogin && (
+                  <button
+                    type="button"
+                    onClick={() => { setIsForgot(true); setError(""); setMessage(""); }}
+                    className="text-xs text-primary font-body mt-2 hover:underline"
+                  >
+                    Zapomniałeś hasła?
+                  </button>
+                )}
               </div>
-            </div>
+            )}
 
             {/* Messages */}
             {error && (
@@ -164,10 +233,22 @@ const Auth = () => {
             >
               {submitting ? (
                 <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+              ) : isForgot ? (
+                "Wyślij link"
               ) : (
                 isLogin ? "Zaloguj się" : "Zarejestruj się"
               )}
             </button>
+
+            {isForgot && (
+              <button
+                type="button"
+                onClick={() => { setIsForgot(false); setError(""); setMessage(""); }}
+                className="w-full text-sm text-muted-foreground font-body hover:text-foreground transition-colors"
+              >
+                ← Wróć do logowania
+              </button>
+            )}
           </form>
 
           {/* Divider */}
