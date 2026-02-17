@@ -516,23 +516,25 @@ const LessonViewer = ({ lesson, onBack, lessonIndex, testQuizId, onTestCompleted
 
         {/* E-test button */}
         {testQuizId && testQuestions && testQuestions.length > 0 && (
-          <div className="mt-10 pt-8 border-t border-border">
-            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 text-center">
-              <ClipboardCheck size={32} className="mx-auto text-primary mb-3" />
-              <h3 className="font-display text-lg font-bold text-foreground mb-1">Sprawdź swoją wiedzę</h3>
-              <p className="text-sm text-muted-foreground font-body mb-4">
-                Rozwiąż e-test i sprawdź, ile zapamiętałeś z tej lekcji.
+          <div className="mt-12 pt-8 border-t border-border">
+            <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-[var(--shadow-card)]">
+              <p className="text-[11px] font-body font-semibold text-muted-foreground uppercase tracking-widest mb-3">
+                E-test · {testQuestions.length} pytań
+              </p>
+              <h3 className="font-display text-xl font-bold text-foreground mb-2">Sprawdź swoją wiedzę</h3>
+              <p className="text-sm text-muted-foreground font-body mb-5 max-w-sm mx-auto">
+                Rozwiąż krótki test i sprawdź, ile zapamiętałeś z tej lekcji.
               </p>
               {bestScore && (
-                <p className="text-sm font-body text-primary font-medium mb-3">
-                  Twój najlepszy wynik: {bestScore.best_score}/{bestScore.total_questions} ({Math.round((bestScore.best_score / bestScore.total_questions) * 100)}%)
+                <p className="text-sm font-body text-primary font-semibold mb-5">
+                  Najlepszy wynik: {bestScore.best_score}/{bestScore.total_questions} ({Math.round((bestScore.best_score / bestScore.total_questions) * 100)}%)
                 </p>
               )}
               <button
                 onClick={() => { setShowTest(true); setTestFinished(false); }}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-body font-semibold hover:bg-primary/90 transition-colors"
+                className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-body font-semibold text-sm hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg"
               >
-                <ClipboardCheck size={18} /> Zrób e-test
+                Rozpocznij test
               </button>
             </div>
           </div>
