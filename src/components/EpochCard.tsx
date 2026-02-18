@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import type { EpochData } from "@/data/epochs";
+import { ArrowRight } from "lucide-react";
 
 interface EpochCardProps {
   epoch: EpochData;
