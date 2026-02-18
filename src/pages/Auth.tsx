@@ -251,7 +251,7 @@ const Auth = () => {
                 onClick={() => { setIsForgot(false); setError(""); setMessage(""); }}
                 className="w-full text-sm text-muted-foreground font-body hover:text-foreground transition-colors"
               >
-                ← Wróć do logowania
+                 Wróć do logowania
               </button>
             )}
           </form>
