@@ -259,7 +259,7 @@ const Auth = () => {
           {/* Divider */}
           <div className="flex items-center gap-3 my-6">
             <div className="flex-1 h-px bg-border" />
-            <span className="text-xs text-muted-foreground font-body">lub</span>
+            <span className="text-sm text-muted-foreground font-body">lub</span>
             <div className="flex-1 h-px bg-border" />
           </div>
 
