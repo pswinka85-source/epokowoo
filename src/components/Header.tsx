@@ -30,6 +30,9 @@ const Header = () => {
     setMenuOpen(false);
   }, [location.pathname]);
 
+  // Hide header on auth page
+  if (location.pathname === "/") return null;
+
   return (
     <header className="sticky top-0 z-50 px-6 pt-3 pb-2">
       <div ref={menuRef} className="max-w-6xl mx-auto relative">
