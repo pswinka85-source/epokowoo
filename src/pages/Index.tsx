@@ -75,7 +75,7 @@ const Index = () => {
                 <div className="h-3 w-full rounded-full bg-white overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500"
-                    style={{ width: `${stats?.averageScore ?? 0}%`, backgroundColor: 'hsl(265, 60%, 55%)' }}
+                    style={{ width: `${stats?.averageScore ?? 0}%`, backgroundColor: 'hsl(246, 59%, 51%)' }}
                   />
                 </div>
               </div>
