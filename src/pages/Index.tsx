@@ -111,13 +111,13 @@ const Index = () => {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 mt-6 md:hidden">
                   <Link
-                    to="/auth"
+                    to="/"
                     className="h-11 px-6 rounded-xl bg-primary text-primary-foreground text-sm font-body font-semibold flex items-center justify-center hover:bg-primary/90 transition-colors"
                   >
                     Zaloguj się
                   </Link>
                   <Link
-                    to="/auth"
+                    to="/"
                     className="h-11 px-6 rounded-xl bg-secondary text-secondary-foreground text-sm font-body font-semibold flex items-center justify-center hover:bg-secondary/80 transition-colors"
                   >
                     Zarejestruj się
@@ -126,13 +126,13 @@ const Index = () => {
               </div>
               <div className="hidden md:flex flex-col gap-3 shrink-0">
                 <Link
-                  to="/auth"
+                  to="/"
                   className="h-11 px-6 rounded-xl bg-primary text-primary-foreground text-sm font-body font-semibold flex items-center justify-center hover:bg-primary/90 transition-colors"
                 >
                   Zaloguj się
                 </Link>
                 <Link
-                  to="/auth"
+                  to="/"
                   className="h-11 px-6 rounded-xl bg-secondary text-secondary-foreground text-sm font-body font-semibold flex items-center justify-center hover:bg-secondary/80 transition-colors"
                 >
                   Zarejestruj się

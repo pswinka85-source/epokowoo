@@ -108,7 +108,7 @@ const Header = () => {
                 Wyloguj się
               </button>
             ) : (
-              <Link to="/auth" onClick={() => setMenuOpen(false)} className={menuItemClass}>
+              <Link to="/" onClick={() => setMenuOpen(false)} className={menuItemClass}>
                 <LogIn size={16} className="text-muted-foreground" />
                 Zaloguj się
               </Link>

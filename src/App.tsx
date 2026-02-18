@@ -29,9 +29,9 @@ const App = () => (
           <ScrollToTop />
           <Header />
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<Auth />} />
+            <Route path="/epoki" element={<Index />} />
             <Route path="/epoka/:id" element={<EpochDetail />} />
-            <Route path="/auth" element={<Auth />} />
             <Route path="/profil" element={<Profile />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/admin" element={<AdminDashboard />} />
