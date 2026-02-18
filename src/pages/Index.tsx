@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { epochs } from "@/data/epochs";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,7 @@ import { CheckCircle, Brain, TrendingUp } from "lucide-react";
 
 const Index = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState<{
     completedLessons: number;
     totalLessonsWithTest: number;
@@ -45,6 +46,12 @@ const Index = () => {
     fetchStats();
   }, [user]);
 
+  useEffect(() => {
+    if (!user) navigate("/");
+  }, [user, navigate]);
+
+  if (!user) return null;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero */}
@@ -53,8 +60,7 @@ const Index = () => {
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
 
         <div className="relative max-w-6xl mx-auto px-6 pt-12 pb-10 md:pt-20 md:pb-14">
-          {user ? (
-            <div>
+          <div>
               <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2">
                 Cześć, <span className="font-normal">{user.user_metadata?.display_name?.split(" ")[0] || ""}</span>! 👋
               </h1>
@@ -99,47 +105,6 @@ const Index = () => {
                 </div>
               )}
             </div>
-          ) : (
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
-              <div className="max-w-2xl">
-                <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground leading-[1.1] mb-5">
-                  Epoki literackie<br />
-                  <span className="text-foreground">bez stresu</span>
-                </h1>
-                <p className="text-lg text-muted-foreground font-body leading-relaxed max-w-lg">
-                  Interaktywne lekcje, quizy i materiały do nauki — wszystko czego potrzebujesz, by zdać maturę z polskiego.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 mt-6 md:hidden">
-                  <Link
-                    to="/"
-                    className="h-11 px-6 rounded-xl bg-primary text-primary-foreground text-sm font-body font-semibold flex items-center justify-center hover:bg-primary/90 transition-colors"
-                  >
-                    Zaloguj się
-                  </Link>
-                  <Link
-                    to="/"
-                    className="h-11 px-6 rounded-xl bg-secondary text-secondary-foreground text-sm font-body font-semibold flex items-center justify-center hover:bg-secondary/80 transition-colors"
-                  >
-                    Zarejestruj się
-                  </Link>
-                </div>
-              </div>
-              <div className="hidden md:flex flex-col gap-3 shrink-0">
-                <Link
-                  to="/"
-                  className="h-11 px-6 rounded-xl bg-primary text-primary-foreground text-sm font-body font-semibold flex items-center justify-center hover:bg-primary/90 transition-colors"
-                >
-                  Zaloguj się
-                </Link>
-                <Link
-                  to="/"
-                  className="h-11 px-6 rounded-xl bg-secondary text-secondary-foreground text-sm font-body font-semibold flex items-center justify-center hover:bg-secondary/80 transition-colors"
-                >
-                  Zarejestruj się
-                </Link>
-              </div>
-            </div>
-          )}
         </div>
       </header>
 
