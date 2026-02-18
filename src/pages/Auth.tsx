@@ -40,7 +40,7 @@ const Auth = () => {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) setError(error.message);
-      else setMessage("Sprawdź swoją skrzynkę e-mail — wysłaliśmy link do resetowania hasła.");
+      else setMessage("Sprawdź swoją skrzynkę e-mail — wysłaliśmy link do resetu hasła.");
       setSubmitting(false);
       return;
     }
@@ -192,11 +192,11 @@ const Auth = () => {
                   <input
                     type={showPassword ? "text" : "password"}
                     required
-                    minLength={6}
+                    minLength={8}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="flex h-12 w-full rounded-xl border border-input bg-background px-4 pr-11 text-sm font-body ring-offset-background placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-all duration-200"
-                    placeholder="Min. 6 znaków"
+                    placeholder="Min. 8 znaków"
                   />
                   <button
                     type="button"
@@ -210,7 +210,7 @@ const Auth = () => {
                   <button
                     type="button"
                     onClick={() => { setIsForgot(true); setError(""); setMessage(""); }}
-                    className="text-xs text-primary font-body mt-2 hover:underline"
+                    className="text-s text-primary font-body mt-2 hover:underline"
                   >
                     Zapomniałeś hasła?
                   </button>
