@@ -4,6 +4,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Eye, EyeOff } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -89,6 +90,10 @@ const Auth = () => {
 
         {/* Card */}
         <div className="rounded-3xl border border-border bg-card p-8 md:p-10 shadow-[var(--shadow-elevated)]">
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <img src={logo} alt="Epokowo" className="h-8" />
+          </div>
           {/* Tab switcher */}
           {!isForgot && (
             <div className="flex rounded-2xl bg-secondary p-1 mb-8">
