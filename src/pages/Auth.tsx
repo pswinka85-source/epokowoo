@@ -249,7 +249,7 @@ const Auth = () => {
               <button
                 type="button"
                 onClick={() => { setIsForgot(false); setError(""); setMessage(""); }}
-                className="w-full text-sm text-muted-foreground font-body hover:text-foreground transition-colors"
+                className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                  Wróć do logowania
               </button>
