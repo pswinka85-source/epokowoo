@@ -62,7 +62,7 @@ const Index = () => {
         <div className="relative max-w-6xl mx-auto px-6 pt-12 pb-10 md:pt-20 md:pb-14">
           <div>
               <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2">
-                Cześć, <span className="font-normal">{user.user_metadata?.display_name?.split(" ")[0] || ""}</span>! 👋
+                Cześć, <span className="font-normal">{user.user_metadata?.display_name?.split(" ")[0] || user.user_metadata?.full_name?.split(" ")[0] || user.user_metadata?.name?.split(" ")[0] || ""}</span>! 👋
               </h1>
               <p className="text-lg text-muted-foreground font-body leading-relaxed mb-4">
                 Oto Twoje postępy w nauce.
