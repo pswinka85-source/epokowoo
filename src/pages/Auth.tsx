@@ -21,7 +21,7 @@ const Auth = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (user) navigate("/");
+    if (user) navigate("/epoki");
   }, [user, navigate]);
 
   useEffect(() => {
@@ -47,7 +47,7 @@ const Auth = () => {
     if (isLogin) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setError(error.message);
-      else navigate("/");
+      else navigate("/epoki");
     } else {
       if (!firstName.trim() || !lastName.trim()) {
         setError("Podaj imię i nazwisko.");

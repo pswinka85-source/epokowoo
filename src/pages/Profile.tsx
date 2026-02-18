@@ -49,7 +49,7 @@ const Profile = () => {
   const [openSection, setOpenSection] = useState<"profile" | "settings">("profile");
 
   useEffect(() => {
-    if (!authLoading && !user) navigate("/auth");
+    if (!authLoading && !user) navigate("/");
   }, [user, authLoading, navigate]);
 
   useEffect(() => setMounted(true), []);
