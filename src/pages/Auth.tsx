@@ -210,7 +210,7 @@ const Auth = () => {
                   <button
                     type="button"
                     onClick={() => { setIsForgot(true); setError(""); setMessage(""); }}
-                    className="text-s text-primary font-body mt-2 hover:underline"
+                    className="text-sm text-primary font-body mt-2 hover:underline"
                   >
                     Zapomniałeś hasła?
                   </button>
