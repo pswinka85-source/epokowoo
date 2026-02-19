@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, Shield, LogIn, LogOut, Menu, X, User, Mail } from "lucide-react";
+import { BookOpen, Shield, LogIn, LogOut, Menu, X, User, Mail, Bell } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import logo from "@/assets/logo.png";
 
 const menuItemClass =
@@ -10,6 +11,7 @@ const menuItemClass =
 const Header = () => {
   const location = useLocation();
   const { user, isAdmin: hasAdminRole, signOut } = useAuth();
+  const unreadCount = useUnreadMessages();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -41,11 +43,26 @@ const Header = () => {
             <img src={logo} alt="Epokowo" className="h-7" />
           </Link>
 
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-foreground hover:bg-secondary transition-all duration-200"
-            aria-label="Menu"
-          >
+          <div className="flex items-center gap-1">
+            {user && (
+              <Link
+                to="/kontakt"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-foreground hover:bg-secondary transition-all duration-200 relative"
+                aria-label="Wiadomości"
+              >
+                <Bell size={18} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-primary text-primary-foreground text-[9px] font-bold rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </Link>
+            )}
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-foreground hover:bg-secondary transition-all duration-200"
+              aria-label="Menu"
+            >
             <div className="relative w-[22px] h-[22px]">
               <span
                 className={`absolute left-0 top-[4px] w-full h-[2px] bg-current rounded-full transition-all duration-300 origin-center ${
@@ -63,7 +80,8 @@ const Header = () => {
                 }`}
               />
             </div>
-          </button>
+            </button>
+          </div>
         </div>
 
         {/* Dropdown menu */}
