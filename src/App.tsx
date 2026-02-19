@@ -15,6 +15,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Profile from "./pages/Profile";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/epoka/:id" element={<EpochDetail />} />
             <Route path="/profil" element={<Profile />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/kontakt" element={<Contact />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
