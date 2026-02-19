@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import type { EpochData } from "@/data/epochs";
-import { ArrowRight } from "lucide-react";
+
 
 interface EpochCardProps {
   epoch: EpochData;
@@ -33,9 +33,8 @@ const EpochCard = ({ epoch, index }: EpochCardProps) => {
             {epoch.shortDesc}
           </p>
 
-          <div className="flex items-center gap-2 mt-4 text-xs font-body font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="flex items-center gap-2 mt-4 text-sm font-body font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             Rozpocznij naukę
-            <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
           </div>
         </div>
       </article>

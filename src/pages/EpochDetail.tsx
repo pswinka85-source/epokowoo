@@ -236,45 +236,15 @@ const EpochDetail = () => {
             <div className="lg:col-span-2 space-y-8">
               {/* Lessons */}
               <section>
-                {lessons.length > 0 ? (
+              {lessons.length > 0 && (
                   <div className="space-y-3">
                     {lessons.map((lesson, i) => (
                       <LessonCard key={lesson.id} lesson={lesson} index={i} epochId={id} onClick={() => setActiveLessonId(lesson.id)} bestScore={testResults[lesson.id] || null} />
                     ))}
                   </div>
-                ) : (
-                  <EmptyState icon={<BookOpen size={28} />} text="Lekcje wkrótce!" />
                 )}
               </section>
 
-              {/* Quizzes */}
-              {quizzes.length > 0 && (
-                <section>
-                  <SectionHeader icon={<Brain size={16} />} title="Quizy" accent />
-                  <div className="space-y-3">
-                    {quizzes.map((quiz) => (
-                      <button
-                        key={quiz.id}
-                        onClick={() => setActiveQuizId(quiz.id)}
-                        className="w-full text-left rounded-2xl border border-border bg-card p-5 hover:shadow-[var(--shadow-card-hover)] hover:border-accent/40 transition-all duration-200 group"
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <div>
-                            <h3 className="font-display text-base font-bold text-foreground group-hover:text-accent transition-colors">
-                              {quiz.title}
-                            </h3>
-                            {quiz.description && <p className="text-sm text-muted-foreground font-body mt-1">{quiz.description}</p>}
-                            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-body mt-2">
-                              <Brain size={12} className="text-accent" /> {quiz.questions.length} pytań
-                            </span>
-                          </div>
-                          <ChevronRight size={18} className="text-muted-foreground/40 group-hover:text-accent transition-colors shrink-0" />
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              )}
             </div>
 
             {/* Sidebar */}
