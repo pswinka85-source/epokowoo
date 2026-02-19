@@ -77,7 +77,7 @@ const Header = () => {
           <div className="pt-2">
             <Link to="/" onClick={() => setMenuOpen(false)} className={menuItemClass}>
               <BookOpen size={16} className="text-primary" />
-              Epoki
+              Nauka
             </Link>
 
             {user && (

@@ -117,8 +117,13 @@ const Profile = () => {
         ui_scale: profile.ui_scale,
       } as any)
       .eq("user_id", user.id);
-    if (error) toast.error("Błąd zapisu");
-    else toast.success("Profil zapisany");
+    if (error) {
+      toast.error("Błąd zapisu");
+    } else {
+      // Update auth metadata so greeting reflects the new name
+      await supabase.auth.updateUser({ data: { display_name: profile.display_name } });
+      toast.success("Profil zapisany");
+    }
     setSaving(false);
   };
 
