@@ -1,20 +1,25 @@
-/* Cały dokument i root jako flex w kolumnie */
+/* Reset i pełna wysokość ekranu */
 html, body, #root {
   margin: 0;
   padding: 0;
-  height: 100%;          /* cała wysokość okna */
-  display: flex;
-  flex-direction: column;
+  height: 100%;
 }
 
-/* Główna zawartość strony rośnie, stopka przykleja się do dołu */
-body > #root > div {
+/* Główny kontener App */
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* cała wysokość ekranu */
+}
+
+/* Treść strony, rośnie w pionie */
+.main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-/* Stopka */
+/* Stopka przyklejona do dołu */
 .site-footer {
   background-color: #222;
   color: #fff;
@@ -31,4 +36,10 @@ body > #root > div {
 
 .site-footer a:hover {
   text-decoration: underline;
+}
+
+/* Dodatkowo: Header i główna treść nie przyklejone do góry */
+header {
+  margin: 0;
+  padding: 0;
 }
