@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Header from "./components/Header";
 import ScrollToTop from "./components/ScrollToTop";
-
+import { Footer } from "./components/Footer"; // <-- dodany import stopki
 
 import Index from "./pages/Index";
 import EpochDetail from "./pages/EpochDetail";
@@ -25,7 +25,6 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        
         <AuthProvider>
           <ScrollToTop />
           <Header />
@@ -39,6 +38,11 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+
+          {/* ------------------ STOPKA ------------------ */}
+          <Footer />
+          {/* ------------------------------------------- */}
+
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
