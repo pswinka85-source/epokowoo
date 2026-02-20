@@ -17,25 +17,35 @@ html, body, #root {
   flex: 1;
   display: flex;
   flex-direction: column;
+  padding-top: 50px; /* opcjonalny odstęp od góry */
 }
 
 /* Stopka przyklejona do dołu */
 .site-footer {
-  background-color: #222;
-  color: #fff;
-  padding: 20px 0;
+  background-color: #222;       /* ciemne tło */
+  color: #888888;               /* szary tekst */
+  padding: 40px 50px;           /* większy padding w pionie i poziomie */
   text-align: center;
   width: 100%;
+  box-sizing: border-box;       /* padding wliczony w szerokość */
+}
+
+.site-footer .footer-content {
+  max-width: 1200px;            /* ograniczona szerokość treści */
+  margin: 0 auto;               /* wycentrowanie w poziomie */
 }
 
 .site-footer a {
-  color: #ffcc00;
+  color: #888888;               /* szare linki domyślnie */
   text-decoration: none;
-  margin: 0 5px;
+  margin: 0 10px;
+  transition: color 0.2s ease;
 }
 
-.site-footer a:hover {
-  text-decoration: underline;
+.site-footer a:hover,
+.site-footer a:active,
+.site-footer a:focus {
+  color: #ffffff;               /* biały przy hover/active/focus */
 }
 
 /* Dodatkowo: Header i główna treść nie przyklejone do góry */
