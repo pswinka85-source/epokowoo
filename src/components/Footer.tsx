@@ -6,7 +6,8 @@ export const Footer = () => {
     <footer className="site-footer">
       <div className="footer-content">
         <a href="#">Polityka Prywatności</a>
-        <a href="#">Ochrona danych</a>
+        <a href="#">Polityka Cookies</a>
+          <a href="#">Ochrona danych</a>
       </div>
     </footer>
   );
