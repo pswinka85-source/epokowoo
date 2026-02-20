@@ -1,37 +1,29 @@
-/* Reset i pełna wysokość ekranu */
-html, body, #root {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-}
-
-/* Główny kontener App */
-.app-wrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh; /* cała wysokość ekranu */
-}
-
-/* Treść strony, rośnie w pionie */
-.main-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Stopka przyklejona do dołu */
 .site-footer {
-  background-color: #222;
-  color: #fff;
-  padding: 20px 0;
+  background-color: #222;         /* ciemne tło */
+  color: #888888;                 /* domyślny szary tekst */
+  padding: 40px 20px;             /* więcej w pionie i w poziomie */
   text-align: center;
   width: 100%;
+  box-sizing: border-box;         /* uwzględnia padding w szerokości */
+}
+
+.site-footer .footer-content {
+  max-width: 1200px;              /* szerokość stopki ograniczona */
+  margin: 0 auto;                 /* wycentrowanie */
 }
 
 .site-footer a {
-  color: #ffcc00;
+  color: #888888;                 /* szary link domyślnie */
   text-decoration: none;
-  margin: 0 5px;
+  margin: 0 10px;
+  transition: color 0.2s ease;
+}
+
+.site-footer a:hover,
+.site-footer a:active,
+.site-footer a:focus {
+  color: #ffffff;                 /* biały przy najechaniu, kliknięciu lub focus */
+}
 }
 
 .site-footer a:hover {
