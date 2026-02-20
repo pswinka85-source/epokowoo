@@ -1,6 +1,6 @@
 /* Stopka przyklejona do dołu i kompatybilna z Twoim layoutem */
 .site-footer {
-  background-color: #222;       /* ciemne tło */
+  background-color: #000;       /* ciemne tło */
   color: #888888;               /* szary tekst */
   padding: 40px 50px;           /* większy padding w pionie i poziomie */
   width: 100%;
@@ -13,7 +13,7 @@
   align-items: flex-start;      /* wyrównanie do lewej strony */
   max-width: 1200px;            /* ograniczona szerokość treści */
   margin: 0 auto;               /* wycentrowanie kontenera w poziomie */
-  gap: 10px;                    /* odstęp między linkami */
+  gap: 5px;                    /* odstęp między linkami */
 }
 
 .site-footer a {
