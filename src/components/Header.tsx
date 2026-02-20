@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, Shield, LogIn, LogOut, Menu, X, User, Mail, Bell } from "lucide-react";
+import { BookOpen, Shield, LogIn, LogOut, User, Mail, Bell, Calendar } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import logo from "@/assets/logo.png";
@@ -107,6 +107,10 @@ const Header = () => {
                 <Link to="/kontakt" onClick={() => setMenuOpen(false)} className={menuItemClass}>
                   <Mail size={16} className="text-primary" />
                   Kontakt
+                </Link>
+                <Link to="/egzaminy" onClick={() => setMenuOpen(false)} className={menuItemClass}>
+                  <Calendar size={16} className="text-primary" />
+                  Egzaminy
                 </Link>
               </>
             )}

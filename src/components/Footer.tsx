@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, Mail, Shield, Cookie, FileText } from "lucide-react";
+import { BookOpen, Mail, Shield, Cookie, FileText, Calendar } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 export const Footer = () => {
@@ -43,6 +43,13 @@ export const Footer = () => {
             >
               <Mail size={14} className="text-primary" />
               Kontakt
+            </Link>
+            <Link
+              to="/egzaminy"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Calendar size={14} className="text-primary" />
+              Egzaminy
             </Link>
             <a
               href="#"

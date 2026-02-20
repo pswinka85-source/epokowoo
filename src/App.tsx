@@ -16,6 +16,7 @@ import Profile from "./pages/Profile";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
+import Exams from "./pages/Exams";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
                 <Route path="/profil" element={<Profile />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/kontakt" element={<Contact />} />
+                <Route path="/egzaminy" element={<Exams />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
