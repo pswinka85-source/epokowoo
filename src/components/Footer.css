@@ -27,3 +27,9 @@
 .site-footer a:focus {
   color: #ffffff;               /* biały przy hover/active/focus */
 }
+/* ---------------- RESPONSYWNOŚĆ ---------------- */
+@media (max-width: 768px) {
+  .site-footer .footer-content {
+    align-items: center;        /* na telefonie wyśrodkowane */
+  }
+}
