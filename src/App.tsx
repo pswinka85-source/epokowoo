@@ -27,21 +27,22 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <ScrollToTop />
-          <Header />
-          <Routes>
-            <Route path="/" element={<Auth />} />
-            <Route path="/epoki" element={<Index />} />
-            <Route path="/epoka/:id" element={<EpochDetail />} />
-            <Route path="/profil" element={<Profile />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/kontakt" element={<Contact />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-
-          {/* ------------------ STOPKA ------------------ */}
-          <Footer />
-          {/* ------------------------------------------- */}
+          <div className="min-h-screen flex flex-col">
+            <Header />
+            <main className="flex-1">
+              <Routes>
+                <Route path="/" element={<Auth />} />
+                <Route path="/epoki" element={<Index />} />
+                <Route path="/epoka/:id" element={<EpochDetail />} />
+                <Route path="/profil" element={<Profile />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/kontakt" element={<Contact />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
 
         </AuthProvider>
       </BrowserRouter>
