@@ -32,7 +32,7 @@ const Sidebar = () => {
                     : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                 }`}
               >
-                <span className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-sm">
+                <span className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-base">
                   {item.icon}
                 </span>
                 <span>{item.name}</span>
