@@ -4,11 +4,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
-import Header from "./components/Header";
 import ScrollToTop from "./components/ScrollToTop";
 import { Footer } from "./components/Footer"; // <-- dodany import stopki
 
 import Index from "./pages/Index";
+import Sidebar from "./components/Sidebar";
 import EpochDetail from "./pages/EpochDetail";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -29,8 +29,8 @@ const App = () => (
         <AuthProvider>
           <ScrollToTop />
           <div className="min-h-screen flex flex-col">
-            <Header />
-            <main className="flex-1">
+  <Header />
+  <main className="flex-1">
               <Routes>
                 <Route path="/" element={<Auth />} />
                 <Route path="/epoki" element={<Index />} />
