@@ -15,8 +15,8 @@ const Sidebar = () => {
   if (location.pathname === "/") return null;
 
   return (
-    <div className="w-[280px] bg-white p-6 flex flex-col rounded-2xl shadow-lg m-4">
-      <div className="mb-10 mt-12 md:mt-20">
+    <div className="w-[280px] bg-white p-6 flex flex-col rounded-2xl shadow-lg mx-4 mb-4">
+      <div className="mb-10 mt-8 md:mt-16">
         <h1 className="text-3xl md:text-4xl font-extrabold text-center leading-[1.1]">Kokpit</h1>
       </div>
 
