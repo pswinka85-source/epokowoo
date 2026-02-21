@@ -1,26 +1,23 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Lightbulb, Mail, Calendar, Settings, Shield } from "lucide-react";
-import logo from "@/assets/logo.png";
 
 const Sidebar = () => {
   const location = useLocation();
 
   const navItems = [
-    { name: "Nauka", icon: <Lightbulb size={20} />, path: "/epoki" },
-    { name: "Wiadomości", icon: <Mail size={20} />, path: "/wiadomosci" },
-    { name: "Egzaminy", icon: <Calendar size={20} />, path: "/egzaminy" },
-    { name: "Ustawienia", icon: <Settings size={20} />, path: "/ustawienia" },
-    { name: "Panel admina", icon: <Shield size={20} />, path: "/admin" },
+    { name: "Nauka", icon: "💡", path: "/epoki" },
+    { name: "Wiadomości", icon: "📧", path: "/wiadomosci" },
+    { name: "Egzaminy", icon: "📅", path: "/egzaminy" },
+    { name: "Ustawienia", icon: "⚙️", path: "/ustawienia" },
+    { name: "Panel admina", icon: "🛡️", path: "/admin" },
   ];
 
   if (location.pathname === "/") return null;
 
   return (
-    <div className="w-[280px] bg-gray-100 p-6 flex flex-col rounded-2xl shadow-lg m-4">
-      <div className="mb-10 flex items-center">
-        <img src={logo} alt="Epokowo Logo" className="h-10 w-auto mr-3" />
-        <h1 className="text-2xl font-bold">Kokpit</h1>
+    <div className="w-[280px] bg-white p-6 flex flex-col rounded-2xl shadow-lg m-4">
+      <div className="mb-10">
+        <h1 className="text-2xl font-bold text-center">Kokpit</h1>
       </div>
 
       <nav className="flex-grow">
@@ -31,11 +28,13 @@ const Sidebar = () => {
                 to={item.path}
                 className={`flex items-center gap-4 p-4 rounded-xl text-lg font-medium transition-colors ${
                   location.pathname === item.path
-                    ? "bg-black text-white"
-                    : "bg-white text-gray-800 hover:bg-gray-50"
+                    ? "bg-gray-200 text-gray-900"
+                    : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                 }`}
               >
-                {item.icon}
+                <span className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-sm">
+                  {item.icon}
+                </span>
                 <span>{item.name}</span>
               </Link>
             </li>
