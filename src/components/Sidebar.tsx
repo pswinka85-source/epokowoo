@@ -26,7 +26,7 @@ const Sidebar = () => {
               <li key={item.name}>
                 <Link
                   to={item.path}
-                  className={`flex items-center gap-4 p-3.8 rounded-xl text-lg font-bold transition-colors ${
+                  className={`flex items-center gap-4 p-5 rounded-xl text-lg font-bold transition-colors ${
                     location.pathname === item.path
                       ? "bg-gray-800 text-white font-bold"
                       : "bg-gray-100 text-gray-800 hover:bg-gray-200"
