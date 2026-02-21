@@ -271,21 +271,21 @@ const Contact = () => {
     <main className="min-h-screen bg-background">
       {/* Hero section */}
       <header className="relative overflow-hidden">
-        <div className="absolute top-10 left-5 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-5 right-5 w-80 h-80 bg-accent/5 rounded-full blur-3xl" />
-        <div className="relative max-w-6xl mx-auto px-6 pt-10 pb-6 md:pt-14 md:pb-8">
-          <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 md:pt-20 md:pb-14">
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-4">
             Wiadomości
           </h1>
-          <p className="text-muted-foreground font-body mt-1">
+          <p className="text-lg text-muted-foreground font-body leading-relaxed">
             Skontaktuj się z innymi użytkownikami Epokowo
           </p>
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div
-          className="bg-card rounded-2xl sm:rounded-3xl shadow-[var(--shadow-card)] border border-border/50 overflow-hidden"
+          className="bg-white rounded-3xl shadow-lg border border-border/60 overflow-hidden"
           style={{ minHeight: "560px", height: "calc(100vh - 220px)" }}
         >
           <div className="flex h-full flex-col md:flex-row">
