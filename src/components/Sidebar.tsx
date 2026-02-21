@@ -15,7 +15,7 @@ const Sidebar = () => {
   if (location.pathname === "/") return null;
 
   return (
-    <div className="mx-16 mb-4">
+    <div className="mx-8 mb-4">
       <div className="mb-4 pt-12 md:pt-20">
         <h1 className="text-3xl md:text-4xl text-center leading-[1.1]">Kokpit</h1>
       </div>
@@ -28,13 +28,13 @@ const Sidebar = () => {
                   to={item.path}
                   className={`flex items-center gap-4 p-2 rounded-xl text-lg font-bold transition-colors ${
                     location.pathname === item.path
-                      ? "bg-gray-800 text-white font-bold"
+                      ? "bg-black text-white font-bold"
                       : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                   }`}
                 >
                   <span className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
                     location.pathname === item.path
-                      ? "bg-gray-800 text-white font-bold"
+                      ? "bg-white text-black font-bold"
                       : "bg-white"
                   }`}>
                     {item.icon}
