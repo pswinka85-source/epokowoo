@@ -109,7 +109,6 @@ const Index = () => {
             </div>
           )}
         </div>
-        </div>
       </header>
 
       {/* Epochs grid */}
