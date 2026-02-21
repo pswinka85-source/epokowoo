@@ -60,10 +60,14 @@ const Index = () => {
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
 
         <div className="relative max-w-6xl mx-auto px-6 pt-12 pb-10 md:pt-20 md:pb-14">
-          <div>
-            <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2">
+          <div className="flex items-baseline gap-4 mb-2">
+            <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1]">
               Cześć, <span className="font-normal">{user.user_metadata?.display_name?.split(" ")[0] || user.user_metadata?.full_name?.split(" ")[0] || user.user_metadata?.name?.split(" ")[0] || ""}</span>! 👋
             </h1>
+            <h1 className="font-display text-3xl md:text-4xl text-foreground leading-[1.1]">
+              Kokpit
+            </h1>
+          </div>
             <p className="text-lg text-muted-foreground font-body leading-relaxed mb-4">
               Oto Twoje postępy w nauce.
             </p>
