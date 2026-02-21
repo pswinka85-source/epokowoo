@@ -17,7 +17,7 @@ const Sidebar = () => {
   return (
     <div className="w-[280px] bg-white p-6 flex flex-col rounded-2xl shadow-lg mx-4 mb-4">
       <div className="mb-10 mt-6 md:mt-14">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-center leading-[1.1]">Kokpit</h1>
+        <h1 className="text-3xl md:text-4xl text-center leading-[1.1]">Kokpit</h1>
       </div>
 
       <nav className="flex-grow">
@@ -32,7 +32,7 @@ const Sidebar = () => {
                     : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                 }`}
               >
-                <span className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-base">
+                <span className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-lg">
                   {item.icon}
                 </span>
                 <span>{item.name}</span>
