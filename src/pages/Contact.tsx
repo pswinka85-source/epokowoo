@@ -352,11 +352,11 @@ const Contact = () => {
               <div className="flex-1 overflow-y-auto min-h-0">
                 {conversations.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center mb-4">
-                      <MessageSquare size={28} className="text-muted-foreground/50" />
+                    <div className="w-20 h-20 rounded-3xl bg-gray-100 flex items-center justify-center mb-6">
+                      <MessageSquare size={40} className="text-gray-400" />
                     </div>
-                    <p className="text-sm font-medium text-foreground">Brak wiadomości</p>
-                    <p className="text-xs text-muted-foreground mt-1.5 max-w-[200px]">
+                    <p className="text-lg font-bold text-gray-800 mb-2">Brak wiadomości</p>
+                    <p className="text-sm text-gray-600 max-w-[240px]">
                       Wyszukaj użytkownika powyżej, aby rozpocząć rozmowę
                     </p>
                   </div>
@@ -366,13 +366,17 @@ const Contact = () => {
                       <button
                         key={c.id}
                         onClick={() => setActiveConvo(c)}
-                        className={`w-full flex items-center gap-3 px-4 py-3.5 mx-2 rounded-xl transition-all text-left ${
+                        className={`w-full flex items-center gap-4 p-3 mx-2 rounded-2xl text-lg font-bold transition-all text-left ${
                           activeConvo?.id === c.id
-                            ? "bg-primary/10 ring-1 ring-primary/20"
-                            : "hover:bg-secondary/50"
+                            ? "bg-black text-white font-bold"
+                            : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                         }`}
                       >
-                        <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary shrink-0 relative overflow-hidden ring-2 ring-border/30">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${
+                          activeConvo?.id === c.id
+                            ? "bg-white text-black font-bold"
+                            : "bg-white"
+                        }`}>
                           {c.other_user?.avatar_url ? (
                             <img
                               src={c.other_user.avatar_url}
@@ -390,13 +394,11 @@ const Contact = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <span
-                              className={`text-sm truncate ${
-                                c.unread_count > 0
-                                  ? "font-semibold text-foreground"
-                                  : "font-medium text-foreground"
-                              }`}
-                            >
+                            <span className={`text-lg font-bold truncate ${
+                              c.unread_count > 0
+                                ? "text-white"
+                                : activeConvo?.id === c.id ? "text-white" : "text-gray-800"
+                            }`}>
                               {c.other_user?.display_name || "Użytkownik"}
                             </span>
                             <span className="text-[11px] text-muted-foreground shrink-0">
@@ -404,10 +406,10 @@ const Contact = () => {
                             </span>
                           </div>
                           <p
-                            className={`text-xs truncate mt-0.5 ${
+                            className={`text-sm truncate mt-1 ${
                               c.unread_count > 0
-                                ? "font-medium text-foreground"
-                                : "text-muted-foreground"
+                                ? "font-bold text-white"
+                                : activeConvo?.id === c.id ? "text-gray-200" : "text-gray-600"
                             }`}
                           >
                             {c.last_message || "Rozpocznij rozmowę"}
