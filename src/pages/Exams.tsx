@@ -219,26 +219,21 @@ const Exams = () => {
   today.setHours(0, 0, 0, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50/30 dark:to-slate-900/30">
+    <div className="min-h-screen bg-background">
       <header className="relative overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-primary/20 to-primary/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-gradient-to-br from-accent/20 to-accent/5 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-2xl -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
         
         <div className="relative max-w-6xl mx-auto px-8 pt-12 pb-10 md:pt-20 md:pb-14">
           <div className="text-center mb-8">
-            <h1 className="font-display text-4xl md:text-5xl font-extrabold text-foreground leading-[1.1] mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-4">
               Zapisz się!✨
             </h1>
             <div className="max-w-2xl mx-auto">
-              <p className="text-xl text-muted-foreground font-body leading-relaxed">
+              <p className="text-lg text-muted-foreground font-body leading-relaxed">
                 Egzamin z egzaminatorem – 20 minut, {EXAM_PRICE} zł
               </p>
               <div className="flex items-center justify-center gap-8 mt-6 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span>Dostępne terminy</span>
-                </div>
                 <div className="flex items-center gap-2">
                   <Clock size={16} />
                   <span>20 minut</span>
@@ -254,28 +249,28 @@ const Exams = () => {
       </header>
 
       <main className="max-w-6xl mx-auto px-8 pb-16">
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3">
           {/* Kalendarz */}
           <div className="lg:col-span-2">
-            <div className="rounded-3xl bg-gradient-to-br from-card to-card/50 backdrop-blur-xl border border-border/30 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden hover:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.15)] transition-all duration-300">
-              <div className="px-8 py-6 border-b border-border/20 bg-gradient-to-r from-slate-50/50 to-slate-100/50 dark:from-slate-900/50 dark:to-slate-800/50">
+            <div className="rounded-2xl border border-border/60 bg-card shadow-[var(--shadow-card)] overflow-hidden">
+              <div className="px-6 py-4 border-b border-border/60 bg-slate-50/50 dark:bg-slate-900/30">
                 <div className="flex items-center justify-between">
-                  <h2 className="font-display text-xl font-bold text-foreground">
+                  <h2 className="font-display font-semibold text-foreground">
                     Wybierz termin egzaminu
                   </h2>
-                  <div className="flex items-center gap-2 bg-white/50 dark:bg-slate-800/50 rounded-xl p-1">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => changeMonth(-1)}
-                      className="p-2 rounded-lg hover:bg-white dark:hover:bg-slate-700 transition-all duration-200 hover:scale-105"
+                      className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                     >
                       <ChevronLeft size={20} />
                     </button>
-                    <span className="font-semibold text-sm min-w-[140px] text-center">
+                    <span className="font-medium text-sm min-w-[120px] text-center">
                       {monthYear}
                     </span>
                     <button
                       onClick={() => changeMonth(1)}
-                      className="p-2 rounded-lg hover:bg-white dark:hover:bg-slate-700 transition-all duration-200 hover:scale-105"
+                      className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                     >
                       <ChevronRight size={20} />
                     </button>
@@ -283,30 +278,30 @@ const Exams = () => {
                 </div>
               </div>
               
-              <div className="p-8">
+              <div className="p-6">
                 {/* Dni tygodnia */}
-                <div className="grid grid-cols-7 gap-2 mb-4">
+                <div className="grid grid-cols-7 gap-1 mb-2">
                   {['N', 'P', 'W', 'Ś', 'C', 'P', 'S'].map(day => (
-                    <div key={day} className="text-center text-sm font-bold text-muted-foreground py-3">
+                    <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">
                       {day}
                     </div>
                   ))}
                 </div>
                 
                 {/* Dni miesiąca */}
-                <div className="grid grid-cols-7 gap-2 mb-8">
+                <div className="grid grid-cols-7 gap-1 mb-8">
                   {days.map((day, index) => (
                     <div key={index} className="aspect-square">
                       {day && (
                         <button
                           onClick={() => handleDateSelect(day)}
                           disabled={day < today}
-                          className={`w-full h-full rounded-2xl flex items-center justify-center text-sm font-bold transition-all duration-200 hover:scale-105 ${
+                          className={`w-full h-full rounded-lg flex items-center justify-center text-sm font-medium transition-colors ${
                             day < today
-                              ? 'text-muted-foreground/20 cursor-not-allowed bg-slate-50/30'
+                              ? 'text-muted-foreground/30 cursor-not-allowed'
                               : selectedDate?.toDateString() === day.toDateString()
-                              ? 'bg-gradient-to-br from-primary to-primary/80 text-white shadow-lg scale-105'
-                              : 'bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 shadow-sm'
+                              ? 'bg-primary text-primary-foreground'
+                              : 'hover:bg-slate-100 dark:hover:bg-slate-800'
                           }`}
                         >
                           {day.getDate()}
@@ -318,48 +313,29 @@ const Exams = () => {
 
                 {/* Wybrane godziny */}
                 {selectedDate && (
-                  <div className="pt-8 border-t border-border/20">
-                    <div className="text-center mb-6">
-                      <h3 className="font-bold text-xl text-foreground mb-2">
-                        Dostępne godziny
-                      </h3>
-                      <p className="text-muted-foreground">
-                        {selectedDate.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}
-                      </p>
-                    </div>
+                  <div className="mt-6 pt-6 border-t border-border/60">
+                    <h3 className="font-medium text-foreground mb-4">
+                      Dostępne godziny - {selectedDate.toLocaleDateString('pl-PL')}
+                    </h3>
                     {loadingSlots ? (
-                      <div className="flex items-center justify-center py-12">
-                        <div className="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
+                      <div className="flex items-center justify-center py-8">
+                        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                       </div>
                     ) : availableSlots.length === 0 ? (
-                      <div className="text-center py-12">
-                        <div className="w-20 h-20 rounded-2xl bg-secondary/50 flex items-center justify-center mx-auto mb-4">
-                          <Calendar size={32} className="text-muted-foreground/50" />
-                        </div>
-                        <p className="text-muted-foreground font-medium">
-                          Brak dostępnych terminów w tym dniu
-                        </p>
-                        <p className="text-sm text-muted-foreground/70 mt-2">
-                          Spróbuj wybrać inny dzień
-                        </p>
-                      </div>
+                      <p className="text-muted-foreground text-center py-8">
+                        Brak dostępnych terminów w tym dniu
+                      </p>
                     ) : (
-                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                         {availableSlots.map((slot) => (
                           <button
                             key={slot.id}
                             onClick={() => handleSlotSelect(slot)}
                             disabled={purchasing}
-                            className="group relative p-4 rounded-2xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-700 border border-border/30 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 overflow-hidden"
+                            className="p-3 rounded-lg border border-border/60 bg-card hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-sm font-medium disabled:opacity-50"
                           >
-                            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                            <Clock size={20} className="mx-auto mb-2 text-primary" />
-                            <div className="font-bold text-foreground relative z-10">
-                              {formatTime(slot.slot_time)}
-                            </div>
-                            <div className="text-xs text-muted-foreground mt-1 relative z-10">
-                              Kliknij aby zarezerwować
-                            </div>
+                            <Clock size={16} className="mx-auto mb-1" />
+                            {formatTime(slot.slot_time)}
                           </button>
                         ))}
                       </div>
@@ -372,22 +348,22 @@ const Exams = () => {
 
           {/* Moje egzaminy */}
           <div className="lg:col-span-1">
-            <div className="rounded-3xl bg-gradient-to-br from-card to-card/50 backdrop-blur-xl border border-border/30 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden">
-              <div className="px-8 py-6 border-b border-border/20 bg-gradient-to-r from-slate-50/50 to-slate-100/50 dark:from-slate-900/50 dark:to-slate-800/50">
-                <h2 className="font-display text-xl font-bold text-foreground">
+            <div className="rounded-2xl border border-border/60 bg-card shadow-[var(--shadow-card)] overflow-hidden">
+              <div className="px-6 py-4 border-b border-border/60 bg-slate-50/50 dark:bg-slate-900/30">
+                <h2 className="font-display font-semibold text-foreground">
                   Moje egzaminy
                 </h2>
               </div>
-              <div className="p-8">
+              <div className="p-6">
                 {bookings.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-secondary/30 to-secondary/10 flex items-center justify-center mx-auto mb-6">
-                      <Calendar size={32} className="text-muted-foreground/50" />
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center mb-4">
+                      <Calendar size={28} className="text-muted-foreground/50" />
                     </div>
-                    <p className="text-muted-foreground font-medium mb-2">
+                    <p className="text-sm text-muted-foreground">
                       Nie masz jeszcze wykupionych egzaminów
                     </p>
-                    <p className="text-sm text-muted-foreground/70">
+                    <p className="text-xs text-muted-foreground/70 mt-1">
                       Wybierz termin w kalendarzu
                     </p>
                   </div>
@@ -396,27 +372,23 @@ const Exams = () => {
                     {bookings.map((b) => (
                       <div
                         key={b.id}
-                        className="group p-6 rounded-2xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-700 border border-border/30 shadow-sm hover:shadow-lg transition-all duration-200"
+                        className="flex items-start gap-4 p-4 rounded-xl border border-border/60 bg-slate-50/30 dark:bg-slate-900/20"
                       >
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 text-primary flex items-center justify-center shrink-0">
-                            <CheckCircle size={24} />
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-bold text-foreground mb-2">
-                              {b.exam_availability && formatDate(b.exam_availability.slot_date)}
-                            </p>
-                            <div className="space-y-1">
-                              <p className="text-sm text-muted-foreground flex items-center gap-2">
-                                <Clock size={14} />
-                                {b.exam_availability && formatTime(b.exam_availability.slot_time)}
-                              </p>
-                              <p className="text-sm text-muted-foreground flex items-center gap-2">
-                                <User size={14} />
-                                {b.examiner_name}
-                              </p>
-                            </div>
-                          </div>
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                          <CheckCircle size={20} />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">
+                            {b.exam_availability && formatDate(b.exam_availability.slot_date)}
+                          </p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Godzina:{" "}
+                            {b.exam_availability &&
+                              formatTime(b.exam_availability.slot_time)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Egzaminator: {b.examiner_name}
+                          </p>
                         </div>
                       </div>
                     ))}
