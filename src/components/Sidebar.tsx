@@ -15,11 +15,11 @@ const Sidebar = () => {
   if (location.pathname === "/") return null;
 
   return (
-    <div className="mx-12 mb-4">
+    <div className="mx-16 mb-4">
       <div className="mb-4 pt-12 md:pt-20">
         <h1 className="text-3xl md:text-4xl text-center leading-[1.1]">Kokpit</h1>
       </div>
-      <div className="w-[320px] bg-white p-4 flex flex-col rounded-2xl shadow-lg mt-8 mx-auto">
+      <div className="w-[280px] bg-white p-4 flex flex-col rounded-2xl shadow-lg mt-8 mx-auto">
         <nav className="flex-grow">
           <ul className="space-y-3">
             {navItems.map((item) => (
