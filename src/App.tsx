@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
 import ScrollToTop from "./components/ScrollToTop";
 import { Footer } from "./components/Footer"; // <-- dodany import stopki
 
@@ -28,9 +29,9 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <ScrollToTop />
-          <div className="min-h-screen flex flex-col">
-            <Header />
-            <main className="flex-1">
+        <div className="min-h-screen flex">
+  <Sidebar />
+  <main className="flex-1 bg-background p-8">
               <Routes>
                 <Route path="/" element={<Auth />} />
                 <Route path="/epoki" element={<Index />} />
