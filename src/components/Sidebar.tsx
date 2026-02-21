@@ -6,7 +6,7 @@ const Sidebar = () => {
 
   const navItems = [
     { name: "Nauka", icon: "💡", path: "/epoki" },
-    { name: "Wiadomości", icon: "📧", path: "/wiadomosci" },
+    { name: "Wiadomości", icon: "📧", path: "/kontakt" },
     { name: "Egzaminy", icon: "📅", path: "/egzaminy" },
     { name: "Ustawienia", icon: "⚙️", path: "/ustawienia" },
     { name: "Panel admina", icon: "🛡️", path: "/admin" },
