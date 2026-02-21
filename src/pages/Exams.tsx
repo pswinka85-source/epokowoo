@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Clock, User, CreditCard, CheckCircle } from "lucide-react";
+import { Calendar, Clock, User, CreditCard, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 interface ExamAvailability {
@@ -40,6 +40,10 @@ const Exams = () => {
   const navigate = useNavigate();
   const [purchasing, setPurchasing] = useState(false);
   const [bookings, setBookings] = useState<(ExamBooking & { examiner_name?: string })[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [availableSlots, setAvailableSlots] = useState<ExamAvailability[]>([]);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/");
@@ -83,7 +87,62 @@ const Exams = () => {
     loadBookings();
   }, [user]);
 
-  const handlePurchase = async () => {
+  // Ładowanie dostępnych slotów dla wybranego dnia
+  useEffect(() => {
+    if (!selectedDate) return;
+    
+    const loadAvailableSlots = async () => {
+      setLoadingSlots(true);
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      
+      const { data } = await supabase
+        .from("exam_availability")
+        .select("*")
+        .eq("status", "available")
+        .eq("slot_date", dateStr)
+        .order("slot_time", { ascending: true });
+
+      setAvailableSlots(data || []);
+      setLoadingSlots(false);
+    };
+
+    loadAvailableSlots();
+  }, [selectedDate]);
+
+  // Generowanie dni kalendarza
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const days = [];
+    // Dodaj puste dni na początku
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(null);
+    }
+    // Dodaj dni miesiąca
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(year, month, i));
+    }
+
+    return days;
+  };
+
+  const handleDateSelect = (date: Date) => {
+    // Nie pozwól wybrać daty z przeszłości
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (date < today) {
+      toast.error("Nie można wybrać daty z przeszłości");
+      return;
+    }
+    setSelectedDate(date);
+  };
+
+  const handleSlotSelect = async (slot: ExamAvailability) => {
     if (!user) return;
     setPurchasing(true);
 
@@ -97,24 +156,6 @@ const Exams = () => {
 
     if (activeBooking) {
       toast.error("Masz już aktywny egzamin. Zakończ go przed zakupem kolejnego.");
-      setPurchasing(false);
-      return;
-    }
-
-    // Znajdź dostępny termin
-    const today = new Date().toISOString().split('T')[0];
-    const { data: slot } = await supabase
-      .from("exam_availability")
-      .select("id, slot_date, slot_time")
-      .eq("status", "available")
-      .gte("slot_date", today)
-      .order("slot_date", { ascending: true })
-      .order("slot_time", { ascending: true })
-      .limit(1)
-      .maybeSingle();
-
-    if (!slot) {
-      toast.error("Brak dostępnych terminów. Spróbuj później.");
       setPurchasing(false);
       return;
     }
@@ -155,6 +196,12 @@ const Exams = () => {
     window.location.reload();
   };
 
+  const changeMonth = (direction: number) => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + direction, 1));
+    setSelectedDate(null);
+    setAvailableSlots([]);
+  };
+
   if (authLoading || !user) return null;
 
   const formatDate = (d: string) =>
@@ -165,6 +212,11 @@ const Exams = () => {
       year: "numeric",
     });
   const formatTime = (t: string) => t.slice(0, 5);
+
+  const monthYear = currentMonth.toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' });
+  const days = getDaysInMonth(currentMonth);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -187,48 +239,105 @@ const Exams = () => {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pb-16">
-        <div className="grid gap-6 lg:grid-cols-5">
-          {/* Karta zakupu */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Kalendarz */}
           <div className="lg:col-span-2">
             <div className="rounded-2xl border border-border/60 bg-card shadow-[var(--shadow-card)] overflow-hidden">
               <div className="px-6 py-4 border-b border-border/60 bg-slate-50/50 dark:bg-slate-900/30">
-                <h2 className="font-display font-semibold text-foreground">
-                  Kup egzamin
-                </h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="font-display font-semibold text-foreground">
+                    Wybierz termin egzaminu
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => changeMonth(-1)}
+                      className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    <span className="font-medium text-sm min-w-[120px] text-center">
+                      {monthYear}
+                    </span>
+                    <button
+                      onClick={() => changeMonth(1)}
+                      className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="p-6 space-y-4">
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <Clock size={18} />
-                  <span>Egzamin trwa {EXAM_DURATION_MIN} minut</span>
+              
+              <div className="p-6">
+                {/* Dni tygodnia */}
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {['N', 'P', 'W', 'Ś', 'C', 'P', 'S'].map(day => (
+                    <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">
+                      {day}
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <User size={18} />
-                  <span>Data i godzina wybierane przez egzaminatora</span>
+                
+                {/* Dni miesiąca */}
+                <div className="grid grid-cols-7 gap-1">
+                  {days.map((day, index) => (
+                    <div key={index} className="aspect-square">
+                      {day && (
+                        <button
+                          onClick={() => handleDateSelect(day)}
+                          disabled={day < today}
+                          className={`w-full h-full rounded-lg flex items-center justify-center text-sm font-medium transition-colors ${
+                            day < today
+                              ? 'text-muted-foreground/30 cursor-not-allowed'
+                              : selectedDate?.toDateString() === day.toDateString()
+                              ? 'bg-primary text-primary-foreground'
+                              : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                          }`}
+                        >
+                          {day.getDate()}
+                        </button>
+                      )}
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center gap-3 font-semibold text-foreground">
-                  <CreditCard size={18} className="text-primary" />
-                  <span>{EXAM_PRICE} zł</span>
-                </div>
-                <button
-                  onClick={handlePurchase}
-                  disabled={purchasing}
-                  className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-body font-semibold flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-50"
-                >
-                  {purchasing ? (
-                    <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <CreditCard size={18} />
-                      Kup egzamin
-                    </>
-                  )}
-                </button>
+
+                {/* Wybrane godziny */}
+                {selectedDate && (
+                  <div className="mt-6 pt-6 border-t border-border/60">
+                    <h3 className="font-medium text-foreground mb-4">
+                      Dostępne godziny - {selectedDate.toLocaleDateString('pl-PL')}
+                    </h3>
+                    {loadingSlots ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                      </div>
+                    ) : availableSlots.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-8">
+                        Brak dostępnych terminów w tym dniu
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                        {availableSlots.map((slot) => (
+                          <button
+                            key={slot.id}
+                            onClick={() => handleSlotSelect(slot)}
+                            disabled={purchasing}
+                            className="p-3 rounded-lg border border-border/60 bg-card hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-sm font-medium disabled:opacity-50"
+                          >
+                            <Clock size={16} className="mx-auto mb-1" />
+                            {formatTime(slot.slot_time)}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* Moje egzaminy */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-1">
             <div className="rounded-2xl border border-border/60 bg-card shadow-[var(--shadow-card)] overflow-hidden">
               <div className="px-6 py-4 border-b border-border/60 bg-slate-50/50 dark:bg-slate-900/30">
                 <h2 className="font-display font-semibold text-foreground">
@@ -245,7 +354,7 @@ const Exams = () => {
                       Nie masz jeszcze wykupionych egzaminów
                     </p>
                     <p className="text-xs text-muted-foreground/70 mt-1">
-                      Kliknij „Kup egzamin”, aby zarezerwować termin
+                      Wybierz termin w kalendarzu
                     </p>
                   </div>
                 ) : (
