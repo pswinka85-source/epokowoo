@@ -28,7 +28,7 @@ const Sidebar = () => {
                   to={item.path}
                   className={`flex items-center gap-4 p-3 rounded-xl text-lg font-medium transition-colors ${
                     location.pathname === item.path
-                      ? "bg-gray-200 text-gray-900"
+                      ? "bg-black text-white font-bold"
                       : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                   }`}
                 >
