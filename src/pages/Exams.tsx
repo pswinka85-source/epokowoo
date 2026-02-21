@@ -87,11 +87,27 @@ const Exams = () => {
     if (!user) return;
     setPurchasing(true);
 
+    // Sprawdź czy użytkownik nie ma już aktywnego egzaminu
+    const { data: activeBooking } = await supabase
+      .from("exam_bookings")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("status", "scheduled")
+      .maybeSingle();
+
+    if (activeBooking) {
+      toast.error("Masz już aktywny egzamin. Zakończ go przed zakupem kolejnego.");
+      setPurchasing(false);
+      return;
+    }
+
+    // Znajdź dostępny termin
+    const today = new Date().toISOString().split('T')[0];
     const { data: slot } = await supabase
       .from("exam_availability")
-      .select("id")
+      .select("id, slot_date, slot_time")
       .eq("status", "available")
-      .gte("slot_date", new Date().toISOString().slice(0, 10))
+      .gte("slot_date", today)
       .order("slot_date", { ascending: true })
       .order("slot_time", { ascending: true })
       .limit(1)
@@ -103,25 +119,39 @@ const Exams = () => {
       return;
     }
 
-    const { error: insertErr } = await supabase.from("exam_bookings").insert({
+    // Dodaj rezerwację
+    const { data: booking, error: insertErr } = await supabase.from("exam_bookings").insert({
       user_id: user.id,
       availability_id: slot.id,
       status: "scheduled",
       amount_pln: EXAM_PRICE,
       payment_reference: `ex-${Date.now()}`,
-    });
+    }).select().single();
 
-    if (insertErr) {
+    if (insertErr || !booking) {
+      console.error("Insert error:", insertErr);
       toast.error("Błąd zakupu. Spróbuj ponownie.");
       setPurchasing(false);
       return;
     }
 
-    await supabase.from("exam_availability").update({ status: "booked" }).eq("id", slot.id);
+    // Zaktualizuj status terminu
+    const { error: updateErr } = await supabase
+      .from("exam_availability")
+      .update({ status: "booked" })
+      .eq("id", slot.id);
 
-    toast.success("Egzamin wykupiony! Sprawdź szczegóły poniżej.");
+    if (updateErr) {
+      console.error("Update error:", updateErr);
+      toast.error("Błąd podczas rezerwacji terminu. Skontaktuj się z obsługą.");
+      setPurchasing(false);
+      return;
+    }
+
+    toast.success(`Egzamin wykupiony! Termin: ${new Date(slot.slot_date).toLocaleDateString('pl-PL')} o ${slot.slot_time.slice(0, 5)}`);
     setPurchasing(false);
 
+    // Przeładuj dane
     window.location.reload();
   };
 
