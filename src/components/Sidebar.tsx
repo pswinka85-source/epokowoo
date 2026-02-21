@@ -16,23 +16,20 @@ const Sidebar = () => {
 
   return (
     <div className="mx-8 mb-4">
-      <div className="mb-4 pt-12 md:pt-20">
-        <h1 className="text-3xl md:text-4xl text-center leading-[1.1]">Kokpit</h1>
-      </div>
-      <div className="w-[280px] bg-white p-4 flex flex-col rounded-2xl shadow-lg mt-8 mx-auto">
+      <div className="w-[280px] bg-white p-4 flex flex-col rounded-3xl shadow-lg mx-auto">
         <nav className="flex-grow">
           <ul className="space-y-3">
             {navItems.map((item) => (
               <li key={item.name}>
                 <Link
                   to={item.path}
-                  className={`flex items-center gap-4 p-2 rounded-xl text-lg font-bold transition-colors ${
+                  className={`flex items-center gap-4 p-2 rounded-2xl text-lg font-bold transition-colors ${
                     location.pathname === item.path
                       ? "bg-black text-white font-bold"
                       : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                   }`}
                 >
-                  <span className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
+                  <span className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${
                     location.pathname === item.path
                       ? "bg-white text-black font-bold"
                       : "bg-white"
