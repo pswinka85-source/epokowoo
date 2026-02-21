@@ -28,11 +28,15 @@ const Sidebar = () => {
                   to={item.path}
                   className={`flex items-center gap-4 p-3 rounded-xl text-lg font-medium transition-colors ${
                     location.pathname === item.path
-                      ? "bg-black text-white font-bold"
+                      ? "bg-gray-800 text-white font-bold"
                       : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                   }`}
                 >
-                  <span className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-lg">
+                  <span className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
+                    location.pathname === item.path
+                      ? "bg-gray-800 text-white font-bold"
+                      : "bg-white"
+                  }`}>
                     {item.icon}
                   </span>
                   <span>{item.name}</span>
