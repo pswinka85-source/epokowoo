@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { epochs } from "@/data/epochs";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import EpochCard from "@/components/EpochCard";
+import Sidebar from "@/components/Sidebar";
 import { CheckCircle, Brain, TrendingUp } from "lucide-react";
 
 const Index = () => {
@@ -53,20 +54,24 @@ const Index = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <header className="relative overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-background flex">
+      <Sidebar />
+      
+      {/* Main content */}
+      <div className="flex-1">
+        {/* Hero */}
+        <header className="relative overflow-hidden">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
 
-        <div className="relative max-w-6xl mx-auto px-6 pt-12 pb-10 md:pt-20 md:pb-14">
-          <div>
-              <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2">
-                Cześć, <span className="font-normal">{user.user_metadata?.display_name?.split(" ")[0] || user.user_metadata?.full_name?.split(" ")[0] || user.user_metadata?.name?.split(" ")[0] || ""}</span>! 👋
-              </h1>
-              <p className="text-lg text-muted-foreground font-body leading-relaxed mb-4">
-                Oto Twoje postępy w nauce.
-              </p>
+          <div className="relative max-w-6xl mx-auto px-6 pt-12 pb-10 md:pt-20 md:pb-14">
+            <div>
+                <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2">
+                  Cześć, <span className="font-normal">{user.user_metadata?.display_name?.split(" ")[0] || user.user_metadata?.full_name?.split(" ")[0] || user.user_metadata?.name?.split(" ")[0] || ""}</span>! 👋
+                </h1>
+                <p className="text-lg text-muted-foreground font-body leading-relaxed mb-4">
+                  Oto Twoje postępy w nauce.
+                </p>
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-sm font-body text-muted-foreground">Postęp e-testów</span>
@@ -116,6 +121,7 @@ const Index = () => {
           ))}
         </div>
       </main>
+      </div>
     </div>
   );
 };
