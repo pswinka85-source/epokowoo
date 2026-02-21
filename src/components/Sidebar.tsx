@@ -53,36 +53,30 @@ const Sidebar = () => {
           </nav>
           
           {/* Karta Rozprawka */}
-          <Link
-            to="/rozprawka"
-            className="group block opacity-0 animate-fade-in mt-6"
-            style={{ animationDelay: '300ms' }}
-          >
-            <article className="relative h-full overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1 hover:border-primary/30">
-              <div className="flex flex-col h-full">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-3xl" role="img" aria-label="Rozprawka">
-                    📝
-                  </span>
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground font-body px-2 py-0.5 rounded-full bg-secondary">
-                    EGZ
-                  </span>
-                </div>
-
-                <h3 className="font-display text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                  Rozprawka
-                </h3>
-
-                <p className="text-sm text-muted-foreground font-body leading-relaxed line-clamp-2 flex-1">
-                  Przygotuj się do egzaminu końcowego i zdaj rozprawkę na ocenę celującą.
-                </p>
-
-                <div className="flex items-center gap-2 mt-4 text-sm font-body font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  Rozpocznij naukę
-                </div>
+          <article className="relative h-full overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1 hover:border-primary/30">
+            <div className="flex flex-col h-full">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-3xl" role="img" aria-label="Rozprawka">
+                  📝
+                </span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground font-body px-2 py-0.5 rounded-full bg-secondary">
+                  EGZ
+                </span>
               </div>
-            </article>
-          </Link>
+
+              <h3 className="font-display text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                Rozprawka
+              </h3>
+
+              <p className="text-sm text-muted-foreground font-body leading-relaxed line-clamp-2 flex-1">
+                Przygotuj się do egzaminu końcowego i zdaj rozprawkę na ocenę celującą.
+              </p>
+
+              <div className="flex items-center gap-2 mt-4 text-sm font-body font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                Rozpocznij naukę
+              </div>
+            </div>
+          </article>
         </div>
       </div>
     </div>
