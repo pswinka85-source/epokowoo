@@ -223,16 +223,13 @@ const Exams = () => {
       <header className="relative overflow-hidden">
         <div className="absolute top-10 left-5 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-5 right-10 w-80 h-80 bg-accent/5 rounded-full blur-3xl" />
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-8 md:pt-14 md:pb-10">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <Calendar size={20} />
-            </div>
-            <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
-              Egzaminy
+        <div className="relative max-w-6xl mx-auto px-8 pt-12 pb-10 md:pt-20 md:pb-14">
+          <div>
+            <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2">
+              Zapisz się!✨
             </h1>
           </div>
-          <p className="text-muted-foreground font-body text-sm sm:text-base">
+          <p className="text-lg text-muted-foreground font-body leading-relaxed mb-4">
             Egzamin z egzaminatorem – 20 minut, {EXAM_PRICE} zł
           </p>
         </div>
