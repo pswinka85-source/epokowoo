@@ -90,34 +90,3 @@ const Header = () => {
 };
 
 export default Header;
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-foreground hover:bg-secondary transition-all duration-200"
-              aria-label="Menu"
-            >
-            <div className="relative w-[22px] h-[22px]">
-              <span
-                className={`absolute left-0 top-[4px] w-full h-[2px] bg-current rounded-full transition-all duration-300 origin-center ${
-                  menuOpen ? "rotate-45 translate-y-[7px]" : ""
-                }`}
-              />
-              <span
-                className={`absolute left-0 top-[10px] w-full h-[2px] bg-current rounded-full transition-all duration-300 ${
-                  menuOpen ? "opacity-0 scale-x-0" : ""
-                }`}
-              />
-              <span
-                className={`absolute left-0 top-[16px] w-full h-[2px] bg-current rounded-full transition-all duration-300 origin-center ${
-                  menuOpen ? "-rotate-45 -translate-y-[5px]" : ""
-                }`}
-              />
-            </div>
-            </button>
-          </div>
-        </div>
-
-        {/* Dropdown menu */}
-        <div
-          className={`absolute right-0 top-full mt-3 w-60 rounded-2xl bg-card shadow-[var(--shadow-elevated)] py-2 z-[5] transition-all duration-300 origin-top-right ${
-
-export default Header;
