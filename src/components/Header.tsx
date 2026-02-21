@@ -36,7 +36,7 @@ const Header = () => {
   if (location.pathname === "/") return null;
 
   return (
-    <header className="sticky top-0 z-50 px-6 pt-6 pb-2">
+    <header className="sticky top-0 z-50 px-8 pt-6 pb-2">
       <div ref={menuRef} className="max-w-6xl mx-auto relative">
         <div className="rounded-full bg-card shadow-sm px-6 h-14 flex items-center justify-between relative z-10">
           <Link to="/" className="flex items-center gap-3">
