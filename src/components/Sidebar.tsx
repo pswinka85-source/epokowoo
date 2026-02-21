@@ -22,7 +22,7 @@ const Sidebar = () => {
             <li key={item.name}>
               <Link
                 to={item.path}
-                className={`flex items-center gap-3 p-3 rounded-xl text-base font-medium transition-colors ${
+                className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${
                   location.pathname === item.path
                     ? "bg-gray-200 text-gray-900"
                     : "bg-gray-100 text-gray-800 hover:bg-gray-200"
@@ -31,7 +31,7 @@ const Sidebar = () => {
                 <span className="w-7 h-7 bg-white rounded-full flex items-center justify-center text-sm">
                   {item.icon}
                 </span>
-                <span>{item.name}</span>
+                <span className={item.name === "Kokpit" ? "text-3xl md:text-4xl font-extrabold leading-[1.1]" : "text-base font-medium"}>{item.name}</span>
               </Link>
             </li>
           ))}
