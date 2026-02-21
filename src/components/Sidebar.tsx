@@ -1,3 +1,4 @@
+import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Lightbulb, Mail, Calendar, Settings, Shield } from "lucide-react";
 import logo from "@/assets/logo.png";
