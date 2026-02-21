@@ -224,7 +224,7 @@ const Exams = () => {
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
         
-        <div className="relative max-w-6xl mx-auto px-8 pt-12 pb-10 md:pt-20 md:pb-14">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 md:pt-20 md:pb-14">
           <div className="text-center mb-8">
             <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-4">
               Zapisz się!✨
@@ -248,7 +248,7 @@ const Exams = () => {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-8 pb-16">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Kalendarz */}
           <div className="lg:col-span-2">

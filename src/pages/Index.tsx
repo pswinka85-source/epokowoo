@@ -59,7 +59,7 @@ const Index = () => {
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
 
-        <div className="relative max-w-6xl mx-auto px-8 pt-12 pb-10 md:pt-20 md:pb-14">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 md:pt-20 md:pb-14">
           <div>
             <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2">
               Cześć, <span className="font-normal">{user.user_metadata?.display_name?.split(" ")[0] || user.user_metadata?.full_name?.split(" ")[0] || user.user_metadata?.name?.split(" ")[0] || ""}</span>! 👋
@@ -109,7 +109,7 @@ const Index = () => {
       </header>
 
       {/* Epochs grid */}
-      <main className="max-w-6xl mx-auto px-8 pb-16">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {epochs.map((epoch, index) => (
             <EpochCard key={epoch.id} epoch={epoch} index={index} />
