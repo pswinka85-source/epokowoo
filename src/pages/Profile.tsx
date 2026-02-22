@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, Save, KeyRound, ChevronDown, Trash2, User, Settings, BookOpen } from "lucide-react";
+import { Camera, Save, KeyRound, ChevronDown, Trash2, User, Settings, BookOpen, LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 type UiScale = "small" | "medium" | "large";
@@ -162,6 +162,16 @@ const Profile = () => {
   const handleDeleteAccount = async () => {
     toast.error("Aby usunąć konto, skontaktuj się z administracją.");
     setShowDeleteConfirm(false);
+  };
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error("Błąd wylogowania");
+    } else {
+      toast.success("Wylogowano pomyślnie");
+      navigate("/");
+    }
   };
 
   if (authLoading) {
@@ -426,6 +436,17 @@ const Profile = () => {
                       {changingPassword ? "Zmieniam..." : "Zmień hasło"}
                     </button>
                   </div>
+                </div>
+
+                {/* Wyloguj */}
+                <div className="pt-4 border-t border-border/60">
+                  <button
+                    onClick={handleLogout}
+                    className="h-10 px-4 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-body font-medium text-sm hover:bg-slate-300 dark:hover:bg-slate-600 active:scale-[0.98] transition-all duration-200 flex items-center gap-2"
+                  >
+                    <LogOut size={15} />
+                    Wyloguj się
+                  </button>
                 </div>
 
                 {/* Usuń konto */}
