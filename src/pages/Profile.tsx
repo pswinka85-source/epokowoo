@@ -51,31 +51,45 @@ const Profile = () => {
 
   useEffect(() => {
     console.log("Profile component mounted, user:", user);
-    if (!user) return;
+    if (!user) {
+      console.log("No user found, redirecting to auth");
+      navigate("/");
+      return;
+    }
     const fetchProfile = async () => {
       console.log("Fetching profile for user:", user.id);
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", user.id)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", user.id)
+          .single();
 
-      console.log("Profile data fetched:", data);
-      if (data) {
-        setProfile({
-          display_name: data.display_name || "",
-          phone: (data as any).phone || "",
-          bio: (data as any).bio || "",
-          avatar_url: (data as any).avatar_url || "",
-          notifications_web: (data as any).notifications_web ?? true,
-          notifications_email: (data as any).notifications_email ?? true,
-          notifications_sms: (data as any).notifications_sms ?? false,
-          ui_scale: ((data as any).ui_scale as UiScale) || "medium",
-        });
+        console.log("Profile data fetched:", { data, error });
+        if (error) {
+          console.error("Error fetching profile:", error);
+          // Nie blokuj wyświetlania strony, nawet jeśli profil się nie załadował
+          toast.error("Nie udało się załadować profilu");
+        }
+        if (data) {
+          setProfile({
+            display_name: data.display_name || "",
+            phone: (data as any).phone || "",
+            bio: (data as any).bio || "",
+            avatar_url: (data as any).avatar_url || "",
+            notifications_web: (data as any).notifications_web ?? true,
+            notifications_email: (data as any).notifications_email ?? true,
+            notifications_sms: (data as any).notifications_sms ?? false,
+            ui_scale: ((data as any).ui_scale as UiScale) || "medium",
+          });
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+        toast.error("Wystąpił nieoczekiwany błąd");
       }
     };
     fetchProfile();
-  }, [user]);
+  }, [user, navigate]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -150,7 +164,22 @@ const Profile = () => {
     setShowDeleteConfirm(false);
   };
 
-  if (authLoading || !user) return null;
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground font-body">Ładowanie...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    console.log("No user found in Profile component");
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground font-body">Brak dostępu. Przekierowywanie...</p>
+      </div>
+    );
+  }
 
   const firstName = profile.display_name
     ? profile.display_name.split(" ")[0]
