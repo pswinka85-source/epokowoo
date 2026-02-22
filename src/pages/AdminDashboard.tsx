@@ -7,7 +7,8 @@ import AdminQuizEditor from "@/components/admin/AdminQuizEditor";
 import AdminEpochEditor from "@/components/admin/AdminEpochEditor";
 import AdminWorksheetManager from "@/components/admin/AdminWorksheetManager";
 import AdminExamManager from "@/components/admin/AdminExamManager";
-import { BookOpen, Brain, ArrowLeft, ChevronDown, Settings, FileText, Calendar } from "lucide-react";
+import AdminCardBackgroundManager from "@/components/admin/AdminCardBackgroundManager";
+import { BookOpen, Brain, ArrowLeft, ChevronDown, Settings, FileText, Calendar, Palette } from "lucide-react";
 
 const AdminDashboard = () => {
   const { isAdmin, loading } = useAuth();
@@ -15,7 +16,7 @@ const AdminDashboard = () => {
   const epochParam = searchParams.get("epoch");
   const editLessonParam = searchParams.get("editLesson");
   const [selectedEpoch, setSelectedEpoch] = useState(epochParam && epochs.find(e => e.id === epochParam) ? epochParam : epochs[0].id);
-  const [activeSection, setActiveSection] = useState<"lessons" | "quizzes" | "epoch" | "worksheets" | "exams">("lessons");
+  const [activeSection, setActiveSection] = useState<"lessons" | "quizzes" | "epoch" | "worksheets" | "exams" | "backgrounds">("lessons");
   const [initialEditLessonId, setInitialEditLessonId] = useState<string | null>(editLessonParam);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground font-body">Ładowanie...</p></div>;
@@ -60,6 +61,7 @@ const AdminDashboard = () => {
               { id: "epoch" as const, label: "Dane epoki", icon: Settings },
               { id: "worksheets" as const, label: "Karty pracy", icon: FileText },
               { id: "exams" as const, label: "Egzaminy", icon: Calendar },
+              { id: "backgrounds" as const, label: "Tła kart", icon: Palette },
             ]).map(tab => {
               const Icon = tab.icon;
               const isActive = activeSection === tab.id;
@@ -87,6 +89,9 @@ const AdminDashboard = () => {
         )}
         {activeSection === "worksheets" && (
           <AdminWorksheetManager epochId={selectedEpoch} epochName={epoch.name} />
+        )}
+        {activeSection === "backgrounds" && (
+          <AdminCardBackgroundManager />
         )}
         {activeSection === "exams" && (
           <AdminExamManager />
