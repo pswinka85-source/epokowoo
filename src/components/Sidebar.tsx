@@ -17,7 +17,7 @@ const Sidebar = () => {
   return (
     <div className="mx-8 mb-4">
       <div className="pt-12 md:pt-20">
-        <div className="w-[300px] bg-white p-4 flex flex-col rounded-3xl shadow-lg mx-auto">
+        <div className="w-[300px] bg-white p-4 flex flex-col rounded-3xl mx-auto">
           <nav className="flex-grow">
             <ul className="space-y-3">
               {navItems.map((item) => (
