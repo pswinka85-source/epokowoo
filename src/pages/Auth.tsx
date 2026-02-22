@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Upload, User, Instagram, Linkedin, Facebook } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const Auth = () => {
@@ -13,6 +13,12 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string>("");
+  const [platform, setPlatform] = useState("");
+  const [instagramHandle, setInstagramHandle] = useState("");
+  const [linkedinHandle, setLinkedinHandle] = useState("");
+  const [facebookHandle, setFacebookHandle] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -28,6 +34,32 @@ const Auth = () => {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Sprawdź typ pliku
+      if (!file.type.startsWith('image/')) {
+        setError("Można przesłać tylko pliki graficzne (JPG, PNG)");
+        return;
+      }
+
+      // Sprawdź rozmiar pliku (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Plik jest zbyt duży. Maksymalny rozmiar to 5MB");
+        return;
+      }
+
+      setProfileImage(file);
+      
+      // Podgląd obrazka
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfileImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,16 +87,65 @@ const Auth = () => {
         setSubmitting(false);
         return;
       }
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: window.location.origin,
-          data: { display_name: `${firstName.trim()} ${lastName.trim()}` },
-        },
-      });
-      if (error) setError(error.message);
-      else setMessage("Sprawdź swoją skrzynkę e-mail, aby potwierdzić rejestrację.");
+
+      try {
+        // Najpierw zarejestruj użytkownika
+        const { data: authData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: window.location.origin,
+            data: { 
+              display_name: `${firstName.trim()} ${lastName.trim()}`,
+              profile_image_url: profileImagePreview || null,
+              platform: platform.trim(),
+              instagram_handle: instagramHandle.trim(),
+              linkedin_handle: linkedinHandle.trim(),
+              facebook_handle: facebookHandle.trim()
+            },
+          },
+        });
+
+        if (signUpError) {
+          setError(signUpError.message);
+          setSubmitting(false);
+          return;
+        }
+
+        // Jeśli przesłano zdjęcie, zapisz je w storage
+        if (profileImage && authData.user) {
+          const fileName = `profile-${authData.user.id}-${Date.now()}.${profileImage.name.split('.').pop()}`;
+          const { error: uploadError } = await supabase.storage
+            .from('profile-images')
+            .upload(fileName, profileImage);
+
+          if (uploadError) {
+            console.error("Error uploading profile image:", uploadError);
+            setError("Błąd przesyłania zdjęcia profilu");
+          } else {
+            const { data: { publicUrl } } = supabase.storage
+              .from('profile-images')
+              .getPublicUrl(fileName);
+
+            // Zaktualizuj profil z URL zdjęcia
+            await supabase
+              .from('profiles')
+              .update({ 
+                avatar_url: publicUrl,
+                platform: platform.trim(),
+                instagram_handle: instagramHandle.trim(),
+                linkedin_handle: linkedinHandle.trim(),
+                facebook_handle: facebookHandle.trim()
+              })
+              .eq('id', authData.user.id);
+          }
+        }
+
+        setMessage("Sprawdź swoją skrzynkę e-mail, aby potwierdzić rejestrację.");
+      } catch (error) {
+        console.error("Registration error:", error);
+        setError("Wystąpił błąd podczas rejestracji. Spróbuj ponownie.");
+      }
     }
     setSubmitting(false);
   };
@@ -74,6 +155,12 @@ const Auth = () => {
     setIsForgot(false);
     setError("");
     setMessage("");
+    setProfileImage(null);
+    setProfileImagePreview("");
+    setPlatform("");
+    setInstagramHandle("");
+    setLinkedinHandle("");
+    setFacebookHandle("");
   };
 
   return (
@@ -83,7 +170,7 @@ const Auth = () => {
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/[0.04] rounded-full blur-[80px]" />
 
       <div
-        className={`relative w-full max-w-[420px] transition-all duration-700 ease-out ${
+        className={`relative w-full max-w-[480px] transition-all duration-700 ease-out ${
           mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
         }`}
       >
@@ -94,9 +181,10 @@ const Auth = () => {
           <div className="flex justify-center mb-6">
             <img src={logo} alt="Epokowo" className="h-8" />
           </div>
+
           {/* Tab switcher */}
           {!isForgot && (
-            <div className="flex rounded-2xl bg-secondary p-1 mb-8">
+            <div className="flex rounded-2xl bg-secondary p-1 mb-6">
               <button
                 onClick={() => { setIsLogin(true); setIsForgot(false); setError(""); setMessage(""); }}
                 className={`flex-1 h-10 rounded-xl text-sm font-body font-semibold transition-all duration-300 ${
@@ -135,6 +223,47 @@ const Auth = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Profile Image Upload for registration */}
+            {!isLogin && !isForgot && (
+              <div className="mb-6">
+                <label className="text-xs font-medium text-muted-foreground font-body block mb-2 uppercase tracking-wider">
+                  Zdjęcie profilowe
+                </label>
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    {profileImagePreview ? (
+                      <img 
+                        src={profileImagePreview} 
+                        alt="Podgląd profilu" 
+                        className="w-20 h-20 rounded-full object-cover border-2 border-border"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center border-2 border-border">
+                        <User size={32} className="text-muted-foreground" />
+                      </div>
+                    )}
+                    <label className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/90 transition-colors">
+                      <Upload size={16} className="text-primary-foreground" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground font-body">
+                      Dodaj zdjęcie profilowe, aby inni mogli Cię lepiej poznać
+                    </p>
+                    <p className="text-xs text-muted-foreground/70 font-body mt-1">
+                      Format: JPG, PNG. Maksymalny rozmiar: 5MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Name fields for registration */}
             {!isLogin && !isForgot && (
               <div className="grid grid-cols-2 gap-3">
@@ -163,6 +292,73 @@ const Auth = () => {
                     className="flex h-12 w-full rounded-xl border border-input bg-background px-4 text-sm font-body ring-offset-background placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-all duration-200"
                     placeholder="Kowalski"
                   />
+                </div>
+              </div>
+            )}
+
+            {/* Platform info for registration */}
+            {!isLogin && !isForgot && (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground font-body block mb-2 uppercase tracking-wider">
+                    Skąd wiesz o platformie?
+                  </label>
+                  <select
+                    value={platform}
+                    onChange={(e) => setPlatform(e.target.value)}
+                    className="flex h-12 w-full rounded-xl border border-input bg-background px-4 text-sm font-body ring-offset-background placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-all duration-200"
+                  >
+                    <option value="">Wybierz opcję</option>
+                    <option value="facebook">Facebook</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="linkedin">LinkedIn</option>
+                    <option value="google">Google</option>
+                    <option value="friend">Polecenie od znajomego</option>
+                    <option value="advertisement">Reklama</option>
+                    <option value="other">Inne</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground font-body block mb-2 uppercase tracking-wider flex items-center gap-2">
+                      <Instagram size={14} />
+                      Instagram
+                    </label>
+                    <input
+                      type="text"
+                      value={instagramHandle}
+                      onChange={(e) => setInstagramHandle(e.target.value)}
+                      className="flex h-12 w-full rounded-xl border border-input bg-background px-4 text-sm font-body ring-offset-background placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-all duration-200"
+                      placeholder="@twojprofil"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground font-body block mb-2 uppercase tracking-wider flex items-center gap-2">
+                      <Linkedin size={14} />
+                      LinkedIn
+                    </label>
+                    <input
+                      type="text"
+                      value={linkedinHandle}
+                      onChange={(e) => setLinkedinHandle(e.target.value)}
+                      className="flex h-12 w-full rounded-xl border border-input bg-background px-4 text-sm font-body ring-offset-background placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-all duration-200"
+                      placeholder="/in/twojprofil"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground font-body block mb-2 uppercase tracking-wider flex items-center gap-2">
+                      <Facebook size={14} />
+                      Facebook
+                    </label>
+                    <input
+                      type="text"
+                      value={facebookHandle}
+                      onChange={(e) => setFacebookHandle(e.target.value)}
+                      className="flex h-12 w-full rounded-xl border border-input bg-background px-4 text-sm font-body ring-offset-background placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-all duration-200"
+                      placeholder="facebook.com/twojprofil"
+                    />
+                  </div>
                 </div>
               </div>
             )}
