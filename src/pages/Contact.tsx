@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Send, ArrowLeft, MessageSquare } from "lucide-react";
+import { Search, Send, ArrowLeft, MessageSquare, Bell, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 interface Profile {
@@ -30,6 +30,15 @@ interface Message {
   created_at: string;
 }
 
+interface SystemMessage {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  read: boolean;
+  type: 'system' | 'notification';
+}
+
 const Contact = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -41,8 +50,37 @@ const Contact = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Profile[]>([]);
   const [searching, setSearching] = useState(false);
+  const [activeTab, setActiveTab] = useState<'messages' | 'notifications'>('messages');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Przykładowe wiadomości systemowe
+  const [systemMessages] = useState<SystemMessage[]>([
+    {
+      id: '1',
+      title: 'Sprawdź, co warto wiedzieć przed 1 września',
+      content: 'Przygotuj się na nowy rok szkolny z naszym kompleksowym przewodnikiem.',
+      date: '2024-08-25',
+      read: false,
+      type: 'system'
+    },
+    {
+      id: '2',
+      title: 'EGZAMIN ÓSMOKLASISTY 2026: Miasta egzamin',
+      content: 'Poznaj listę miast, w których odbędzie się egzamin ósmoklasisty w 2026 roku.',
+      date: '2024-08-20',
+      read: false,
+      type: 'notification'
+    },
+    {
+      id: '3',
+      title: 'Przyjdź na spotkania na nowy rok szkolny',
+      content: 'Dołącz do naszych spotkań organizacyjnych przed rozpoczęciem roku szkolnego.',
+      date: '2024-08-15',
+      read: true,
+      type: 'system'
+    }
+  ]);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/");
@@ -265,118 +303,156 @@ const Contact = () => {
     return d.toLocaleDateString("pl-PL", { day: "numeric", month: "short" });
   };
 
+  const formatDate = (date: string) => {
+    const d = new Date(date);
+    return d.toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" });
+  };
+
+  const getUnreadCount = () => {
+    if (activeTab === 'messages') {
+      return conversations.reduce((sum, c) => sum + c.unread_count, 0);
+    } else {
+      return systemMessages.filter(m => !m.read).length;
+    }
+  };
+
   if (authLoading) return null;
 
   return (
-    <main className="min-h-screen bg-background">
-      {/* Hero section */}
-      <header className="relative overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 md:pt-20 md:pb-14">
-          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-4">
-            Wiadomości
-          </h1>
-          <p className="text-lg text-muted-foreground font-body leading-relaxed">
-            Skontaktuj się z innymi użytkownikami Epokowo
-          </p>
+    <main className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto h-screen flex flex-col">
+        {/* Header */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4">
+          <h1 className="text-2xl font-bold text-gray-900">Skrzynka odbiorcza</h1>
         </div>
-      </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div
-          className="bg-white rounded-3xl shadow-lg border border-border/60 overflow-hidden"
-          style={{ minHeight: "560px", height: "calc(100vh - 220px)" }}
-        >
-          <div className="flex h-full flex-col md:flex-row">
-            {/* Left sidebar - conversation list */}
-            <div
-              className={`w-full md:w-80 lg:w-[340px] border-b md:border-b-0 md:border-r border-border/60 flex flex-col shrink-0 ${
-                activeConvo ? "hidden md:flex" : "flex"
-              }`}
-            >
-              {/* Search bar - zawsze widoczny */}
-              <div className="p-4 pb-3 border-b border-border/60">
-                <div className="relative">
-                  <Search
-                    size={18}
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Szukaj użytkownika..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-secondary/50 text-sm font-body text-foreground placeholder:text-muted-foreground border border-transparent focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/30 transition-all"
-                  />
-                  {searchQuery && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl shadow-[var(--shadow-elevated)] border border-border/60 z-20 max-h-64 overflow-y-auto py-1">
-                      {searching ? (
-                        <div className="px-4 py-6 text-center text-sm text-muted-foreground">
-                          Szukam...
-                        </div>
-                      ) : searchResults.length === 0 ? (
-                        <div className="px-4 py-6 text-center text-sm text-muted-foreground">
-                          Nie znaleziono użytkowników
-                        </div>
-                      ) : (
-                        searchResults.map((p) => (
-                          <button
-                            key={p.user_id}
-                            onClick={() => startConversation(p)}
-                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/60 transition-colors text-left"
-                          >
-                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary shrink-0 overflow-hidden ring-2 ring-border/40">
-                              {p.avatar_url ? (
-                                <img
-                                  src={p.avatar_url}
-                                  className="w-full h-full rounded-full object-cover"
-                                  alt={p.display_name || "avatar"}
-                                />
-                              ) : (
-                                <span>{getInitials(p.display_name)}</span>
-                              )}
-                            </div>
-                            <span className="text-sm font-medium text-foreground truncate">
-                              {p.display_name || "Użytkownik"}
-                            </span>
-                          </button>
-                        ))
-                      )}
-                    </div>
+        <div className="flex flex-1 overflow-hidden">
+          {/* ŚRODKOWA KOLUMNA - LISTA WIADOMOŚCI */}
+          <div className="w-full md:w-96 bg-white border-r border-gray-200 flex flex-col">
+            {/* Zakładki */}
+            <div className="flex border-b border-gray-200">
+              <button
+                onClick={() => setActiveTab('messages')}
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                  activeTab === 'messages'
+                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <Mail size={16} />
+                  <span>Wiadomości</span>
+                  {conversations.reduce((sum, c) => sum + c.unread_count, 0) > 0 && (
+                    <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
+                      {conversations.reduce((sum, c) => sum + c.unread_count, 0)}
+                    </span>
                   )}
                 </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('notifications')}
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                  activeTab === 'notifications'
+                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <Bell size={16} />
+                  <span>Powiadomienia</span>
+                  {systemMessages.filter(m => !m.read).length > 0 && (
+                    <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
+                      {systemMessages.filter(m => !m.read).length}
+                    </span>
+                  )}
+                </div>
+              </button>
+            </div>
+
+            {/* Search bar */}
+            <div className="p-4 border-b border-gray-200">
+              <div className="relative">
+                <Search
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                />
+                <input
+                  type="text"
+                  placeholder={activeTab === 'messages' ? "Szukaj użytkownika..." : "Szukaj powiadomień..."}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-100 text-sm text-gray-900 placeholder:text-gray-500 border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                />
+                {searchQuery && activeTab === 'messages' && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-20 max-h-64 overflow-y-auto">
+                    {searching ? (
+                      <div className="px-4 py-6 text-center text-sm text-gray-500">
+                        Szukam...
+                      </div>
+                    ) : searchResults.length === 0 ? (
+                      <div className="px-4 py-6 text-center text-sm text-gray-500">
+                        Nie znaleziono użytkowników
+                      </div>
+                    ) : (
+                      searchResults.map((p) => (
+                        <button
+                          key={p.user_id}
+                          onClick={() => startConversation(p)}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-semibold text-blue-600 shrink-0">
+                            {p.avatar_url ? (
+                              <img
+                                src={p.avatar_url}
+                                className="w-full h-full rounded-full object-cover"
+                                alt={p.display_name || "avatar"}
+                              />
+                            ) : (
+                              <span>{getInitials(p.display_name)}</span>
+                            )}
+                          </div>
+                          <span className="text-sm font-medium text-gray-900 truncate">
+                            {p.display_name || "Użytkownik"}
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Lista wiadomości */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="px-4 py-3">
+                <p className="text-sm font-medium text-gray-900">Twoje wiadomości</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {getUnreadCount()} nieprzeczytanych
+                </p>
               </div>
 
-              {/* Conversation list */}
-              <div className="flex-1 overflow-y-auto min-h-0">
-                {conversations.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                    <div className="w-20 h-20 rounded-3xl bg-gray-100 flex items-center justify-center mb-6">
-                      <MessageSquare size={40} className="text-gray-400" />
+              {activeTab === 'messages' ? (
+                conversations.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                      <MessageSquare size={32} className="text-gray-400" />
                     </div>
-                    <p className="text-lg font-bold text-gray-800 mb-2">Brak wiadomości</p>
-                    <p className="text-sm text-gray-600 max-w-[240px]">
-                      Wyszukaj użytkownika powyżej, aby rozpocząć rozmowę
-                    </p>
+                    <p className="text-sm font-medium text-gray-900 mb-1">Brak wiadomości</p>
+                    <p className="text-xs text-gray-500">Wyszukaj użytkownika, aby rozpocząć rozmowę</p>
                   </div>
                 ) : (
-                  <div className="py-2">
+                  <div className="px-2">
                     {conversations.map((c) => (
                       <button
                         key={c.id}
                         onClick={() => setActiveConvo(c)}
-                        className={`w-full flex items-center gap-4 p-3 mx-2 rounded-2xl text-lg font-bold transition-all text-left ${
+                        className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left mb-1 ${
                           activeConvo?.id === c.id
-                            ? "bg-black text-white font-bold"
-                            : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                            ? 'bg-blue-50 border border-blue-200'
+                            : 'hover:bg-gray-50 border border-transparent'
                         }`}
                       >
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${
-                          activeConvo?.id === c.id
-                            ? "bg-white text-black font-bold"
-                            : "bg-white"
-                        }`}>
+                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-sm font-semibold text-blue-600 shrink-0 relative">
                           {c.other_user?.avatar_url ? (
                             <img
                               src={c.other_user.avatar_url}
@@ -384,172 +460,201 @@ const Contact = () => {
                               alt={c.other_user?.display_name || "avatar"}
                             />
                           ) : (
-                            getInitials(c.other_user?.display_name ?? null)
+                            <span>{getInitials(c.other_user?.display_name ?? null)}</span>
                           )}
                           {c.unread_count > 0 && (
-                            <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
                               {c.unread_count > 9 ? "9+" : c.unread_count}
                             </span>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <span className={`text-lg font-bold truncate ${
-                              c.unread_count > 0
-                                ? "text-white"
-                                : activeConvo?.id === c.id ? "text-white" : "text-gray-800"
+                            <span className={`text-sm font-semibold truncate ${
+                              c.unread_count > 0 ? 'text-gray-900' : 'text-gray-700'
                             }`}>
                               {c.other_user?.display_name || "Użytkownik"}
                             </span>
-                            <span className="text-[11px] text-muted-foreground shrink-0">
+                            <span className="text-xs text-gray-500 shrink-0">
                               {formatTime(c.last_message_at)}
                             </span>
                           </div>
-                          <p
-                            className={`text-sm truncate mt-1 ${
-                              c.unread_count > 0
-                                ? "font-bold text-white"
-                                : activeConvo?.id === c.id ? "text-gray-200" : "text-gray-600"
-                            }`}
-                          >
+                          <p className={`text-xs truncate mt-1 ${
+                            c.unread_count > 0 ? 'text-gray-900 font-medium' : 'text-gray-500'
+                          }`}>
                             {c.last_message || "Rozpocznij rozmowę"}
                           </p>
                         </div>
                       </button>
                     ))}
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* Right side - chat */}
-            <div
-              className={`flex-1 flex flex-col min-w-0 ${
-                !activeConvo ? "hidden md:flex" : "flex"
-              }`}
-            >
-              {activeConvo ? (
-                <>
-                  {/* Chat header */}
-                  <div className="shrink-0 px-4 sm:px-6 py-4 border-b border-border/60 flex items-center gap-3 bg-card/80">
+                )
+              ) : (
+                <div className="px-2">
+                  {systemMessages.map((msg) => (
                     <button
-                      onClick={() => setActiveConvo(null)}
-                      className="md:hidden w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-                      aria-label="Wróć do listy"
+                      key={msg.id}
+                      className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left mb-1 ${
+                        !msg.read
+                          ? 'bg-blue-50 border border-blue-200'
+                          : 'hover:bg-gray-50 border border-transparent'
+                      }`}
                     >
-                      <ArrowLeft size={20} />
-                    </button>
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary overflow-hidden ring-2 ring-border/30 shrink-0">
-                      {activeConvo.other_user?.avatar_url ? (
-                        <img
-                          src={activeConvo.other_user.avatar_url}
-                          className="w-full h-full rounded-full object-cover"
-                          alt={activeConvo.other_user?.display_name || "avatar"}
-                        />
-                      ) : (
-                        getInitials(activeConvo.other_user?.display_name ?? null)
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="font-display font-semibold text-foreground block truncate">
-                        {activeConvo.other_user?.display_name || "Użytkownik"}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {activeConvo.last_message_at
-                          ? formatTime(activeConvo.last_message_at)
-                          : "Aktywny"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Messages */}
-                  <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-3 bg-white min-h-0">
-                    {messages.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <div className="w-16 h-16 rounded-3xl bg-gray-200 flex items-center justify-center mb-4">
-                          <MessageSquare size={32} className="text-gray-500" />
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                        {msg.type === 'system' ? (
+                          <Bell size={18} className="text-gray-600" />
+                        ) : (
+                          <Mail size={18} className="text-gray-600" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={`text-sm font-semibold truncate ${
+                            !msg.read ? 'text-gray-900' : 'text-gray-700'
+                          }`}>
+                            {msg.title}
+                          </span>
+                          <span className="text-xs text-gray-500 shrink-0">
+                            {formatDate(msg.date)}
+                          </span>
                         </div>
-                        <p className="text-lg font-bold text-gray-800">
-                          Nie ma jeszcze wiadomości
-                        </p>
-                        <p className="text-sm text-gray-600 mt-2">
-                          Napisz pierwszą wiadomość!
+                        <p className={`text-xs truncate mt-1 ${
+                          !msg.read ? 'text-gray-900 font-medium' : 'text-gray-500'
+                        }`}>
+                          {msg.content}
                         </p>
                       </div>
-                    ) : (
-                      messages.map((msg) => {
-                        const isMine = msg.sender_id === user?.id;
-                        return (
-                          <div
-                            key={msg.id}
-                            className={`flex ${isMine ? "justify-end" : "justify-start"}`}
-                          >
-                            <div
-                              className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${
-                                isMine
-                                  ? "bg-blue-600 text-white rounded-br-lg"
-                                  : "bg-gray-100 text-gray-900 rounded-bl-lg"
-                              }`}
-                            >
-                              <p className="whitespace-pre-wrap break-words leading-normal">
-                                {msg.content}
-                              </p>
-                              <p
-                                className={`text-xs mt-1 ${
-                                  isMine
-                                    ? "text-blue-100"
-                                    : "text-gray-500"
-                                }`}
-                              >
-                                {formatTime(msg.created_at)}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
-                    <div ref={messagesEndRef} />
-                  </div>
-
-                  {/* Input */}
-                  <div className="shrink-0 p-4 bg-gray-50 border-t border-gray-200">
-                    <div className="flex items-center gap-2">
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        placeholder="Napisz wiadomość..."
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyDown={(e) =>
-                          e.key === "Enter" && !e.shiftKey && sendMessage()
-                        }
-                        className="flex-1 px-4 py-3 rounded-full bg-white border border-gray-300 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                      />
-                      <button
-                        onClick={sendMessage}
-                        disabled={!newMessage.trim()}
-                        className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 shrink-0"
-                        aria-label="Wyślij wiadomość"
-                      >
-                        <Send size={18} />
-                      </button>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-center px-8 py-16">
-                  <div className="w-20 h-20 rounded-2xl bg-secondary/40 flex items-center justify-center mb-6">
-                    <MessageSquare size={36} className="text-muted-foreground/40" />
-                  </div>
-                  <h3 className="font-display font-semibold text-foreground text-lg mb-2">
-                    Wybierz rozmowę
-                  </h3>
-                  <p className="text-sm text-muted-foreground max-w-[260px]">
-                    Wybierz konwersację z listy lub wyszukaj użytkownika, aby rozpocząć nową rozmowę.
-                  </p>
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
+          </div>
+
+          {/* PRAWA KOLUMNA - PANEL PODGLĄDU */}
+          <div className="flex-1 bg-white flex flex-col">
+            {activeConvo ? (
+              <>
+                {/* Chat header */}
+                <div className="shrink-0 px-6 py-4 border-b border-gray-200 flex items-center gap-3">
+                  <button
+                    onClick={() => setActiveConvo(null)}
+                    className="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
+                  >
+                    <ArrowLeft size={16} />
+                  </button>
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-sm font-semibold text-blue-600 shrink-0">
+                    {activeConvo.other_user?.avatar_url ? (
+                      <img
+                        src={activeConvo.other_user.avatar_url}
+                        className="w-full h-full rounded-full object-cover"
+                        alt={activeConvo.other_user?.display_name || "avatar"}
+                      />
+                    ) : (
+                      <span>{getInitials(activeConvo.other_user?.display_name ?? null)}</span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-semibold text-gray-900 block truncate">
+                      {activeConvo.other_user?.display_name || "Użytkownik"}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {activeConvo.last_message_at
+                        ? formatTime(activeConvo.last_message_at)
+                        : "Aktywny"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+                  {messages.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                        <MessageSquare size={32} className="text-gray-400" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-900 mb-1">
+                        Nie ma jeszcze wiadomości
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Napisz pierwszą wiadomość!
+                      </p>
+                    </div>
+                  ) : (
+                    messages.map((msg) => {
+                      const isMine = msg.sender_id === user?.id;
+                      return (
+                        <div
+                          key={msg.id}
+                          className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+                        >
+                          <div
+                            className={`max-w-[70%] px-4 py-2 rounded-2xl text-sm ${
+                              isMine
+                                ? "bg-blue-600 text-white"
+                                : "bg-gray-100 text-gray-900"
+                            }`}
+                          >
+                            <p className="whitespace-pre-wrap break-words">
+                              {msg.content}
+                            </p>
+                            <p
+                              className={`text-xs mt-1 ${
+                                isMine
+                                  ? "text-blue-100"
+                                  : "text-gray-500"
+                              }`}
+                            >
+                              {formatTime(msg.created_at)}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Input */}
+                <div className="shrink-0 px-6 py-4 border-t border-gray-200">
+                  <div className="flex items-center gap-2">
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      placeholder="Napisz wiadomość..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && !e.shiftKey && sendMessage()
+                      }
+                      className="flex-1 px-4 py-2 rounded-full bg-gray-100 text-sm text-gray-900 placeholder:text-gray-500 border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    />
+                    <button
+                      onClick={sendMessage}
+                      disabled={!newMessage.trim()}
+                      className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                    >
+                      <Send size={16} />
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
+                <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center mb-6">
+                  <MessageSquare size={48} className="text-gray-400" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-3">
+                  Witaj w skrzynce odbiorczej
+                </h2>
+                <p className="text-sm text-gray-600 max-w-md mb-2">
+                  Tutaj pojawiają się wszystkie Twoje wiadomości i powiadomienia systemowe.
+                </p>
+                <p className="text-sm text-gray-500">
+                  Wybierz wiadomość, którą chcesz odczytać
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
