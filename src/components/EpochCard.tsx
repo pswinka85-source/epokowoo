@@ -14,11 +14,26 @@ const EpochCard = ({ epoch, index }: EpochCardProps) => {
     'renesans': '#ccdecf'
   };
 
+  // Kolory hover dla tekstu (mocniejsze odcienie tła)
+  const epochHoverColors: Record<string, string> = {
+    'antyk': '#d0d3d6',
+    'sredniowiecze': '#c8c7c4',
+    'renesans': '#b8b9bc'
+  };
+
   const getCardStyle = () => {
     const backgroundColor = epochBackgrounds[epoch.id] || 'hsl(217, 91%, 60%)';
     
     return {
       backgroundColor,
+    };
+  };
+
+  const getHoverStyle = () => {
+    const hoverColor = epochHoverColors[epoch.id] || '#5a67d8';
+    
+    return {
+      color: hoverColor,
     };
   };
 
@@ -42,7 +57,7 @@ const EpochCard = ({ epoch, index }: EpochCardProps) => {
             </span>
           </div>
 
-          <h3 className="font-display text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+          <h3 className="font-display text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors" style={getHoverStyle()}>
             {epoch.name}
           </h3>
 
@@ -50,7 +65,7 @@ const EpochCard = ({ epoch, index }: EpochCardProps) => {
             {epoch.shortDesc}
           </p>
 
-          <div className="flex items-center gap-2 mt-4 text-sm font-body font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="flex items-center gap-2 mt-4 text-sm font-body font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={getHoverStyle()}>
             Rozpocznij naukę
           </div>
         </div>
