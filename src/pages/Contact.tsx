@@ -463,16 +463,16 @@ const Contact = () => {
                   </div>
 
                   {/* Messages */}
-                  <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-4 bg-background/30 min-h-0">
+                  <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-4 bg-gray-50 min-h-0">
                     {messages.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <div className="w-14 h-14 rounded-2xl bg-secondary/50 flex items-center justify-center mb-4">
-                          <MessageSquare size={24} className="text-muted-foreground/40" />
+                        <div className="w-16 h-16 rounded-3xl bg-gray-200 flex items-center justify-center mb-4">
+                          <MessageSquare size={32} className="text-gray-500" />
                         </div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-lg font-bold text-gray-800">
                           Nie ma jeszcze wiadomości
                         </p>
-                        <p className="text-xs text-muted-foreground/70 mt-1">
+                        <p className="text-sm text-gray-600 mt-2">
                           Napisz pierwszą wiadomość!
                         </p>
                       </div>
@@ -485,20 +485,20 @@ const Contact = () => {
                             className={`flex ${isMine ? "justify-end" : "justify-start"}`}
                           >
                             <div
-                              className={`group max-w-[85%] sm:max-w-[75%] px-4 py-3 rounded-2xl text-sm font-body shadow-sm ${
+                              className={`group max-w-[85%] sm:max-w-[75%] px-5 py-4 rounded-3xl text-base font-medium shadow-md ${
                                 isMine
-                                  ? "bg-primary text-primary-foreground rounded-br-md"
-                                  : "bg-card text-foreground rounded-bl-md border border-border/50"
+                                  ? "bg-black text-white rounded-br-2xl"
+                                  : "bg-white text-gray-800 rounded-bl-2xl border border-gray-200 shadow-sm"
                               }`}
                             >
-                              <p className="whitespace-pre-wrap break-words leading-relaxed">
+                              <p className="whitespace-pre-wrap break-words leading-relaxed text-base">
                                 {msg.content}
                               </p>
                               <p
-                                className={`text-[10px] mt-1.5 ${
+                                className={`text-xs mt-2 font-medium ${
                                   isMine
-                                    ? "text-primary-foreground/70"
-                                    : "text-muted-foreground"
+                                    ? "text-gray-300"
+                                    : "text-gray-500"
                                 }`}
                               >
                                 {formatTime(msg.created_at)}
@@ -512,8 +512,8 @@ const Contact = () => {
                   </div>
 
                   {/* Input */}
-                  <div className="shrink-0 p-4 sm:p-6 pt-3 border-t border-border/60 bg-card/50">
-                    <div className="flex items-center gap-3">
+                  <div className="shrink-0 p-6 bg-white border-t border-gray-200">
+                    <div className="flex items-center gap-4">
                       <input
                         ref={inputRef}
                         type="text"
@@ -523,15 +523,15 @@ const Contact = () => {
                         onKeyDown={(e) =>
                           e.key === "Enter" && !e.shiftKey && sendMessage()
                         }
-                        className="flex-1 px-4 py-3 rounded-xl bg-background border border-border/60 text-sm font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all"
+                        className="flex-1 px-5 py-4 rounded-2xl bg-gray-100 border border-gray-300 text-base font-medium text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black transition-all"
                       />
                       <button
                         onClick={sendMessage}
                         disabled={!newMessage.trim()}
-                        className="w-11 h-11 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 shrink-0"
+                        className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center hover:bg-gray-800 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 shrink-0"
                         aria-label="Wyślij wiadomość"
                       >
-                        <Send size={18} />
+                        <Send size={20} />
                       </button>
                     </div>
                   </div>
