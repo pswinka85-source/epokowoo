@@ -23,7 +23,7 @@ const Header = () => {
           <div className="flex items-center gap-1">
             {user && (
               <Link
-                to="/ustawienia"
+                to="/profil"
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-foreground hover:bg-secondary transition-all duration-200 relative"
                 aria-label="Ustawienia"
               >

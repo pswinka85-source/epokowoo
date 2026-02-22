@@ -83,7 +83,6 @@ const App = () => {
                     <Route path="/epoka/:id" element={<EpochDetail />} />
                     <Route path="/profil" element={<Profile />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
-                    <Route path="/ustawienia" element={<Contact />} />
                     <Route path="/kontakt" element={<Contact />} />
                     <Route path="/egzaminy" element={<Exams />} />
                     <Route path="/admin" element={<AdminDashboard />} />
