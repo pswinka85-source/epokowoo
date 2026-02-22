@@ -119,29 +119,125 @@ const AdminCardBackgroundManager = () => {
     }
   };
 
+  // Funkcja do tworzenia tabeli jeśli nie istnieje
+  const createTableIfNotExists = async () => {
+    try {
+      // Sprawdź czy użytkownik jest adminem
+      const { data: adminCheck } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (!adminCheck) {
+        toast.error("Tylko admin może tworzyć tabele");
+        return;
+      }
+
+      // Wykonaj surowe SQL do stworzenia tabeli
+      const { error: tableError } = await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS public.card_backgrounds (
+            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+            epoch_id TEXT NOT NULL,
+            background_type TEXT NOT NULL DEFAULT 'color' CHECK (background_type IN ('color', 'image')),
+            background_value TEXT NOT NULL DEFAULT 'hsl(217, 91%, 60%)',
+            is_active BOOLEAN NOT NULL DEFAULT false,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+          );
+        `
+      });
+
+      if (tableError) {
+        toast.error(`Błąd tworzenia tabeli: ${tableError.message}`);
+        return;
+      }
+
+      // Włącz RLS
+      await supabase.rpc('exec_sql', {
+        sql: `ALTER TABLE public.card_backgrounds ENABLE ROW LEVEL SECURITY;`
+      });
+
+      // Utwórz polityki
+      await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE POLICY IF NOT EXISTS "Anyone can read card backgrounds" ON public.card_backgrounds
+          FOR SELECT USING (true);
+        `
+      });
+
+      await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE POLICY IF NOT EXISTS "Admins can insert card backgrounds" ON public.card_backgrounds
+          FOR INSERT WITH CHECK (public.is_admin(auth.uid()));
+        `
+      });
+
+      await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE POLICY IF NOT EXISTS "Admins can update card backgrounds" ON public.card_backgrounds
+          FOR UPDATE USING (public.is_admin(auth.uid()));
+        `
+      });
+
+      await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE POLICY IF NOT EXISTS "Admins can delete card backgrounds" ON public.card_backgrounds
+          FOR DELETE USING (public.is_admin(auth.uid()));
+        `
+      });
+
+      toast.success("Tabela card_backgrounds została utworzona pomyślnie!");
+      loadBackgrounds();
+      
+    } catch (error) {
+      console.error("Error creating table:", error);
+      toast.error(`Błąd: ${error.message || error}`);
+    }
+  };
+
   const saveColorBackground = async () => {
-    if (!selectedEpoch) return;
+    if (!selectedEpoch) {
+      toast.error("Wybierz epokę przed zapisaniem koloru");
+      return;
+    }
 
     try {
-      const { error } = await supabase
+      console.log("Saving color background:", { epoch_id: selectedEpoch, background_value: colorValue });
+      
+      const { data, error } = await supabase
         .from("card_backgrounds")
         .insert({
           epoch_id: selectedEpoch,
           background_type: 'color',
           background_value: colorValue,
           is_active: false
-        });
+        })
+        .select()
+        .single();
 
       if (error) {
         console.error("Error saving color:", error);
-        toast.error("Błąd zapisywania koloru tła");
-      } else {
+        
+        // Sprawdź czy to błąd braku tabeli
+        if (error.message?.includes('does not exist') || error.message?.includes('relation')) {
+          toast.error("Tabela 'card_backgrounds' nie istnieje. Uruchom migracje w Supabase.");
+        } else {
+          toast.error(`Błąd zapisywania koloru tła: ${error.message || error.details || 'Nieznany błąd'}`);
+        }
+      } else if (data) {
+        console.log("Color saved successfully:", data);
         toast.success("Kolor tła został dodany");
+        setColorValue('#6973ff'); // Reset do domyślnej wartości
         loadBackgrounds();
+      } else {
+        toast.error("Nie udało się zapisać koloru tła - brak danych zwrotnych");
       }
     } catch (error) {
       console.error("Save color error:", error);
-      toast.error("Wystąpił nieoczekiwany błąd");
+      toast.error(`Wystąpił nieoczekiwany błąd: ${error.message || error}`);
     }
   };
 
@@ -212,9 +308,17 @@ const AdminCardBackgroundManager = () => {
     <div className="space-y-8">
       {/* Dodawanie nowego tła */}
       <div className="rounded-xl border border-border bg-card p-6">
-        <h3 className="font-display font-semibold text-foreground mb-6">
-          Dodaj tło kart
-        </h3>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="font-display font-semibold text-foreground">
+            Dodaj tło kart
+          </h3>
+          <button
+            onClick={createTableIfNotExists}
+            className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium transition-colors"
+          >
+            Utwórz tabelę
+          </button>
+        </div>
         
         <div className="space-y-4">
           {/* Wybór epoki */}
