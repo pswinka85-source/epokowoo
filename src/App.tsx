@@ -12,8 +12,8 @@ import { Footer } from "./components/Footer"; // <-- dodany import stopki
 // Komponent karty rozprawki
 const EssayCard = () => (
   <div className="mx-8 mb-4">
-    <div className="w-[300px] bg-white p-4 rounded-3xl shadow-lg mx-auto">
-      <article className="relative h-full overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1 hover:border-primary/30">
+    <div className="w-[300px]">
+      <article className="relative h-full overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30">
         <div className="flex flex-col h-full">
           <div className="flex items-center gap-3 mb-3">
             <span className="text-3xl" role="img" aria-label="Rozprawka">
