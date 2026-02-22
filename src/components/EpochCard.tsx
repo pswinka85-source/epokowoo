@@ -1,15 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import type { EpochData } from "@/data/epochs";
-
-interface CardBackground {
-  id: string;
-  epoch_id: string;
-  background_type: 'color' | 'image';
-  background_value: string;
-  is_active: boolean;
-}
 
 interface EpochCardProps {
   epoch: EpochData;
@@ -17,45 +7,18 @@ interface EpochCardProps {
 }
 
 const EpochCard = ({ epoch, index }: EpochCardProps) => {
-  const [cardBackground, setCardBackground] = useState<CardBackground | null>(null);
-
-  useEffect(() => {
-    const loadBackground = async () => {
-      const { data, error } = await supabase
-        .from("card_backgrounds")
-        .select("*")
-        .eq("epoch_id", epoch.id)
-        .eq("is_active", true)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error loading background:", error);
-      } else if (data) {
-        setCardBackground(data);
-      }
-    };
-
-    loadBackground();
-  }, [epoch.id]);
+  // Kolory tła dla poszczególnych epok
+  const epochBackgrounds: Record<string, string> = {
+    'antyk': '#edeff1',
+    'sredniowiecze': '#e2e1df',
+    'renesans': '#ccdecf'
+  };
 
   const getCardStyle = () => {
-    if (cardBackground) {
-      if (cardBackground.background_type === 'color') {
-        return {
-          backgroundColor: cardBackground.background_value,
-        };
-      } else if (cardBackground.background_type === 'image') {
-        return {
-          backgroundImage: `url(${cardBackground.background_value})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        };
-      }
-    }
+    const backgroundColor = epochBackgrounds[epoch.id] || 'hsl(217, 91%, 60%)';
     
-    // Domyślne tło
     return {
-      backgroundColor: 'hsl(217, 91%, 60%)',
+      backgroundColor,
     };
   };
 
