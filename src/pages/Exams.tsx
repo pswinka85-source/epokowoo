@@ -45,6 +45,100 @@ const Exams = () => {
   const [availableSlots, setAvailableSlots] = useState<ExamAvailability[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>("");
+
+  // Funkcja testowa do sprawdzania i tworzenia przykładowych terminów
+  const createSampleSlots = async () => {
+    if (!user) return;
+    
+    try {
+      // Sprawdź czy użytkownik jest adminem
+      const { data: adminCheck } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (!adminCheck) {
+        toast.error("Tylko admin może tworzyć przykładowe terminy");
+        return;
+      }
+
+      // Dodaj kilka przykładowych terminów na najbliższe dni
+      const sampleSlots = [];
+      const today = new Date();
+      
+      for (let i = 1; i <= 5; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        const dateStr = date.toISOString().split('T')[0];
+        
+        sampleSlots.push({
+          examiner_id: user.id,
+          slot_date: dateStr,
+          slot_time: `${9 + i}:00`,
+          status: "available"
+        });
+      }
+
+      const { error } = await supabase
+        .from("exam_availability")
+        .insert(sampleSlots);
+
+      if (error) {
+        console.error("Error creating sample slots:", error);
+        toast.error(`Błąd tworzenia terminów: ${error.message}`);
+      } else {
+        toast.success("Dodano 5 przykładowych terminów");
+        if (selectedDate) {
+          // Przeładuj dostępne sloty dla wybranego dnia
+          const dateStr = selectedDate.toISOString().split('T')[0];
+          const { data } = await supabase
+            .from("exam_availability")
+            .select("*")
+            .eq("status", "available")
+            .eq("slot_date", dateStr)
+            .order("slot_time", { ascending: true });
+          setAvailableSlots(data || []);
+        }
+      }
+    } catch (error) {
+      console.error("Error in createSampleSlots:", error);
+      toast.error("Wystąpił błąd");
+    }
+  };
+
+  // Funkcja do sprawdzania stanu bazy danych
+  const checkDatabaseState = async () => {
+    try {
+      const { data: allSlots, error: slotsError } = await supabase
+        .from("exam_availability")
+        .select("*")
+        .limit(10);
+
+      const { data: myBookings, error: bookingsError } = await supabase
+        .from("exam_bookings")
+        .select("*")
+        .eq("user_id", user.id);
+
+      const { data: userRole } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      setDebugInfo(`
+        Dostępne terminy: ${allSlots?.length || 0}
+        Twoje rezerwacje: ${myBookings?.length || 0}
+        Twoja rola: ${userRole?.role || 'brak'}
+        Błąd slotów: ${slotsError?.message || 'brak'}
+        Błąd rezerwacji: ${bookingsError?.message || 'brak'}
+      `);
+    } catch (error) {
+      setDebugInfo(`Błąd sprawdzania: ${error}`);
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/");
@@ -289,6 +383,29 @@ const Exams = () => {
                   <span>{EXAM_PRICE} zł</span>
                 </div>
               </div>
+              
+              {/* Przyciski debugowania */}
+              <div className="flex justify-center gap-4 mt-6">
+                <button
+                  onClick={checkDatabaseState}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Sprawdź bazę danych
+                </button>
+                <button
+                  onClick={createSampleSlots}
+                  className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Dodaj przykładowe terminy
+                </button>
+              </div>
+              
+              {/* Informacje debugowania */}
+              {debugInfo && (
+                <div className="mt-4 p-4 bg-gray-100 rounded-lg text-xs font-mono text-left max-w-2xl mx-auto">
+                  <pre className="whitespace-pre-wrap">{debugInfo}</pre>
+                </div>
+              )}
             </div>
           </div>
         </div>
