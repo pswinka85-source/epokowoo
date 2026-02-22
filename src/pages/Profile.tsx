@@ -50,13 +50,17 @@ const Profile = () => {
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
+    console.log("Profile component mounted, user:", user);
     if (!user) return;
     const fetchProfile = async () => {
+      console.log("Fetching profile for user:", user.id);
       const { data } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", user.id)
         .single();
+
+      console.log("Profile data fetched:", data);
       if (data) {
         setProfile({
           display_name: data.display_name || "",
