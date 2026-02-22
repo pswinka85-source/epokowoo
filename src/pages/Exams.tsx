@@ -109,32 +109,154 @@ const Exams = () => {
     }
   };
 
-  // Funkcja do sprawdzania stanu bazy danych
-  const checkDatabaseState = async () => {
+  // Funkcja do ręcznego tworzenia tabel
+  const createTablesManually = async () => {
+    if (!user) return;
+    
     try {
-      const { data: allSlots, error: slotsError } = await supabase
-        .from("exam_availability")
-        .select("*")
-        .limit(10);
-
-      const { data: myBookings, error: bookingsError } = await supabase
-        .from("exam_bookings")
-        .select("*")
-        .eq("user_id", user.id);
-
-      const { data: userRole } = await supabase
+      // Sprawdź czy użytkownik jest adminem
+      const { data: adminCheck } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
+        .eq("role", "admin")
         .maybeSingle();
 
-      setDebugInfo(`
+      if (!adminCheck) {
+        toast.error("Tylko admin może tworzyć tabele");
+        return;
+      }
+
+      // Wykonaj surowe SQL do stworzenia tabel
+      const { error: availabilityError } = await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS public.exam_availability (
+            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+            examiner_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+            slot_date DATE NOT NULL,
+            slot_time TIME NOT NULL,
+            status TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'booked')),
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+            UNIQUE(examiner_id, slot_date, slot_time)
+          );
+        `
+      });
+
+      if (availabilityError) {
+        toast.error(`Błąd tworzenia exam_availability: ${availabilityError.message}`);
+        return;
+      }
+
+      const { error: bookingsError } = await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS public.exam_bookings (
+            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+            user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+            availability_id UUID NOT NULL REFERENCES public.exam_availability(id) ON DELETE CASCADE,
+            status TEXT NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'completed', 'cancelled', 'refunded')),
+            amount_pln DECIMAL(10,2) NOT NULL DEFAULT 19.99,
+            payment_reference TEXT,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+          );
+        `
+      });
+
+      if (bookingsError) {
+        toast.error(`Błąd tworzenia exam_bookings: ${bookingsError.message}`);
+        return;
+      }
+
+      // Włącz RLS
+      await supabase.rpc('exec_sql', {
+        sql: `ALTER TABLE public.exam_availability ENABLE ROW LEVEL SECURITY;`
+      });
+
+      await supabase.rpc('exec_sql', {
+        sql: `ALTER TABLE public.exam_bookings ENABLE ROW LEVEL SECURITY;`
+      });
+
+      // Utwórz polityki
+      await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE POLICY IF NOT EXISTS "Anyone can read exam availability" ON public.exam_availability
+          FOR SELECT USING (true);
+        `
+      });
+
+      await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE POLICY IF NOT EXISTS "Authenticated users can create exam bookings" ON public.exam_bookings
+          FOR INSERT WITH CHECK (auth.uid() = user_id);
+        `
+      });
+
+      toast.success("Tabele zostały utworzone pomyślnie!");
+      
+      // Sprawdź ponownie stan bazy
+      await checkDatabaseState();
+      
+    } catch (error) {
+      console.error("Error creating tables:", error);
+      toast.error(`Błąd: ${error}`);
+    }
+  };
+  const checkDatabaseState = async () => {
+    try {
+      // Sprawdź czy tabele istnieją
+      const { data: tables, error: tablesError } = await supabase
+        .from('information_schema.tables')
+        .select('table_name')
+        .eq('table_schema', 'public')
+        .in('table_name', ['exam_availability', 'exam_bookings', 'user_roles']);
+
+      if (tablesError) {
+        setDebugInfo(`Błąd sprawdzania tabel: ${tablesError.message}`);
+        return;
+      }
+
+      const tableNames = tables?.map(t => t.table_name) || [];
+      const hasExamAvailability = tableNames.includes('exam_availability');
+      const hasExamBookings = tableNames.includes('exam_bookings');
+      const hasUserRoles = tableNames.includes('user_roles');
+
+      let debugText = `
+        Istniejące tabele: ${tableNames.join(', ') || 'brak'}
+        exam_availability: ${hasExamAvailability ? 'TAK' : 'NIE'}
+        exam_bookings: ${hasExamBookings ? 'TAK' : 'NIE'}
+        user_roles: ${hasUserRoles ? 'TAK' : 'NIE'}
+      `;
+
+      if (!hasExamAvailability) {
+        debugText += '\n\n❌ Tabela exam_availability nie istnieje! Uruchom migracje.';
+      }
+
+      if (hasExamAvailability) {
+        const { data: allSlots, error: slotsError } = await supabase
+          .from("exam_availability")
+          .select("*")
+          .limit(10);
+
+        const { data: myBookings, error: bookingsError } = await supabase
+          .from("exam_bookings")
+          .select("*")
+          .eq("user_id", user.id);
+
+        const { data: userRole } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        debugText += `
         Dostępne terminy: ${allSlots?.length || 0}
         Twoje rezerwacje: ${myBookings?.length || 0}
         Twoja rola: ${userRole?.role || 'brak'}
         Błąd slotów: ${slotsError?.message || 'brak'}
         Błąd rezerwacji: ${bookingsError?.message || 'brak'}
-      `);
+        `;
+      }
+
+      setDebugInfo(debugText);
     } catch (error) {
       setDebugInfo(`Błąd sprawdzania: ${error}`);
     }
@@ -397,6 +519,12 @@ const Exams = () => {
                   className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm font-medium transition-colors"
                 >
                   Dodaj przykładowe terminy
+                </button>
+                <button
+                  onClick={createTablesManually}
+                  className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Utwórz tabele ręcznie
                 </button>
               </div>
               
