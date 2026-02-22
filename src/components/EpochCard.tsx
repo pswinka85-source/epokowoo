@@ -7,33 +7,15 @@ interface EpochCardProps {
 }
 
 const EpochCard = ({ epoch, index }: EpochCardProps) => {
-  // Kolory tła dla poszczególnych epok
-  const epochBackgrounds: Record<string, string> = {
-    'antyk': '#edeff1',
-    'sredniowiecze': '#e2e1df',
-    'renesans': '#ccdecf'
-  };
-
-  // Kolory hover dla tekstu (mocniejsze odcienie tła)
-  const epochHoverColors: Record<string, string> = {
-    'antyk': '#000000',
-    'sredniowiecze': '#000000',
-    'renesans': '#000000'
-  };
-
   const getCardStyle = () => {
-    const backgroundColor = epochBackgrounds[epoch.id] || 'hsl(217, 91%, 60%)';
-    
     return {
-      backgroundColor,
+      backgroundColor: 'white',
     };
   };
 
   const getHoverStyle = () => {
-    const hoverColor = epochHoverColors[epoch.id] || '#5a67d8';
-    
     return {
-      color: hoverColor,
+      color: '#000000',
     };
   };
 
