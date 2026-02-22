@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, X, Palette, Image as ImageIcon, Check } from "lucide-react";
+import { Upload, X, Palette, Image as ImageIcon, Check, Database } from "lucide-react";
 import { toast } from "sonner";
 import { epochs } from "@/data/epochs";
 
@@ -23,22 +23,53 @@ const AdminCardBackgroundManager = () => {
   const [selectedEpoch, setSelectedEpoch] = useState(epochs[0]?.id || '');
   const [colorValue, setColorValue] = useState('#6973ff');
   const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   useEffect(() => {
     loadBackgrounds();
   }, []);
 
   const loadBackgrounds = async () => {
-    const { data, error } = await supabase
-      .from("card_backgrounds")
-      .select("*")
-      .order("epoch_id, created_at", { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from("card_backgrounds")
+        .select("*")
+        .order("epoch_id, created_at", { ascending: true });
 
-    if (error) {
-      console.error("Error loading backgrounds:", error);
-      toast.error("Błąd ładowania tł");
-    } else {
-      setBackgrounds(data || []);
+      if (error) {
+        console.error("Error loading backgrounds:", error);
+        setDebugInfo(`Błąd ładowania: ${error.message}`);
+        toast.error("Błąd ładowania tł");
+      } else {
+        setBackgrounds(data || []);
+        setDebugInfo(`Załadowano ${data?.length || 0} tł`);
+      }
+    } catch (error) {
+      console.error("Load error:", error);
+      setDebugInfo(`Błąd: ${error}`);
+    }
+  };
+
+  const checkTableExists = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("card_backgrounds")
+        .select("id")
+        .limit(1);
+
+      if (error) {
+        console.error("Table check error:", error);
+        setDebugInfo(`Tabela nie istnieje: ${error.message}`);
+        toast.error("Tabela card_backgrounds nie istnieje. Uruchom migrację.");
+        return false;
+      } else {
+        setDebugInfo("Tabela istnieje ✅");
+        return true;
+      }
+    } catch (error) {
+      console.error("Check error:", error);
+      setDebugInfo(`Błąd sprawdzania: ${error}`);
+      return false;
     }
   };
 
@@ -46,13 +77,11 @@ const AdminCardBackgroundManager = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Sprawdź typ pliku
     if (!file.type.startsWith('image/')) {
       toast.error("Można przesyłać tylko pliki graficzne (JPG, PNG, SVG)");
       return;
     }
 
-    // Sprawdź rozmiar pliku (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error("Plik jest zbyt duży. Maksymalny rozmiar to 5MB");
       return;
@@ -60,142 +89,11 @@ const AdminCardBackgroundManager = () => {
 
     setSelectedFile(file);
     
-    // Podgląd obrazka
     const reader = new FileReader();
     reader.onload = (e) => {
       setPreviewUrl(e.target?.result as string);
     };
     reader.readAsDataURL(file);
-  };
-
-  const uploadImage = async () => {
-    if (!selectedFile || !selectedEpoch) return;
-
-    setUploading(true);
-    
-    try {
-      // Prześlij plik do Supabase Storage
-      const fileName = `card-bg-${Date.now()}-${selectedFile.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('card-backgrounds')
-        .upload(fileName, selectedFile);
-
-      if (uploadError) {
-        console.error("Upload error:", uploadError);
-        toast.error("Błąd przesyłania pliku");
-        setUploading(false);
-        return;
-      }
-
-      // Pobierz publiczny URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('card-backgrounds')
-        .getPublicUrl(fileName);
-
-      // Zapisz w bazie danych
-      const { error: dbError } = await supabase
-        .from("card_backgrounds")
-        .insert({
-          epoch_id: selectedEpoch,
-          background_type: 'image',
-          background_value: publicUrl,
-          is_active: false
-        });
-
-      if (dbError) {
-        console.error("Database error:", dbError);
-        toast.error("Błąd zapisywania tła");
-      } else {
-        toast.success("Obraz tła został dodany");
-        setSelectedFile(null);
-        setPreviewUrl('');
-        loadBackgrounds();
-      }
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast.error("Wystąpił nieoczekiwany błąd");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  // Funkcja do tworzenia tabeli jeśli nie istnieje
-  const createTableIfNotExists = async () => {
-    try {
-      // Sprawdź czy użytkownik jest adminem
-      const { data: adminCheck } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      if (!adminCheck) {
-        toast.error("Tylko admin może tworzyć tabele");
-        return;
-      }
-
-      // Wykonaj surowe SQL do stworzenia tabeli
-      const { error: tableError } = await supabase.rpc('exec_sql', {
-        sql: `
-          CREATE TABLE IF NOT EXISTS public.card_backgrounds (
-            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-            epoch_id TEXT NOT NULL,
-            background_type TEXT NOT NULL DEFAULT 'color' CHECK (background_type IN ('color', 'image')),
-            background_value TEXT NOT NULL DEFAULT 'hsl(217, 91%, 60%)',
-            is_active BOOLEAN NOT NULL DEFAULT false,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-            updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-          );
-        `
-      });
-
-      if (tableError) {
-        toast.error(`Błąd tworzenia tabeli: ${tableError.message}`);
-        return;
-      }
-
-      // Włącz RLS
-      await supabase.rpc('exec_sql', {
-        sql: `ALTER TABLE public.card_backgrounds ENABLE ROW LEVEL SECURITY;`
-      });
-
-      // Utwórz polityki
-      await supabase.rpc('exec_sql', {
-        sql: `
-          CREATE POLICY IF NOT EXISTS "Anyone can read card backgrounds" ON public.card_backgrounds
-          FOR SELECT USING (true);
-        `
-      });
-
-      await supabase.rpc('exec_sql', {
-        sql: `
-          CREATE POLICY IF NOT EXISTS "Admins can insert card backgrounds" ON public.card_backgrounds
-          FOR INSERT WITH CHECK (public.is_admin(auth.uid()));
-        `
-      });
-
-      await supabase.rpc('exec_sql', {
-        sql: `
-          CREATE POLICY IF NOT EXISTS "Admins can update card backgrounds" ON public.card_backgrounds
-          FOR UPDATE USING (public.is_admin(auth.uid()));
-        `
-      });
-
-      await supabase.rpc('exec_sql', {
-        sql: `
-          CREATE POLICY IF NOT EXISTS "Admins can delete card backgrounds" ON public.card_backgrounds
-          FOR DELETE USING (public.is_admin(auth.uid()));
-        `
-      });
-
-      toast.success("Tabela card_backgrounds została utworzona pomyślnie!");
-      loadBackgrounds();
-      
-    } catch (error) {
-      console.error("Error creating table:", error);
-      toast.error(`Błąd: ${error.message || error}`);
-    }
   };
 
   const saveColorBackground = async () => {
@@ -204,8 +102,14 @@ const AdminCardBackgroundManager = () => {
       return;
     }
 
+    const tableExists = await checkTableExists();
+    if (!tableExists) {
+      toast.error("Najpierw utwórz tabelę card_backgrounds");
+      return;
+    }
+
     try {
-      console.log("Saving color background:", { epoch_id: selectedEpoch, background_value: colorValue });
+      console.log("Próba zapisu koloru:", { epoch_id: selectedEpoch, background_value: colorValue });
       
       const { data, error } = await supabase
         .from("card_backgrounds")
@@ -219,31 +123,86 @@ const AdminCardBackgroundManager = () => {
         .single();
 
       if (error) {
-        console.error("Error saving color:", error);
-        
-        // Sprawdź czy to błąd braku tabeli
-        if (error.message?.includes('does not exist') || error.message?.includes('relation')) {
-          toast.error("Tabela 'card_backgrounds' nie istnieje. Uruchom migracje w Supabase.");
-        } else {
-          toast.error(`Błąd zapisywania koloru tła: ${error.message || error.details || 'Nieznany błąd'}`);
-        }
+        console.error("Błąd zapisu koloru:", error);
+        setDebugInfo(`Błąd zapisu: ${JSON.stringify(error, null, 2)}`);
+        toast.error(`Błąd zapisywania: ${error.message}`);
       } else if (data) {
-        console.log("Color saved successfully:", data);
+        console.log("Kolor zapisany:", data);
+        setDebugInfo("Kolor zapisany pomyślnie ✅");
         toast.success("Kolor tła został dodany");
-        setColorValue('#6973ff'); // Reset do domyślnej wartości
+        setColorValue('#6973ff');
         loadBackgrounds();
       } else {
-        toast.error("Nie udało się zapisać koloru tła - brak danych zwrotnych");
+        setDebugInfo("Brak danych zwrotnych ❌");
+        toast.error("Nie udało się zapisać koloru");
       }
     } catch (error) {
-      console.error("Save color error:", error);
-      toast.error(`Wystąpił nieoczekiwany błąd: ${error.message || error}`);
+      console.error("Save error:", error);
+      setDebugInfo(`Błąd: ${error}`);
+      toast.error("Wystąpił nieoczekiwany błąd");
+    }
+  };
+
+  const uploadImage = async () => {
+    if (!selectedFile || !selectedEpoch) return;
+
+    const tableExists = await checkTableExists();
+    if (!tableExists) {
+      toast.error("Najpierw utwórz tabelę card_backgrounds");
+      return;
+    }
+
+    setUploading(true);
+    
+    try {
+      const fileName = `card-bg-${Date.now()}-${selectedFile.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('card-backgrounds')
+        .upload(fileName, selectedFile);
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        setDebugInfo(`Błąd uploadu: ${uploadError.message}`);
+        toast.error("Błąd przesyłania pliku");
+        setUploading(false);
+        return;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('card-backgrounds')
+        .getPublicUrl(fileName);
+
+      const { error: dbError } = await supabase
+        .from("card_backgrounds")
+        .insert({
+          epoch_id: selectedEpoch,
+          background_type: 'image',
+          background_value: publicUrl,
+          is_active: false
+        });
+
+      if (dbError) {
+        console.error("Database error:", dbError);
+        setDebugInfo(`Błąd bazy: ${dbError.message}`);
+        toast.error("Błąd zapisywania tła");
+      } else {
+        setDebugInfo("Obraz zapisany pomyślnie ✅");
+        toast.success("Obraz tła został dodany");
+        setSelectedFile(null);
+        setPreviewUrl('');
+        loadBackgrounds();
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      setDebugInfo(`Błąd: ${error}`);
+      toast.error("Wystąpił nieoczekiwany błąd");
+    } finally {
+      setUploading(false);
     }
   };
 
   const setActiveBackground = async (id: string) => {
     try {
-      // Dezaktywuj wszystkie tła dla tej epoki
       const { error: updateError } = await supabase
         .from("card_backgrounds")
         .update({ is_active: false })
@@ -255,7 +214,6 @@ const AdminCardBackgroundManager = () => {
         return;
       }
 
-      // Aktywuj wybrane tło
       const { error: activateError } = await supabase
         .from("card_backgrounds")
         .update({ is_active: true })
@@ -306,19 +264,33 @@ const AdminCardBackgroundManager = () => {
 
   return (
     <div className="space-y-8">
-      {/* Dodawanie nowego tła */}
+      {/* Debug info */}
       <div className="rounded-xl border border-border bg-card p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="font-display font-semibold text-foreground">
-            Dodaj tło kart
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-display font-semibold text-foreground flex items-center gap-2">
+            <Database size={20} />
+            Debugowanie
           </h3>
           <button
-            onClick={createTableIfNotExists}
-            className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium transition-colors"
+            onClick={checkTableExists}
+            className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm font-medium transition-colors"
           >
-            Utwórz tabelę
+            Sprawdź tabelę
           </button>
         </div>
+        
+        {debugInfo && (
+          <div className="p-4 bg-gray-100 rounded-lg text-xs font-mono text-left">
+            <pre className="whitespace-pre-wrap">{debugInfo}</pre>
+          </div>
+        )}
+      </div>
+
+      {/* Dodawanie nowego tła */}
+      <div className="rounded-xl border border-border bg-card p-6">
+        <h3 className="font-display font-semibold text-foreground mb-6">
+          Dodaj tło kart
+        </h3>
         
         <div className="space-y-4">
           {/* Wybór epoki */}
@@ -416,7 +388,6 @@ const AdminCardBackgroundManager = () => {
                 />
               </div>
               
-              {/* Podgląd obrazu */}
               {previewUrl && (
                 <div className="mt-4">
                   <label className="text-sm font-medium text-foreground block mb-2">
