@@ -545,8 +545,7 @@ const Contact = () => {
                     Wybierz rozmowę
                   </h3>
                   <p className="text-sm text-muted-foreground max-w-[260px]">
-                    Wybierz konwersację z listy lub wyszukaj użytkownika, aby
-                    rozpocząć nową
+                    Wybierz konwersację z listy lub wyszukaj użytkownika, aby rozpocząć nową rozmowę.
                   </p>
                 </div>
               )}
