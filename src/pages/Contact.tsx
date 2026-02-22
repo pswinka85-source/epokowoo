@@ -463,7 +463,7 @@ const Contact = () => {
                   </div>
 
                   {/* Messages */}
-                  <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-4 bg-gray-50 min-h-0">
+                  <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-3 bg-white min-h-0">
                     {messages.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-12 text-center">
                         <div className="w-16 h-16 rounded-3xl bg-gray-200 flex items-center justify-center mb-4">
@@ -485,19 +485,19 @@ const Contact = () => {
                             className={`flex ${isMine ? "justify-end" : "justify-start"}`}
                           >
                             <div
-                              className={`group max-w-[85%] sm:max-w-[75%] px-5 py-4 rounded-3xl text-base font-medium shadow-md ${
+                              className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${
                                 isMine
-                                  ? "bg-black text-white rounded-br-2xl"
-                                  : "bg-white text-gray-800 rounded-bl-2xl border border-gray-200 shadow-sm"
+                                  ? "bg-blue-600 text-white rounded-br-lg"
+                                  : "bg-gray-100 text-gray-900 rounded-bl-lg"
                               }`}
                             >
-                              <p className="whitespace-pre-wrap break-words leading-relaxed text-base">
+                              <p className="whitespace-pre-wrap break-words leading-normal">
                                 {msg.content}
                               </p>
                               <p
-                                className={`text-xs mt-2 font-medium ${
+                                className={`text-xs mt-1 ${
                                   isMine
-                                    ? "text-gray-300"
+                                    ? "text-blue-100"
                                     : "text-gray-500"
                                 }`}
                               >
@@ -512,8 +512,8 @@ const Contact = () => {
                   </div>
 
                   {/* Input */}
-                  <div className="shrink-0 p-6 bg-white border-t border-gray-200">
-                    <div className="flex items-center gap-4">
+                  <div className="shrink-0 p-4 bg-gray-50 border-t border-gray-200">
+                    <div className="flex items-center gap-2">
                       <input
                         ref={inputRef}
                         type="text"
@@ -523,15 +523,15 @@ const Contact = () => {
                         onKeyDown={(e) =>
                           e.key === "Enter" && !e.shiftKey && sendMessage()
                         }
-                        className="flex-1 px-5 py-4 rounded-2xl bg-gray-100 border border-gray-300 text-base font-medium text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black transition-all"
+                        className="flex-1 px-4 py-3 rounded-full bg-white border border-gray-300 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                       />
                       <button
                         onClick={sendMessage}
                         disabled={!newMessage.trim()}
-                        className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center hover:bg-gray-800 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 shrink-0"
+                        className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 shrink-0"
                         aria-label="Wyślij wiadomość"
                       >
-                        <Send size={20} />
+                        <Send size={18} />
                       </button>
                     </div>
                   </div>
