@@ -8,7 +8,7 @@ const Sidebar = () => {
     { name: "Nauka", icon: "💡", path: "/epoki" },
     { name: "Wiadomości", icon: "📧", path: "/kontakt" },
     { name: "Egzaminy", icon: "📅", path: "/egzaminy" },
-    { name: "Ustawienia", icon: "⚙️", path: "/ustawienia" },
+    { name: "Ustawienia", icon: "⚙️", path: "/profil" },
     { name: "Panel admina", icon: "🛡️", path: "/admin" },
   ];
 
