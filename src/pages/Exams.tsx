@@ -19,6 +19,7 @@ interface ExamBooking {
   availability_id: string;
   status: string;
   amount_pln: number;
+  payment_reference?: string;
   created_at: string;
   exam_availability?: {
     slot_date: string;
@@ -52,37 +53,52 @@ const Exams = () => {
   useEffect(() => {
     if (!user) return;
     const loadBookings = async () => {
-      const { data } = await supabase
-        .from("exam_bookings")
-        .select(`
-          *,
-          exam_availability (slot_date, slot_time, examiner_id)
-        `)
-        .eq("user_id", user.id)
-        .in("status", ["scheduled", "completed"])
-        .order("created_at", { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from("exam_bookings")
+          .select(`
+            *,
+            exam_availability (slot_date, slot_time, examiner_id)
+          `)
+          .eq("user_id", user.id)
+          .in("status", ["scheduled", "completed"])
+          .order("created_at", { ascending: false });
 
-      if (!data?.length) {
+        if (error) {
+          console.error("Error loading bookings:", error);
+          setBookings([]);
+          return;
+        }
+
+        if (!data?.length) {
+          setBookings([]);
+          return;
+        }
+
+        const examinerIds = [...new Set(data.flatMap((b: any) => b.exam_availability?.examiner_id).filter(Boolean))];
+        const { data: profiles, error: profileError } = await supabase
+          .from("profiles")
+          .select("user_id, display_name")
+          .in("user_id", examinerIds);
+
+        if (profileError) {
+          console.error("Error loading profiles:", profileError);
+        }
+
+        const profileMap = new Map((profiles as Profile[])?.map((p) => [p.user_id, p.display_name || "Egzaminator"]) || []);
+
+        setBookings(
+          data.map((b: any) => ({
+            ...b,
+            examiner_name: b.exam_availability?.examiner_id
+              ? profileMap.get(b.exam_availability.examiner_id) || "Egzaminator"
+              : "Egzaminator",
+          }))
+        );
+      } catch (error) {
+        console.error("Unexpected error loading bookings:", error);
         setBookings([]);
-        return;
       }
-
-      const examinerIds = [...new Set(data.flatMap((b: any) => b.exam_availability?.examiner_id).filter(Boolean))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, display_name")
-        .in("user_id", examinerIds);
-
-      const profileMap = new Map((profiles as Profile[])?.map((p) => [p.user_id, p.display_name || "Egzaminator"]) || []);
-
-      setBookings(
-        data.map((b: any) => ({
-          ...b,
-          examiner_name: b.exam_availability?.examiner_id
-            ? profileMap.get(b.exam_availability.examiner_id) || "Egzaminator"
-            : "Egzaminator",
-        }))
-      );
     };
     loadBookings();
   }, [user]);
@@ -93,17 +109,28 @@ const Exams = () => {
     
     const loadAvailableSlots = async () => {
       setLoadingSlots(true);
-      const dateStr = selectedDate.toISOString().split('T')[0];
-      
-      const { data } = await supabase
-        .from("exam_availability")
-        .select("*")
-        .eq("status", "available")
-        .eq("slot_date", dateStr)
-        .order("slot_time", { ascending: true });
+      try {
+        const dateStr = selectedDate.toISOString().split('T')[0];
+        
+        const { data, error } = await supabase
+          .from("exam_availability")
+          .select("*")
+          .eq("status", "available")
+          .eq("slot_date", dateStr)
+          .order("slot_time", { ascending: true });
 
-      setAvailableSlots(data || []);
-      setLoadingSlots(false);
+        if (error) {
+          console.error("Error loading available slots:", error);
+          setAvailableSlots([]);
+        } else {
+          setAvailableSlots(data || []);
+        }
+      } catch (error) {
+        console.error("Unexpected error loading slots:", error);
+        setAvailableSlots([]);
+      } finally {
+        setLoadingSlots(false);
+      }
     };
 
     loadAvailableSlots();
@@ -146,54 +173,73 @@ const Exams = () => {
     if (!user) return;
     setPurchasing(true);
 
-    // Sprawdź czy użytkownik nie ma już aktywnego egzaminu
-    const { data: activeBooking } = await supabase
-      .from("exam_bookings")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("status", "scheduled")
-      .maybeSingle();
+    try {
+      // Sprawdź czy użytkownik nie ma już aktywnego egzaminu
+      const { data: activeBooking, error: checkError } = await supabase
+        .from("exam_bookings")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "scheduled")
+        .maybeSingle();
 
-    if (activeBooking) {
-      toast.error("Masz już aktywny egzamin. Zakończ go przed zakupem kolejnego.");
+      if (checkError) {
+        console.error("Error checking active booking:", checkError);
+        toast.error("Błąd sprawdzania aktywnych egzaminów. Spróbuj ponownie.");
+        setPurchasing(false);
+        return;
+      }
+
+      if (activeBooking) {
+        toast.error("Masz już aktywny egzamin. Zakończ go przed zakupem kolejnego.");
+        setPurchasing(false);
+        return;
+      }
+
+      // Dodaj rezerwację
+      const { data: booking, error: insertErr } = await supabase.from("exam_bookings").insert({
+        user_id: user.id,
+        availability_id: slot.id,
+        status: "scheduled",
+        amount_pln: EXAM_PRICE,
+        payment_reference: `ex-${Date.now()}`,
+      }).select().single();
+
+      if (insertErr) {
+        console.error("Insert error:", insertErr);
+        toast.error(`Błąd zakupu: ${insertErr.message || 'Nieznany błąd'}`);
+        setPurchasing(false);
+        return;
+      }
+
+      if (!booking) {
+        toast.error("Błąd tworzenia rezerwacji. Spróbuj ponownie.");
+        setPurchasing(false);
+        return;
+      }
+
+      // Zaktualizuj status terminu
+      const { error: updateErr } = await supabase
+        .from("exam_availability")
+        .update({ status: "booked" })
+        .eq("id", slot.id);
+
+      if (updateErr) {
+        console.error("Update error:", updateErr);
+        toast.error(`Błąd podczas rezerwacji terminu: ${updateErr.message || 'Nieznany błąd'}`);
+        setPurchasing(false);
+        return;
+      }
+
+      toast.success(`Egzamin wykupiony! Termin: ${new Date(slot.slot_date).toLocaleDateString('pl-PL')} o ${slot.slot_time.slice(0, 5)}`);
       setPurchasing(false);
-      return;
-    }
 
-    // Dodaj rezerwację
-    const { data: booking, error: insertErr } = await supabase.from("exam_bookings").insert({
-      user_id: user.id,
-      availability_id: slot.id,
-      status: "scheduled",
-      amount_pln: EXAM_PRICE,
-      payment_reference: `ex-${Date.now()}`,
-    }).select().single();
-
-    if (insertErr || !booking) {
-      console.error("Insert error:", insertErr);
-      toast.error("Błąd zakupu. Spróbuj ponownie.");
+      // Przeładuj dane
+      window.location.reload();
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      toast.error("Wystąpił nieoczekiwany błąd. Spróbuj ponownie.");
       setPurchasing(false);
-      return;
     }
-
-    // Zaktualizuj status terminu
-    const { error: updateErr } = await supabase
-      .from("exam_availability")
-      .update({ status: "booked" })
-      .eq("id", slot.id);
-
-    if (updateErr) {
-      console.error("Update error:", updateErr);
-      toast.error("Błąd podczas rezerwacji terminu. Skontaktuj się z obsługą.");
-      setPurchasing(false);
-      return;
-    }
-
-    toast.success(`Egzamin wykupiony! Termin: ${new Date(slot.slot_date).toLocaleDateString('pl-PL')} o ${slot.slot_time.slice(0, 5)}`);
-    setPurchasing(false);
-
-    // Przeładuj dane
-    window.location.reload();
   };
 
   const changeMonth = (direction: number) => {
