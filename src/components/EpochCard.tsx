@@ -17,8 +17,8 @@ const EpochCard = ({ epoch, index }: EpochCardProps) => {
   // Kolory hover dla tekstu (mocniejsze odcienie tła)
   const epochHoverColors: Record<string, string> = {
     'antyk': '#000000',
-    'sredniowiecze': '#3c2400',
-    'renesans': '#04c700'
+    'sredniowiecze': '#000000',
+    'renesans': '#000000'
   };
 
   const getCardStyle = () => {
