@@ -29,9 +29,10 @@ interface ExamBooking {
   };
 }
 
-interface Profile {
+interface ExaminerProfile {
   user_id: string;
   display_name: string | null;
+  avatar_url: string | null;
 }
 
 const EXAM_PRICE = 19.99;
@@ -41,9 +42,9 @@ const Exams = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [purchasing, setPurchasing] = useState(false);
-  const [bookings, setBookings] = useState<(ExamBooking & { examiner_name?: string })[]>([]);
+  const [bookings, setBookings] = useState<(ExamBooking & { examiner_name?: string; examiner_avatar?: string | null })[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [availableSlots, setAvailableSlots] = useState<ExamAvailability[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<(ExamAvailability & { examiner_name?: string; examiner_avatar?: string | null })[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
@@ -63,30 +64,27 @@ const Exams = () => {
         .in("status", ["scheduled", "completed"])
         .order("created_at", { ascending: false });
 
-      if (error || !data?.length) {
-        setBookings([]);
-        return;
-      }
+      if (error || !data?.length) { setBookings([]); return; }
 
-      const examinerIds = [
-        ...new Set(data.flatMap((b: any) => b.exam_availability?.examiner_id).filter(Boolean)),
-      ];
+      const examinerIds = [...new Set(data.flatMap((b: any) => b.exam_availability?.examiner_id).filter(Boolean))];
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, display_name")
+        .select("user_id, display_name, avatar_url")
         .in("user_id", examinerIds);
 
       const profileMap = new Map(
-        (profiles as Profile[])?.map((p) => [p.user_id, p.display_name || "Egzaminator"]) || []
+        (profiles as ExaminerProfile[])?.map((p) => [p.user_id, p]) || []
       );
 
       setBookings(
-        data.map((b: any) => ({
-          ...b,
-          examiner_name: b.exam_availability?.examiner_id
-            ? profileMap.get(b.exam_availability.examiner_id) || "Egzaminator"
-            : "Egzaminator",
-        }))
+        data.map((b: any) => {
+          const prof = b.exam_availability?.examiner_id ? profileMap.get(b.exam_availability.examiner_id) : null;
+          return {
+            ...b,
+            examiner_name: prof?.display_name || "Egzaminator",
+            examiner_avatar: prof?.avatar_url || null,
+          };
+        })
       );
     };
     loadBookings();
@@ -104,7 +102,29 @@ const Exams = () => {
         .eq("status", "available")
         .eq("slot_date", dateStr)
         .order("slot_time", { ascending: true });
-      setAvailableSlots((data as ExamAvailability[]) || []);
+
+      if (!data?.length) { setAvailableSlots([]); setLoadingSlots(false); return; }
+
+      const examinerIds = [...new Set(data.map((s: any) => s.examiner_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, avatar_url")
+        .in("user_id", examinerIds);
+
+      const profileMap = new Map(
+        (profiles as ExaminerProfile[])?.map((p) => [p.user_id, p]) || []
+      );
+
+      setAvailableSlots(
+        data.map((s: any) => {
+          const prof = profileMap.get(s.examiner_id);
+          return {
+            ...s,
+            examiner_name: prof?.display_name || "Egzaminator",
+            examiner_avatar: prof?.avatar_url || null,
+          };
+        })
+      );
       setLoadingSlots(false);
     };
     loadSlots();
@@ -126,7 +146,6 @@ const Exams = () => {
     }
     setPurchasing(true);
 
-    // Check active booking
     const { data: activeBooking } = await supabase
       .from("exam_bookings")
       .select("id")
@@ -148,37 +167,21 @@ const Exams = () => {
       payment_reference: `ex-${Date.now()}`,
     });
 
-    if (insertErr) {
-      toast.error(`Błąd zakupu: ${insertErr.message}`);
-      setPurchasing(false);
-      return;
-    }
+    if (insertErr) { toast.error(`Błąd zakupu: ${insertErr.message}`); setPurchasing(false); return; }
 
-    await supabase
-      .from("exam_availability")
-      .update({ status: "booked" })
-      .eq("id", slot.id);
+    await supabase.from("exam_availability").update({ status: "booked" }).eq("id", slot.id);
 
-    toast.success(
-      `Egzamin wykupiony! ${new Date(slot.slot_date).toLocaleDateString("pl-PL")} o ${slot.slot_time.slice(0, 5)}`
-    );
+    toast.success(`Egzamin wykupiony! ${new Date(slot.slot_date).toLocaleDateString("pl-PL")} o ${slot.slot_time.slice(0, 5)}`);
     setPurchasing(false);
     window.location.reload();
   };
 
   const handleCancelBooking = async (booking: ExamBooking) => {
     setCancellingId(booking.id);
-    await supabase
-      .from("exam_bookings")
-      .update({ status: "refunded" })
-      .eq("id", booking.id);
-    await supabase
-      .from("exam_availability")
-      .update({ status: "available" })
-      .eq("id", booking.availability_id);
+    await supabase.from("exam_bookings").update({ status: "refunded" }).eq("id", booking.id);
+    await supabase.from("exam_availability").update({ status: "available" }).eq("id", booking.availability_id);
     toast.success("Egzamin anulowany. Zwrot 19,99 zł.");
     setCancellingId(null);
-    // Reload bookings
     setBookings((prev) => prev.filter((b) => b.id !== booking.id));
   };
 
@@ -210,12 +213,7 @@ const Exams = () => {
   if (authLoading || !user) return null;
 
   const formatDate = (d: string) =>
-    new Date(d + "T12:00:00").toLocaleDateString("pl-PL", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+    new Date(d + "T12:00:00").toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const formatTime = (t: string) => t.slice(0, 5);
 
   const monthYear = currentMonth.toLocaleDateString("pl-PL", { month: "long", year: "numeric" });
@@ -237,14 +235,8 @@ const Exams = () => {
               Egzamin z egzaminatorem – 20 minut, {EXAM_PRICE} zł
             </p>
             <div className="flex items-center justify-center gap-8 mt-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Clock size={16} />
-                <span>20 minut</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CreditCard size={16} />
-                <span>{EXAM_PRICE} zł</span>
-              </div>
+              <div className="flex items-center gap-2"><Clock size={16} /><span>20 minut</span></div>
+              <div className="flex items-center gap-2"><CreditCard size={16} /><span>{EXAM_PRICE} zł</span></div>
             </div>
             <p className="text-xs text-muted-foreground mt-3">
               Zapisy możliwe max {MAX_DAYS_BEFORE_BOOKING} dni przed terminem
@@ -262,21 +254,9 @@ const Exams = () => {
                 <div className="flex items-center justify-between">
                   <h2 className="font-display font-semibold text-foreground">Wybierz termin</h2>
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => changeMonth(-1)}
-                      className="p-1 rounded-lg hover:bg-secondary transition-colors"
-                    >
-                      <ChevronLeft size={20} />
-                    </button>
-                    <span className="font-medium text-sm min-w-[120px] text-center">
-                      {monthYear}
-                    </span>
-                    <button
-                      onClick={() => changeMonth(1)}
-                      className="p-1 rounded-lg hover:bg-secondary transition-colors"
-                    >
-                      <ChevronRight size={20} />
-                    </button>
+                    <button onClick={() => changeMonth(-1)} className="p-1 rounded-lg hover:bg-secondary transition-colors"><ChevronLeft size={20} /></button>
+                    <span className="font-medium text-sm min-w-[120px] text-center">{monthYear}</span>
+                    <button onClick={() => changeMonth(1)} className="p-1 rounded-lg hover:bg-secondary transition-colors"><ChevronRight size={20} /></button>
                   </div>
                 </div>
               </div>
@@ -284,9 +264,7 @@ const Exams = () => {
               <div className="p-6">
                 <div className="grid grid-cols-7 gap-1 mb-2">
                   {["N", "P", "W", "Ś", "C", "P", "S"].map((day, i) => (
-                    <div key={i} className="text-center text-xs font-medium text-muted-foreground py-2">
-                      {day}
-                    </div>
+                    <div key={i} className="text-center text-xs font-medium text-muted-foreground py-2">{day}</div>
                   ))}
                 </div>
 
@@ -322,11 +300,9 @@ const Exams = () => {
                         <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                       </div>
                     ) : availableSlots.length === 0 ? (
-                      <p className="text-muted-foreground text-center py-8">
-                        Brak dostępnych terminów w tym dniu
-                      </p>
+                      <p className="text-muted-foreground text-center py-8">Brak dostępnych terminów w tym dniu</p>
                     ) : (
-                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                      <div className="space-y-2">
                         {availableSlots.map((slot) => {
                           const canBook = isWithinBookingWindow(slot.slot_date);
                           return (
@@ -334,19 +310,25 @@ const Exams = () => {
                               key={slot.id}
                               onClick={() => handleSlotSelect(slot)}
                               disabled={purchasing || !canBook}
-                              title={
-                                !canBook
-                                  ? `Zapisy otwierają się ${MAX_DAYS_BEFORE_BOOKING} dni przed terminem`
-                                  : undefined
-                              }
-                              className={`p-3 rounded-lg border border-border/60 text-sm font-medium transition-colors ${
+                              title={!canBook ? `Zapisy otwierają się ${MAX_DAYS_BEFORE_BOOKING} dni przed terminem` : undefined}
+                              className={`w-full p-3 rounded-xl border border-border/60 text-sm font-medium transition-colors flex items-center gap-3 ${
                                 canBook
-                                  ? "bg-card hover:bg-secondary disabled:opacity-50"
+                                  ? "bg-card hover:bg-secondary/50 disabled:opacity-50"
                                   : "bg-muted/50 text-muted-foreground cursor-not-allowed opacity-50"
                               }`}
                             >
-                              <Clock size={16} className="mx-auto mb-1" />
-                              {formatTime(slot.slot_time)}
+                              {slot.examiner_avatar ? (
+                                <img src={slot.examiner_avatar} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+                              ) : (
+                                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                                  {(slot.examiner_name || "E")[0].toUpperCase()}
+                                </div>
+                              )}
+                              <div className="flex-1 text-left">
+                                <span className="text-foreground font-medium">{formatTime(slot.slot_time)}</span>
+                                <span className="text-muted-foreground ml-2 font-normal">· {slot.examiner_name}</span>
+                              </div>
+                              <Clock size={14} className="text-muted-foreground" />
                             </button>
                           );
                         })}
@@ -376,14 +358,16 @@ const Exams = () => {
                 ) : (
                   <div className="space-y-4">
                     {bookings.map((b) => (
-                      <div
-                        key={b.id}
-                        className="p-4 rounded-xl border border-border/60 bg-secondary/10"
-                      >
+                      <div key={b.id} className="p-4 rounded-xl border border-border/60 bg-secondary/10">
                         <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                            <CheckCircle size={20} />
-                          </div>
+                          {/* Examiner avatar */}
+                          {b.examiner_avatar ? (
+                            <img src={b.examiner_avatar} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 font-display font-bold text-sm">
+                              {(b.examiner_name || "E")[0].toUpperCase()}
+                            </div>
+                          )}
                           <div className="flex-1">
                             <p className="font-medium text-foreground">
                               {b.exam_availability && formatDate(b.exam_availability.slot_date)}
@@ -395,7 +379,7 @@ const Exams = () => {
                               Egzaminator: {b.examiner_name}
                             </p>
 
-                            {/* Rescheduled info */}
+                            {/* Rescheduled info + cancel button */}
                             {b.rescheduled && (
                               <div className="mt-2 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
                                 <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
@@ -407,19 +391,15 @@ const Exams = () => {
                                     Poprzednia godzina: {formatTime(b.original_slot_time)}
                                   </p>
                                 )}
+                                <button
+                                  onClick={() => handleCancelBooking(b)}
+                                  disabled={cancellingId === b.id}
+                                  className="mt-2 h-8 px-3 rounded-lg bg-destructive/10 text-destructive text-xs font-medium hover:bg-destructive/20 disabled:opacity-50 flex items-center gap-1.5 transition-colors"
+                                >
+                                  <XCircle size={13} />
+                                  {cancellingId === b.id ? "Anuluję..." : "Wypisz się (zwrot 19,99 zł)"}
+                                </button>
                               </div>
-                            )}
-
-                            {/* Cancel button */}
-                            {b.status === "scheduled" && (
-                              <button
-                                onClick={() => handleCancelBooking(b)}
-                                disabled={cancellingId === b.id}
-                                className="mt-3 h-8 px-3 rounded-lg bg-destructive/10 text-destructive text-xs font-medium hover:bg-destructive/20 disabled:opacity-50 flex items-center gap-1.5"
-                              >
-                                <XCircle size={13} />
-                                {cancellingId === b.id ? "Anuluję..." : "Wypisz się (zwrot 19,99 zł)"}
-                              </button>
                             )}
                           </div>
                         </div>
