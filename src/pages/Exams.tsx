@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Clock, User, CreditCard, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, Clock, CreditCard, CheckCircle, ChevronLeft, ChevronRight, AlertTriangle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface ExamAvailability {
@@ -19,7 +19,8 @@ interface ExamBooking {
   availability_id: string;
   status: string;
   amount_pln: number;
-  payment_reference?: string;
+  rescheduled: boolean;
+  original_slot_time: string | null;
   created_at: string;
   exam_availability?: {
     slot_date: string;
@@ -34,7 +35,7 @@ interface Profile {
 }
 
 const EXAM_PRICE = 19.99;
-const EXAM_DURATION_MIN = 20;
+const MAX_DAYS_BEFORE_BOOKING = 5;
 
 const Exams = () => {
   const { user, loading: authLoading } = useAuth();
@@ -45,421 +46,163 @@ const Exams = () => {
   const [availableSlots, setAvailableSlots] = useState<ExamAvailability[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [loadingSlots, setLoadingSlots] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string>("");
-
-  // Funkcja testowa do sprawdzania i tworzenia przykładowych terminów
-  const createSampleSlots = async () => {
-    if (!user) return;
-    
-    try {
-      // Sprawdź czy użytkownik jest adminem
-      const { data: adminCheck } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      if (!adminCheck) {
-        toast.error("Tylko admin może tworzyć przykładowe terminy");
-        return;
-      }
-
-      // Dodaj kilka przykładowych terminów na najbliższe dni
-      const sampleSlots = [];
-      const today = new Date();
-      
-      for (let i = 1; i <= 5; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() + i);
-        const dateStr = date.toISOString().split('T')[0];
-        
-        sampleSlots.push({
-          examiner_id: user.id,
-          slot_date: dateStr,
-          slot_time: `${9 + i}:00`,
-          status: "available"
-        });
-      }
-
-      const { error } = await supabase
-        .from("exam_availability")
-        .insert(sampleSlots);
-
-      if (error) {
-        console.error("Error creating sample slots:", error);
-        toast.error(`Błąd tworzenia terminów: ${error.message}`);
-      } else {
-        toast.success("Dodano 5 przykładowych terminów");
-        if (selectedDate) {
-          // Przeładuj dostępne sloty dla wybranego dnia
-          const dateStr = selectedDate.toISOString().split('T')[0];
-          const { data } = await supabase
-            .from("exam_availability")
-            .select("*")
-            .eq("status", "available")
-            .eq("slot_date", dateStr)
-            .order("slot_time", { ascending: true });
-          setAvailableSlots(data || []);
-        }
-      }
-    } catch (error) {
-      console.error("Error in createSampleSlots:", error);
-      toast.error("Wystąpił błąd");
-    }
-  };
-
-  // Funkcja do ręcznego tworzenia tabel
-  const createTablesManually = async () => {
-    if (!user) return;
-    
-    try {
-      // Sprawdź czy użytkownik jest adminem
-      const { data: adminCheck } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      if (!adminCheck) {
-        toast.error("Tylko admin może tworzyć tabele");
-        return;
-      }
-
-      // Wykonaj surowe SQL do stworzenia tabel
-      const { error: availabilityError } = await supabase.rpc('exec_sql', {
-        sql: `
-          CREATE TABLE IF NOT EXISTS public.exam_availability (
-            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-            examiner_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-            slot_date DATE NOT NULL,
-            slot_time TIME NOT NULL,
-            status TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'booked')),
-            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-            UNIQUE(examiner_id, slot_date, slot_time)
-          );
-        `
-      });
-
-      if (availabilityError) {
-        toast.error(`Błąd tworzenia exam_availability: ${availabilityError.message}`);
-        return;
-      }
-
-      const { error: bookingsError } = await supabase.rpc('exec_sql', {
-        sql: `
-          CREATE TABLE IF NOT EXISTS public.exam_bookings (
-            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-            user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-            availability_id UUID NOT NULL REFERENCES public.exam_availability(id) ON DELETE CASCADE,
-            status TEXT NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'completed', 'cancelled', 'refunded')),
-            amount_pln DECIMAL(10,2) NOT NULL DEFAULT 19.99,
-            payment_reference TEXT,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-          );
-        `
-      });
-
-      if (bookingsError) {
-        toast.error(`Błąd tworzenia exam_bookings: ${bookingsError.message}`);
-        return;
-      }
-
-      // Włącz RLS
-      await supabase.rpc('exec_sql', {
-        sql: `ALTER TABLE public.exam_availability ENABLE ROW LEVEL SECURITY;`
-      });
-
-      await supabase.rpc('exec_sql', {
-        sql: `ALTER TABLE public.exam_bookings ENABLE ROW LEVEL SECURITY;`
-      });
-
-      // Utwórz polityki
-      await supabase.rpc('exec_sql', {
-        sql: `
-          CREATE POLICY IF NOT EXISTS "Anyone can read exam availability" ON public.exam_availability
-          FOR SELECT USING (true);
-        `
-      });
-
-      await supabase.rpc('exec_sql', {
-        sql: `
-          CREATE POLICY IF NOT EXISTS "Authenticated users can create exam bookings" ON public.exam_bookings
-          FOR INSERT WITH CHECK (auth.uid() = user_id);
-        `
-      });
-
-      toast.success("Tabele zostały utworzone pomyślnie!");
-      
-      // Sprawdź ponownie stan bazy
-      await checkDatabaseState();
-      
-    } catch (error) {
-      console.error("Error creating tables:", error);
-      toast.error(`Błąd: ${error}`);
-    }
-  };
-  const checkDatabaseState = async () => {
-    try {
-      // Sprawdź czy tabele istnieją
-      const { data: tables, error: tablesError } = await supabase
-        .from('information_schema.tables')
-        .select('table_name')
-        .eq('table_schema', 'public')
-        .in('table_name', ['exam_availability', 'exam_bookings', 'user_roles']);
-
-      if (tablesError) {
-        setDebugInfo(`Błąd sprawdzania tabel: ${tablesError.message}`);
-        return;
-      }
-
-      const tableNames = tables?.map(t => t.table_name) || [];
-      const hasExamAvailability = tableNames.includes('exam_availability');
-      const hasExamBookings = tableNames.includes('exam_bookings');
-      const hasUserRoles = tableNames.includes('user_roles');
-
-      let debugText = `
-        Istniejące tabele: ${tableNames.join(', ') || 'brak'}
-        exam_availability: ${hasExamAvailability ? 'TAK' : 'NIE'}
-        exam_bookings: ${hasExamBookings ? 'TAK' : 'NIE'}
-        user_roles: ${hasUserRoles ? 'TAK' : 'NIE'}
-      `;
-
-      if (!hasExamAvailability) {
-        debugText += '\n\n❌ Tabela exam_availability nie istnieje! Uruchom migracje.';
-      }
-
-      if (hasExamAvailability) {
-        const { data: allSlots, error: slotsError } = await supabase
-          .from("exam_availability")
-          .select("*")
-          .limit(10);
-
-        const { data: myBookings, error: bookingsError } = await supabase
-          .from("exam_bookings")
-          .select("*")
-          .eq("user_id", user.id);
-
-        const { data: userRole } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        debugText += `
-        Dostępne terminy: ${allSlots?.length || 0}
-        Twoje rezerwacje: ${myBookings?.length || 0}
-        Twoja rola: ${userRole?.role || 'brak'}
-        Błąd slotów: ${slotsError?.message || 'brak'}
-        Błąd rezerwacji: ${bookingsError?.message || 'brak'}
-        `;
-      }
-
-      setDebugInfo(debugText);
-    } catch (error) {
-      setDebugInfo(`Błąd sprawdzania: ${error}`);
-    }
-  };
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/");
   }, [user, authLoading, navigate]);
 
+  // Load user bookings
   useEffect(() => {
     if (!user) return;
     const loadBookings = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("exam_bookings")
-          .select(`
-            *,
-            exam_availability (slot_date, slot_time, examiner_id)
-          `)
-          .eq("user_id", user.id)
-          .in("status", ["scheduled", "completed"])
-          .order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("exam_bookings")
+        .select("*, exam_availability(slot_date, slot_time, examiner_id)")
+        .eq("user_id", user.id)
+        .in("status", ["scheduled", "completed"])
+        .order("created_at", { ascending: false });
 
-        if (error) {
-          console.error("Error loading bookings:", error);
-          setBookings([]);
-          return;
-        }
-
-        if (!data?.length) {
-          setBookings([]);
-          return;
-        }
-
-        const examinerIds = [...new Set(data.flatMap((b: any) => b.exam_availability?.examiner_id).filter(Boolean))];
-        const { data: profiles, error: profileError } = await supabase
-          .from("profiles")
-          .select("user_id, display_name")
-          .in("user_id", examinerIds);
-
-        if (profileError) {
-          console.error("Error loading profiles:", profileError);
-        }
-
-        const profileMap = new Map((profiles as Profile[])?.map((p) => [p.user_id, p.display_name || "Egzaminator"]) || []);
-
-        setBookings(
-          data.map((b: any) => ({
-            ...b,
-            examiner_name: b.exam_availability?.examiner_id
-              ? profileMap.get(b.exam_availability.examiner_id) || "Egzaminator"
-              : "Egzaminator",
-          }))
-        );
-      } catch (error) {
-        console.error("Unexpected error loading bookings:", error);
+      if (error || !data?.length) {
         setBookings([]);
+        return;
       }
+
+      const examinerIds = [
+        ...new Set(data.flatMap((b: any) => b.exam_availability?.examiner_id).filter(Boolean)),
+      ];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, display_name")
+        .in("user_id", examinerIds);
+
+      const profileMap = new Map(
+        (profiles as Profile[])?.map((p) => [p.user_id, p.display_name || "Egzaminator"]) || []
+      );
+
+      setBookings(
+        data.map((b: any) => ({
+          ...b,
+          examiner_name: b.exam_availability?.examiner_id
+            ? profileMap.get(b.exam_availability.examiner_id) || "Egzaminator"
+            : "Egzaminator",
+        }))
+      );
     };
     loadBookings();
   }, [user]);
 
-  // Ładowanie dostępnych slotów dla wybranego dnia
+  // Load available slots for selected date
   useEffect(() => {
     if (!selectedDate) return;
-    
-    const loadAvailableSlots = async () => {
+    const loadSlots = async () => {
       setLoadingSlots(true);
-      try {
-        const dateStr = selectedDate.toISOString().split('T')[0];
-        
-        const { data, error } = await supabase
-          .from("exam_availability")
-          .select("*")
-          .eq("status", "available")
-          .eq("slot_date", dateStr)
-          .order("slot_time", { ascending: true });
-
-        if (error) {
-          console.error("Error loading available slots:", error);
-          setAvailableSlots([]);
-        } else {
-          setAvailableSlots(data || []);
-        }
-      } catch (error) {
-        console.error("Unexpected error loading slots:", error);
-        setAvailableSlots([]);
-      } finally {
-        setLoadingSlots(false);
-      }
+      const dateStr = selectedDate.toISOString().split("T")[0];
+      const { data } = await supabase
+        .from("exam_availability")
+        .select("*")
+        .eq("status", "available")
+        .eq("slot_date", dateStr)
+        .order("slot_time", { ascending: true });
+      setAvailableSlots((data as ExamAvailability[]) || []);
+      setLoadingSlots(false);
     };
-
-    loadAvailableSlots();
+    loadSlots();
   }, [selectedDate]);
 
-  // Generowanie dni kalendarza
+  const isWithinBookingWindow = (slotDate: string): boolean => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const slot = new Date(slotDate + "T00:00:00");
+    const diffDays = Math.ceil((slot.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return diffDays >= 0 && diffDays <= MAX_DAYS_BEFORE_BOOKING;
+  };
+
+  const handleSlotSelect = async (slot: ExamAvailability) => {
+    if (!user) return;
+    if (!isWithinBookingWindow(slot.slot_date)) {
+      toast.error(`Zapisy możliwe max ${MAX_DAYS_BEFORE_BOOKING} dni przed terminem`);
+      return;
+    }
+    setPurchasing(true);
+
+    // Check active booking
+    const { data: activeBooking } = await supabase
+      .from("exam_bookings")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("status", "scheduled")
+      .maybeSingle();
+
+    if (activeBooking) {
+      toast.error("Masz już aktywny egzamin. Zakończ go lub anuluj przed zakupem kolejnego.");
+      setPurchasing(false);
+      return;
+    }
+
+    const { error: insertErr } = await supabase.from("exam_bookings").insert({
+      user_id: user.id,
+      availability_id: slot.id,
+      status: "scheduled",
+      amount_pln: EXAM_PRICE,
+      payment_reference: `ex-${Date.now()}`,
+    });
+
+    if (insertErr) {
+      toast.error(`Błąd zakupu: ${insertErr.message}`);
+      setPurchasing(false);
+      return;
+    }
+
+    await supabase
+      .from("exam_availability")
+      .update({ status: "booked" })
+      .eq("id", slot.id);
+
+    toast.success(
+      `Egzamin wykupiony! ${new Date(slot.slot_date).toLocaleDateString("pl-PL")} o ${slot.slot_time.slice(0, 5)}`
+    );
+    setPurchasing(false);
+    window.location.reload();
+  };
+
+  const handleCancelBooking = async (booking: ExamBooking) => {
+    setCancellingId(booking.id);
+    await supabase
+      .from("exam_bookings")
+      .update({ status: "refunded" })
+      .eq("id", booking.id);
+    await supabase
+      .from("exam_availability")
+      .update({ status: "available" })
+      .eq("id", booking.availability_id);
+    toast.success("Egzamin anulowany. Zwrot 19,99 zł.");
+    setCancellingId(null);
+    // Reload bookings
+    setBookings((prev) => prev.filter((b) => b.id !== booking.id));
+  };
+
+  // Calendar helpers
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
-
-    const days = [];
-    // Dodaj puste dni na początku
-    for (let i = 0; i < startingDayOfWeek; i++) {
-      days.push(null);
-    }
-    // Dodaj dni miesiąca
-    for (let i = 1; i <= daysInMonth; i++) {
-      days.push(new Date(year, month, i));
-    }
-
+    const days: (Date | null)[] = [];
+    for (let i = 0; i < firstDay.getDay(); i++) days.push(null);
+    for (let i = 1; i <= lastDay.getDate(); i++) days.push(new Date(year, month, i));
     return days;
   };
 
   const handleDateSelect = (date: Date) => {
-    // Nie pozwól wybrać daty z przeszłości
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (date < today) {
-      toast.error("Nie można wybrać daty z przeszłości");
-      return;
-    }
+    if (date < today) return;
     setSelectedDate(date);
   };
 
-  const handleSlotSelect = async (slot: ExamAvailability) => {
-    if (!user) return;
-    setPurchasing(true);
-
-    try {
-      // Sprawdź czy użytkownik nie ma już aktywnego egzaminu
-      const { data: activeBooking, error: checkError } = await supabase
-        .from("exam_bookings")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("status", "scheduled")
-        .maybeSingle();
-
-      if (checkError) {
-        console.error("Error checking active booking:", checkError);
-        toast.error("Błąd sprawdzania aktywnych egzaminów. Spróbuj ponownie.");
-        setPurchasing(false);
-        return;
-      }
-
-      if (activeBooking) {
-        toast.error("Masz już aktywny egzamin. Zakończ go przed zakupem kolejnego.");
-        setPurchasing(false);
-        return;
-      }
-
-      // Dodaj rezerwację
-      const { data: booking, error: insertErr } = await supabase.from("exam_bookings").insert({
-        user_id: user.id,
-        availability_id: slot.id,
-        status: "scheduled",
-        amount_pln: EXAM_PRICE,
-        payment_reference: `ex-${Date.now()}`,
-      }).select().single();
-
-      if (insertErr) {
-        console.error("Insert error:", insertErr);
-        toast.error(`Błąd zakupu: ${insertErr.message || 'Nieznany błąd'}`);
-        setPurchasing(false);
-        return;
-      }
-
-      if (!booking) {
-        toast.error("Błąd tworzenia rezerwacji. Spróbuj ponownie.");
-        setPurchasing(false);
-        return;
-      }
-
-      // Zaktualizuj status terminu
-      const { error: updateErr } = await supabase
-        .from("exam_availability")
-        .update({ status: "booked" })
-        .eq("id", slot.id);
-
-      if (updateErr) {
-        console.error("Update error:", updateErr);
-        toast.error(`Błąd podczas rezerwacji terminu: ${updateErr.message || 'Nieznany błąd'}`);
-        setPurchasing(false);
-        return;
-      }
-
-      toast.success(`Egzamin wykupiony! Termin: ${new Date(slot.slot_date).toLocaleDateString('pl-PL')} o ${slot.slot_time.slice(0, 5)}`);
-      setPurchasing(false);
-
-      // Przeładuj dane
-      window.location.reload();
-    } catch (error) {
-      console.error("Unexpected error:", error);
-      toast.error("Wystąpił nieoczekiwany błąd. Spróbuj ponownie.");
-      setPurchasing(false);
-    }
-  };
-
-  const changeMonth = (direction: number) => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + direction, 1));
+  const changeMonth = (dir: number) => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + dir, 1));
     setSelectedDate(null);
     setAvailableSlots([]);
   };
@@ -475,7 +218,7 @@ const Exams = () => {
     });
   const formatTime = (t: string) => t.slice(0, 5);
 
-  const monthYear = currentMonth.toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' });
+  const monthYear = currentMonth.toLocaleDateString("pl-PL", { month: "long", year: "numeric" });
   const days = getDaysInMonth(currentMonth);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -485,74 +228,43 @@ const Exams = () => {
       <header className="relative overflow-hidden">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
-        
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 md:pt-20 md:pb-14">
           <div className="text-center mb-8">
             <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-4">
-              Zapisz się!✨
+              Zapisz się! ✨
             </h1>
-            <div className="max-w-2xl mx-auto">
-              <p className="text-lg text-muted-foreground font-body leading-relaxed">
-                Egzamin z egzaminatorem – 20 minut, {EXAM_PRICE} zł
-              </p>
-              <div className="flex items-center justify-center gap-8 mt-6 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Clock size={16} />
-                  <span>20 minut</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CreditCard size={16} />
-                  <span>{EXAM_PRICE} zł</span>
-                </div>
+            <p className="text-lg text-muted-foreground font-body leading-relaxed">
+              Egzamin z egzaminatorem – 20 minut, {EXAM_PRICE} zł
+            </p>
+            <div className="flex items-center justify-center gap-8 mt-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Clock size={16} />
+                <span>20 minut</span>
               </div>
-              
-              {/* Przyciski debugowania */}
-              <div className="flex justify-center gap-4 mt-6">
-                <button
-                  onClick={checkDatabaseState}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
-                >
-                  Sprawdź bazę danych
-                </button>
-                <button
-                  onClick={createSampleSlots}
-                  className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm font-medium transition-colors"
-                >
-                  Dodaj przykładowe terminy
-                </button>
-                <button
-                  onClick={createTablesManually}
-                  className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium transition-colors"
-                >
-                  Utwórz tabele ręcznie
-                </button>
+              <div className="flex items-center gap-2">
+                <CreditCard size={16} />
+                <span>{EXAM_PRICE} zł</span>
               </div>
-              
-              {/* Informacje debugowania */}
-              {debugInfo && (
-                <div className="mt-4 p-4 bg-gray-100 rounded-lg text-xs font-mono text-left max-w-2xl mx-auto">
-                  <pre className="whitespace-pre-wrap">{debugInfo}</pre>
-                </div>
-              )}
             </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Zapisy możliwe max {MAX_DAYS_BEFORE_BOOKING} dni przed terminem
+            </p>
           </div>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Kalendarz */}
+          {/* Calendar */}
           <div className="lg:col-span-2">
             <div className="rounded-2xl border border-border/60 bg-card shadow-[var(--shadow-card)] overflow-hidden">
-              <div className="px-6 py-4 border-b border-border/60 bg-slate-50/50 dark:bg-slate-900/30">
+              <div className="px-6 py-4 border-b border-border/60 bg-secondary/20">
                 <div className="flex items-center justify-between">
-                  <h2 className="font-display font-semibold text-foreground">
-                    Wybierz termin egzaminu
-                  </h2>
+                  <h2 className="font-display font-semibold text-foreground">Wybierz termin</h2>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => changeMonth(-1)}
-                      className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                      className="p-1 rounded-lg hover:bg-secondary transition-colors"
                     >
                       <ChevronLeft size={20} />
                     </button>
@@ -561,25 +273,23 @@ const Exams = () => {
                     </span>
                     <button
                       onClick={() => changeMonth(1)}
-                      className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                      className="p-1 rounded-lg hover:bg-secondary transition-colors"
                     >
                       <ChevronRight size={20} />
                     </button>
                   </div>
                 </div>
               </div>
-              
+
               <div className="p-6">
-                {/* Dni tygodnia */}
                 <div className="grid grid-cols-7 gap-1 mb-2">
-                  {['N', 'P', 'W', 'Ś', 'C', 'P', 'S'].map(day => (
-                    <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">
+                  {["N", "P", "W", "Ś", "C", "P", "S"].map((day, i) => (
+                    <div key={i} className="text-center text-xs font-medium text-muted-foreground py-2">
                       {day}
                     </div>
                   ))}
                 </div>
-                
-                {/* Dni miesiąca */}
+
                 <div className="grid grid-cols-7 gap-1 mb-8">
                   {days.map((day, index) => (
                     <div key={index} className="aspect-square">
@@ -589,10 +299,10 @@ const Exams = () => {
                           disabled={day < today}
                           className={`w-full h-full rounded-lg flex items-center justify-center text-sm font-medium transition-colors ${
                             day < today
-                              ? 'text-muted-foreground/30 cursor-not-allowed'
+                              ? "text-muted-foreground/30 cursor-not-allowed"
                               : selectedDate?.toDateString() === day.toDateString()
-                              ? 'bg-primary text-primary-foreground'
-                              : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                              ? "bg-primary text-primary-foreground"
+                              : "hover:bg-secondary"
                           }`}
                         >
                           {day.getDate()}
@@ -602,11 +312,10 @@ const Exams = () => {
                   ))}
                 </div>
 
-                {/* Wybrane godziny */}
                 {selectedDate && (
                   <div className="mt-6 pt-6 border-t border-border/60">
                     <h3 className="font-medium text-foreground mb-4">
-                      Dostępne godziny - {selectedDate.toLocaleDateString('pl-PL')}
+                      Dostępne godziny – {selectedDate.toLocaleDateString("pl-PL")}
                     </h3>
                     {loadingSlots ? (
                       <div className="flex items-center justify-center py-8">
@@ -618,17 +327,29 @@ const Exams = () => {
                       </p>
                     ) : (
                       <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                        {availableSlots.map((slot) => (
-                          <button
-                            key={slot.id}
-                            onClick={() => handleSlotSelect(slot)}
-                            disabled={purchasing}
-                            className="p-3 rounded-lg border border-border/60 bg-card hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-sm font-medium disabled:opacity-50"
-                          >
-                            <Clock size={16} className="mx-auto mb-1" />
-                            {formatTime(slot.slot_time)}
-                          </button>
-                        ))}
+                        {availableSlots.map((slot) => {
+                          const canBook = isWithinBookingWindow(slot.slot_date);
+                          return (
+                            <button
+                              key={slot.id}
+                              onClick={() => handleSlotSelect(slot)}
+                              disabled={purchasing || !canBook}
+                              title={
+                                !canBook
+                                  ? `Zapisy otwierają się ${MAX_DAYS_BEFORE_BOOKING} dni przed terminem`
+                                  : undefined
+                              }
+                              className={`p-3 rounded-lg border border-border/60 text-sm font-medium transition-colors ${
+                                canBook
+                                  ? "bg-card hover:bg-secondary disabled:opacity-50"
+                                  : "bg-muted/50 text-muted-foreground cursor-not-allowed opacity-50"
+                              }`}
+                            >
+                              <Clock size={16} className="mx-auto mb-1" />
+                              {formatTime(slot.slot_time)}
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -637,13 +358,11 @@ const Exams = () => {
             </div>
           </div>
 
-          {/* Moje egzaminy */}
+          {/* My exams */}
           <div className="lg:col-span-1">
             <div className="rounded-2xl border border-border/60 bg-card shadow-[var(--shadow-card)] overflow-hidden">
-              <div className="px-6 py-4 border-b border-border/60 bg-slate-50/50 dark:bg-slate-900/30">
-                <h2 className="font-display font-semibold text-foreground">
-                  Moje egzaminy
-                </h2>
+              <div className="px-6 py-4 border-b border-border/60 bg-secondary/20">
+                <h2 className="font-display font-semibold text-foreground">Moje egzaminy</h2>
               </div>
               <div className="p-6">
                 {bookings.length === 0 ? (
@@ -651,35 +370,58 @@ const Exams = () => {
                     <div className="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center mb-4">
                       <Calendar size={28} className="text-muted-foreground/50" />
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      Nie masz jeszcze wykupionych egzaminów
-                    </p>
-                    <p className="text-xs text-muted-foreground/70 mt-1">
-                      Wybierz termin w kalendarzu
-                    </p>
+                    <p className="text-sm text-muted-foreground">Brak wykupionych egzaminów</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">Wybierz termin w kalendarzu</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {bookings.map((b) => (
                       <div
                         key={b.id}
-                        className="flex items-start gap-4 p-4 rounded-xl border border-border/60 bg-slate-50/30 dark:bg-slate-900/20"
+                        className="p-4 rounded-xl border border-border/60 bg-secondary/10"
                       >
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                          <CheckCircle size={20} />
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground">
-                            {b.exam_availability && formatDate(b.exam_availability.slot_date)}
-                          </p>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Godzina:{" "}
-                            {b.exam_availability &&
-                              formatTime(b.exam_availability.slot_time)}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            Egzaminator: {b.examiner_name}
-                          </p>
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                            <CheckCircle size={20} />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-foreground">
+                              {b.exam_availability && formatDate(b.exam_availability.slot_date)}
+                            </p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Godzina: {b.exam_availability && formatTime(b.exam_availability.slot_time)}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Egzaminator: {b.examiner_name}
+                            </p>
+
+                            {/* Rescheduled info */}
+                            {b.rescheduled && (
+                              <div className="mt-2 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                                <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
+                                  <AlertTriangle size={14} />
+                                  <span className="text-xs font-medium">Termin został zmieniony</span>
+                                </div>
+                                {b.original_slot_time && (
+                                  <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">
+                                    Poprzednia godzina: {formatTime(b.original_slot_time)}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Cancel button */}
+                            {b.status === "scheduled" && (
+                              <button
+                                onClick={() => handleCancelBooking(b)}
+                                disabled={cancellingId === b.id}
+                                className="mt-3 h-8 px-3 rounded-lg bg-destructive/10 text-destructive text-xs font-medium hover:bg-destructive/20 disabled:opacity-50 flex items-center gap-1.5"
+                              >
+                                <XCircle size={13} />
+                                {cancellingId === b.id ? "Anuluję..." : "Wypisz się (zwrot 19,99 zł)"}
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}

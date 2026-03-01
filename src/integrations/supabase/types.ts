@@ -65,6 +65,118 @@ export type Database = {
         }
         Relationships: []
       }
+      exam_availability: {
+        Row: {
+          created_at: string
+          examiner_id: string
+          id: string
+          schedule_id: string | null
+          slot_date: string
+          slot_time: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          examiner_id: string
+          id?: string
+          schedule_id?: string | null
+          slot_date: string
+          slot_time: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          examiner_id?: string
+          id?: string
+          schedule_id?: string | null
+          slot_date?: string
+          slot_time?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_availability_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "exam_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_bookings: {
+        Row: {
+          amount_pln: number
+          availability_id: string
+          created_at: string
+          id: string
+          original_slot_time: string | null
+          payment_reference: string | null
+          rescheduled: boolean
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_pln?: number
+          availability_id: string
+          created_at?: string
+          id?: string
+          original_slot_time?: string | null
+          payment_reference?: string | null
+          rescheduled?: boolean
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_pln?: number
+          availability_id?: string
+          created_at?: string
+          id?: string
+          original_slot_time?: string | null
+          payment_reference?: string | null
+          rescheduled?: boolean
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_bookings_availability_id_fkey"
+            columns: ["availability_id"]
+            isOneToOne: false
+            referencedRelation: "exam_availability"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_schedules: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          examiner_id: string
+          id: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          examiner_id: string
+          id?: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          examiner_id?: string
+          id?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lesson_test_results: {
         Row: {
           attempts: number
