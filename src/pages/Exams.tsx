@@ -2,8 +2,17 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Clock, CreditCard, CheckCircle, ChevronLeft, ChevronRight, AlertTriangle, XCircle } from "lucide-react";
+import { Calendar, Clock, CreditCard, CheckCircle, ChevronLeft, ChevronRight, AlertTriangle, XCircle, ShieldCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface ExamAvailability {
   id: string;
@@ -41,14 +50,15 @@ const MAX_DAYS_BEFORE_BOOKING = 5;
 const Exams = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [purchasing, setPurchasing] = useState(false);
+  
   const [bookings, setBookings] = useState<(ExamBooking & { examiner_name?: string; examiner_avatar?: string | null })[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [availableSlots, setAvailableSlots] = useState<(ExamAvailability & { examiner_name?: string; examiner_avatar?: string | null })[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
-
+  const [confirmSlot, setConfirmSlot] = useState<(ExamAvailability & { examiner_name?: string; examiner_avatar?: string | null }) | null>(null);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
   useEffect(() => {
     if (!authLoading && !user) navigate("/");
   }, [user, authLoading, navigate]);
@@ -138,13 +148,18 @@ const Exams = () => {
     return diffDays >= 0 && diffDays <= MAX_DAYS_BEFORE_BOOKING;
   };
 
-  const handleSlotSelect = async (slot: ExamAvailability) => {
+  const handleSlotSelect = (slot: ExamAvailability & { examiner_name?: string; examiner_avatar?: string | null }) => {
     if (!user) return;
     if (!isWithinBookingWindow(slot.slot_date)) {
       toast.error(`Zapisy możliwe max ${MAX_DAYS_BEFORE_BOOKING} dni przed terminem`);
       return;
     }
-    setPurchasing(true);
+    setConfirmSlot(slot);
+  };
+
+  const handleConfirmPayment = async () => {
+    if (!user || !confirmSlot) return;
+    setPaymentProcessing(true);
 
     const { data: activeBooking } = await supabase
       .from("exam_bookings")
@@ -155,24 +170,34 @@ const Exams = () => {
 
     if (activeBooking) {
       toast.error("Masz już aktywny egzamin. Zakończ go lub anuluj przed zakupem kolejnego.");
-      setPurchasing(false);
+      setPaymentProcessing(false);
+      setConfirmSlot(null);
       return;
     }
 
+    // Simulate payment processing
+    await new Promise((r) => setTimeout(r, 1500));
+
     const { error: insertErr } = await supabase.from("exam_bookings").insert({
       user_id: user.id,
-      availability_id: slot.id,
+      availability_id: confirmSlot.id,
       status: "scheduled",
       amount_pln: EXAM_PRICE,
-      payment_reference: `ex-${Date.now()}`,
+      payment_reference: `pay-${Date.now()}`,
     });
 
-    if (insertErr) { toast.error(`Błąd zakupu: ${insertErr.message}`); setPurchasing(false); return; }
+    if (insertErr) {
+      toast.error(`Błąd płatności: ${insertErr.message}`);
+      setPaymentProcessing(false);
+      setConfirmSlot(null);
+      return;
+    }
 
-    await supabase.from("exam_availability").update({ status: "booked" }).eq("id", slot.id);
+    await supabase.from("exam_availability").update({ status: "booked" }).eq("id", confirmSlot.id);
 
-    toast.success(`Egzamin wykupiony! ${new Date(slot.slot_date).toLocaleDateString("pl-PL")} o ${slot.slot_time.slice(0, 5)}`);
-    setPurchasing(false);
+    toast.success(`Płatność zakończona! Egzamin ${new Date(confirmSlot.slot_date).toLocaleDateString("pl-PL")} o ${confirmSlot.slot_time.slice(0, 5)}`);
+    setPaymentProcessing(false);
+    setConfirmSlot(null);
     window.location.reload();
   };
 
@@ -309,7 +334,7 @@ const Exams = () => {
                             <button
                               key={slot.id}
                               onClick={() => handleSlotSelect(slot)}
-                              disabled={purchasing || !canBook}
+                              disabled={!canBook}
                               title={!canBook ? `Zapisy otwierają się ${MAX_DAYS_BEFORE_BOOKING} dni przed terminem` : undefined}
                               className={`w-full p-3 rounded-xl border border-border/60 text-sm font-medium transition-colors flex items-center gap-3 ${
                                 canBook
@@ -412,6 +437,97 @@ const Exams = () => {
           </div>
         </div>
       </main>
+
+      {/* Payment confirmation dialog */}
+      <Dialog open={!!confirmSlot} onOpenChange={(open) => { if (!open && !paymentProcessing) setConfirmSlot(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard size={20} className="text-primary" />
+              Potwierdzenie rezerwacji
+            </DialogTitle>
+            <DialogDescription>
+              Czy chcesz wybrać ten termin egzaminu?
+            </DialogDescription>
+          </DialogHeader>
+
+          {confirmSlot && (
+            <div className="space-y-4 py-2">
+              {/* Slot details */}
+              <div className="rounded-xl border border-border/60 bg-secondary/20 p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  {confirmSlot.examiner_avatar ? (
+                    <img src={confirmSlot.examiner_avatar} alt="" className="w-12 h-12 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
+                      {(confirmSlot.examiner_name || "E")[0].toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-medium text-foreground">{confirmSlot.examiner_name || "Egzaminator"}</p>
+                    <p className="text-sm text-muted-foreground">Egzaminator</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-1.5 text-foreground">
+                    <Calendar size={14} className="text-muted-foreground" />
+                    {new Date(confirmSlot.slot_date + "T12:00:00").toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long" })}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-foreground">
+                    <Clock size={14} className="text-muted-foreground" />
+                    {confirmSlot.slot_time.slice(0, 5)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment summary */}
+              <div className="rounded-xl border border-border/60 bg-card p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Egzamin ustny (20 min)</span>
+                  <span className="font-semibold text-foreground">{EXAM_PRICE} zł</span>
+                </div>
+                <div className="border-t border-border/60 mt-3 pt-3 flex items-center justify-between">
+                  <span className="font-medium text-foreground">Do zapłaty</span>
+                  <span className="text-lg font-bold text-primary">{EXAM_PRICE} zł</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <ShieldCheck size={14} className="text-primary shrink-0" />
+                <span>Bezpieczna płatność. Zwrot możliwy po zmianie terminu przez admina.</span>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setConfirmSlot(null)}
+              disabled={paymentProcessing}
+              className="w-full sm:w-auto"
+            >
+              Anuluj
+            </Button>
+            <Button
+              onClick={handleConfirmPayment}
+              disabled={paymentProcessing}
+              className="w-full sm:w-auto gap-2"
+            >
+              {paymentProcessing ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Przetwarzanie płatności...
+                </>
+              ) : (
+                <>
+                  <CreditCard size={16} />
+                  Zapłać {EXAM_PRICE} zł
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
