@@ -141,14 +141,21 @@ const AdminExamManager = () => {
     return result;
   };
 
+  const formatLocalDate = (d: Date): string => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
   const getFutureDates = (dayOfWeek: number): string[] => {
     const dates: string[] = [];
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setHours(12, 0, 0, 0);
     for (let i = 0; i < GENERATE_WEEKS_AHEAD * 7; i++) {
       const d = new Date(today);
       d.setDate(today.getDate() + i);
-      if (d.getDay() === dayOfWeek) dates.push(d.toISOString().slice(0, 10));
+      if (d.getDay() === dayOfWeek) dates.push(formatLocalDate(d));
     }
     return dates;
   };
@@ -157,7 +164,7 @@ const AdminExamManager = () => {
     const times = generateTimeSlots(schedule.start_time, schedule.end_time);
     const dates = getFutureDates(schedule.day_of_week);
     if (!times.length || !dates.length) return;
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = formatLocalDate(new Date());
     const { data: existing } = await supabase
       .from("exam_availability")
       .select("id, slot_date, slot_time, status")
