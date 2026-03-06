@@ -121,3 +121,35 @@
     font-family: var(--font-body);
   }
 }
+
+@layer utilities {
+  .animate-slide-in-sidebar {
+    animation: slide-in-sidebar 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .animate-fade-in-item {
+    opacity: 0;
+    animation: fade-in-item 0.4s ease-out forwards;
+  }
+}
+
+@keyframes slide-in-sidebar {
+  from {
+    opacity: 0;
+    transform: translateX(-20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes fade-in-item {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
