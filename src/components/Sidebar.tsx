@@ -1,8 +1,8 @@
-import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { Lightbulb, Inbox, Clock, PenLine, Settings, ShieldCheck } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -23,7 +23,13 @@ const Sidebar = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <aside className="hidden md:flex w-[300px] shrink-0 px-6 pt-[120px] pb-6 self-start sticky top-0">
+    <aside className="hidden md:flex flex-col w-[300px] shrink-0 px-6 pt-6 pb-6 self-start sticky top-0">
+      {/* Logo above sidebar */}
+      <div className="pb-6 pl-3">
+        <Link to="/">
+          <img src={logo} alt="Epokowo" className="h-7" />
+        </Link>
+      </div>
       <div className="w-full flex flex-col bg-card rounded-3xl shadow-[var(--shadow-elevated)] border border-border/50 overflow-hidden animate-slide-in-sidebar">
         {/* Title */}
         <div className="px-6 pt-6 pb-2">
