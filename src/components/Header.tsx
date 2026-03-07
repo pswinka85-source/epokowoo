@@ -39,16 +39,9 @@ const Header = () => {
           </Link>
         </div>
 
-        {/* Desktop: logo left */}
-        <div className="hidden md:flex items-center">
-          <Link to="/">
-            <img src={logo} alt="Epokowo" className="h-7" />
-          </Link>
-        </div>
-
-        {/* Desktop: bell + avatar */}
+        {/* Desktop: bell + avatar only (logo is in sidebar) */}
         {user && (
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-2 ml-auto">
             <Link
               to="/kontakt"
               className="w-10 h-10 rounded-xl flex items-center justify-center text-foreground hover:bg-secondary transition-all duration-200 relative"
