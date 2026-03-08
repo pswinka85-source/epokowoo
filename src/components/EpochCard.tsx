@@ -53,6 +53,8 @@ const EpochCard = ({ epoch, index }: EpochCardProps) => {
               <img src={wspolczesnoscIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
             ) : epoch.id === "romantyzm" ? (
               <img src={romantyzmIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
+            ) : epoch.id === "mloda-polska" ? (
+              <img src={mlodaPolskaIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
             ) : (
               <span className="text-3xl" role="img" aria-label={epoch.name}>
                 {epoch.icon}
