@@ -51,10 +51,17 @@ const Contact = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Profile[]>([]);
   const [searching, setSearching] = useState(false);
-  const initialTab = searchParams.get('tab') === 'notifications' ? 'notifications' : 'messages';
-  const [activeTab, setActiveTab] = useState<'messages' | 'notifications'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'messages' | 'notifications'>('messages');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Sync tab from URL param
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'notifications') {
+      setActiveTab('notifications');
+    }
+  }, [searchParams]);
 
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
