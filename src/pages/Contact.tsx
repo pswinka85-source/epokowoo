@@ -395,7 +395,7 @@ const Contact = () => {
             )}
 
             {/* Unified list */}
-            <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border)) transparent' }}>
+            <div className="flex-1 overflow-y-auto scrollbar-thin">
               {unifiedItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
                   <div className="w-16 h-16 rounded-full bg-muted/40 flex items-center justify-center mb-4">
