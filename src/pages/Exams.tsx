@@ -148,12 +148,27 @@ const Exams = () => {
     return diffDays >= 0 && diffDays <= MAX_DAYS_BEFORE_BOOKING;
   };
 
-  const handleSlotSelect = (slot: ExamAvailability & { examiner_name?: string; examiner_avatar?: string | null }) => {
+  const handleSlotSelect = async (slot: ExamAvailability & { examiner_name?: string; examiner_avatar?: string | null }) => {
     if (!user) return;
     if (!isWithinBookingWindow(slot.slot_date)) {
       toast.error(`Zapisy możliwe max ${MAX_DAYS_BEFORE_BOOKING} dni przed terminem`);
       return;
     }
+
+    // Check if user already has an exam on this day
+    const { data: existingBookingOnDay } = await supabase
+      .from("exam_bookings")
+      .select("id, exam_availability!inner(slot_date)")
+      .eq("user_id", user.id)
+      .eq("status", "scheduled")
+      .eq("exam_availability.slot_date", slot.slot_date)
+      .maybeSingle();
+
+    if (existingBookingOnDay) {
+      toast.error("Masz już egzamin zaplanowany na ten dzień. Wypisz się najpierw lub wybierz inny termin.");
+      return;
+    }
+
     setConfirmSlot(slot);
   };
 
@@ -161,15 +176,17 @@ const Exams = () => {
     if (!user || !confirmSlot) return;
     setPaymentProcessing(true);
 
-    const { data: activeBooking } = await supabase
+    // Check if user already has an exam on this specific day
+    const { data: existingBookingOnDay } = await supabase
       .from("exam_bookings")
-      .select("id")
+      .select("id, exam_availability!inner(slot_date)")
       .eq("user_id", user.id)
       .eq("status", "scheduled")
+      .eq("exam_availability.slot_date", confirmSlot.slot_date)
       .maybeSingle();
 
-    if (activeBooking) {
-      toast.error("Masz już aktywny egzamin. Zakończ go lub anuluj przed zakupem kolejnego.");
+    if (existingBookingOnDay) {
+      toast.error("Masz już egzamin zaplanowany na ten dzień. Wypisz się najpierw lub wybierz inny termin.");
       setPaymentProcessing(false);
       setConfirmSlot(null);
       return;
