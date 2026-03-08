@@ -468,7 +468,7 @@ const Contact = () => {
                       return (
                         <div key={`notif-${n.id}`} className="relative ml-5">
                           {/* Avatar on left edge */}
-                          <div className="absolute -left-5 top-1/2 -translate-y-1/2 z-10">
+                          <div className="absolute -left-[21px] -top-[21px] z-10">
                             <div className="w-[42px] h-[42px] rounded-full bg-muted/40 flex items-center justify-center text-[12px] font-bold text-muted-foreground">
                               ES
                             </div>
