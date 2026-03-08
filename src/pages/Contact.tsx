@@ -469,11 +469,11 @@ const Contact = () => {
                         >
                           {/* Notification avatar */}
                           <div className="relative shrink-0 mt-0.5">
-                            <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center text-sm font-bold text-muted-foreground">
+                            <div className="w-[52px] h-[52px] rounded-full bg-muted/40 flex items-center justify-center text-base font-bold text-muted-foreground">
                               ES
                             </div>
                             {/* Icon overlay */}
-                            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-card border-2 border-background flex items-center justify-center shadow-sm">
+                            <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-card border-[2.5px] border-background flex items-center justify-center shadow-sm">
                               {getNotificationIcon(n.type)}
                             </div>
                           </div>
