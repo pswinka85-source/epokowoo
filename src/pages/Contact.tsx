@@ -335,7 +335,7 @@ const Contact = () => {
         <div className="flex gap-0 overflow-hidden" style={{ height: "calc(100vh - 260px)", minHeight: 480 }}>
 
           {/* LEFT PANEL — Unified list */}
-          <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full md:w-[420px] flex-col shrink-0`}>
+          <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full md:w-[440px] flex-col shrink-0 border-r border-border/40`}>
 
             {/* Search toggle */}
             {showSearch && (
@@ -393,7 +393,7 @@ const Contact = () => {
                   <p className="text-xs text-muted-foreground/50">Wyszukaj użytkownika, aby rozpocząć rozmowę</p>
                 </div>
               ) : (
-                <div className="space-y-1 px-1">
+                <div className="divide-y divide-border/40">
                   {unifiedItems.map((item) => {
                     if (item.kind === "conversation") {
                       const c = item.data;
@@ -402,47 +402,49 @@ const Contact = () => {
                         <button
                           key={`conv-${c.id}`}
                           onClick={() => { setActiveConvo(c); setActiveNotification(null); }}
-                          className={`w-full flex items-start gap-3.5 px-4 py-4 rounded-2xl transition-all duration-200 text-left ${
+                          className={`w-full flex items-start gap-4 px-5 py-5 transition-all duration-200 text-left ${
                             isActive
-                              ? 'bg-primary/8 shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.12)]'
-                              : 'hover:bg-muted/40'
+                              ? 'bg-primary/[0.06]'
+                              : 'hover:bg-muted/30'
                           }`}
                         >
                           {/* Avatar */}
                           <div className="relative shrink-0 mt-0.5">
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
+                            <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
                               c.unread_count > 0
-                                ? 'ring-[3px] ring-primary/30'
+                                ? 'ring-[3px] ring-primary/40'
                                 : ''
                             } bg-muted/60 text-muted-foreground`}>
                               {c.other_user?.avatar_url ? (
                                 <img src={c.other_user.avatar_url} className="w-full h-full object-cover" alt="" />
                               ) : (
-                                <span>{getInitials(c.other_user?.display_name ?? null)}</span>
+                                <span className="text-base">{getInitials(c.other_user?.display_name ?? null)}</span>
                               )}
                             </div>
-                            {/* Online indicator */}
-                            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-foreground border-[2.5px] border-background" />
+                            {/* Online indicator — two black dots like in reference */}
+                            <span className="absolute bottom-0 left-0 flex gap-0.5">
+                              <span className="w-2.5 h-2.5 rounded-full bg-foreground border-2 border-background" />
+                              <span className="w-2.5 h-2.5 rounded-full bg-foreground border-2 border-background" />
+                            </span>
                           </div>
 
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className={`text-[14px] font-bold text-foreground truncate`}>
+                              <span className="text-[15px] font-bold text-foreground truncate">
                                 {c.other_user?.display_name || "Użytkownik"}
                               </span>
-                              {/* Show verified badge for admins */}
-                              <BadgeCheck size={16} className="text-primary shrink-0" />
+                              <BadgeCheck size={17} className="text-primary shrink-0" />
                             </div>
-                            <p className="text-xs text-muted-foreground mb-1.5">
+                            <p className="text-[12px] text-muted-foreground mb-2">
                               Aktywny: {formatTimeAgo(c.last_message_at)}
                             </p>
                             {c.last_message && (
                               <>
-                                <p className={`text-[13px] font-semibold text-foreground truncate`}>
-                                  {c.last_message.length > 40 ? c.last_message.slice(0, 40) + "..." : c.last_message}
+                                <p className="text-[13px] font-bold text-foreground truncate leading-snug">
+                                  {c.last_message.length > 45 ? "Re: " + c.last_message.slice(0, 35) + "..." : c.last_message}
                                 </p>
-                                <p className="text-xs text-muted-foreground/60 truncate mt-0.5">
+                                <p className="text-[12px] text-muted-foreground/50 truncate mt-1 leading-relaxed">
                                   {c.last_message}
                                 </p>
                               </>
@@ -457,21 +459,21 @@ const Contact = () => {
                         <button
                           key={`notif-${n.id}`}
                           onClick={() => { setActiveNotification(n); setActiveConvo(null); if (!n.read) markNotificationAsRead(n.id); }}
-                          className={`w-full flex items-start gap-3.5 px-4 py-4 rounded-2xl transition-all duration-200 text-left ${
+                          className={`w-full flex items-start gap-4 px-5 py-5 transition-all duration-200 text-left ${
                             isActive
-                              ? 'bg-primary/8 shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.12)]'
+                              ? 'bg-primary/[0.06]'
                               : !n.read
-                                ? 'bg-primary/[0.03] hover:bg-primary/[0.06]'
-                                : 'hover:bg-muted/40'
+                                ? 'bg-primary/[0.02] hover:bg-primary/[0.05]'
+                                : 'hover:bg-muted/30'
                           }`}
                         >
                           {/* Notification avatar */}
                           <div className="relative shrink-0 mt-0.5">
-                            <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center text-sm font-bold text-muted-foreground">
+                            <div className="w-[52px] h-[52px] rounded-full bg-muted/40 flex items-center justify-center text-base font-bold text-muted-foreground">
                               ES
                             </div>
                             {/* Icon overlay */}
-                            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-card border-2 border-background flex items-center justify-center shadow-sm">
+                            <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-card border-[2.5px] border-background flex items-center justify-center shadow-sm">
                               {getNotificationIcon(n.type)}
                             </div>
                           </div>
@@ -479,18 +481,18 @@ const Contact = () => {
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className={`text-[14px] font-bold text-foreground truncate`}>
+                              <span className="text-[15px] font-bold text-foreground truncate">
                                 Epokowo System
                               </span>
                             </div>
-                            <p className="text-xs text-muted-foreground mb-1.5">
+                            <p className="text-[12px] text-muted-foreground mb-2">
                               {getNotificationSubtype(n.type)}
                             </p>
-                            <p className={`text-[13px] font-semibold text-foreground truncate ${!n.read ? '' : ''}`}>
+                            <p className="text-[13px] font-bold text-foreground truncate leading-snug">
                               {n.title}
                             </p>
                             {n.message && (
-                              <p className="text-xs text-muted-foreground/60 truncate mt-0.5">
+                              <p className="text-[12px] text-muted-foreground/50 truncate mt-1 leading-relaxed">
                                 {n.message}
                               </p>
                             )}
@@ -505,7 +507,7 @@ const Contact = () => {
           </div>
 
           {/* RIGHT PANEL */}
-          <div className={`${isDetailOpen ? 'flex' : 'hidden md:flex'} flex-1 flex-col border-l border-border/30 bg-card rounded-3xl shadow-[var(--shadow-card)] ml-4 overflow-hidden`}>
+          <div className={`${isDetailOpen ? 'flex' : 'hidden md:flex'} flex-1 flex-col bg-card rounded-3xl shadow-[var(--shadow-card)] ml-5 overflow-hidden`}>
             {activeConvo ? (
               <>
                 {/* Chat header */}
