@@ -411,9 +411,9 @@ const Contact = () => {
                       const c = item.data;
                       const isActive = activeConvo?.id === c.id;
                       return (
-                        <div key={`conv-${c.id}`} className="relative pt-5">
-                          {/* Avatar overlapping top of card */}
-                          <div className="absolute left-4 -top-0 z-10">
+                        <div key={`conv-${c.id}`} className="relative ml-5">
+                          {/* Avatar on left edge, overlapping left and bottom */}
+                          <div className="absolute -left-5 top-1/2 -translate-y-1/2 z-10">
                             <div className={`w-[42px] h-[42px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
                               c.unread_count > 0 ? 'ring-2 ring-primary/50' : ''
                             } bg-muted/60 text-muted-foreground`}>
@@ -432,7 +432,7 @@ const Contact = () => {
                           {/* Card */}
                           <button
                             onClick={() => { setActiveConvo(c); setActiveNotification(null); }}
-                            className={`w-full min-w-0 px-3 pt-6 pb-2.5 rounded-2xl border transition-all duration-200 text-left ${
+                            className={`w-full min-w-0 pl-6 pr-3 py-2.5 rounded-2xl border transition-all duration-200 text-left ${
                               isActive
                                 ? 'bg-primary/[0.06] border-primary/20'
                                 : 'bg-card border-border/30 hover:border-border/50 hover:shadow-sm'
