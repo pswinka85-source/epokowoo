@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import EpochCard from "@/components/EpochCard";
 import { CheckCircle, Brain, TrendingUp } from "lucide-react";
 import epokiTitle from "@/assets/epoki-title.png";
+import rozprawkaIcon from "@/assets/rozprawka-icon.png";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const { user } = useAuth();
@@ -116,6 +118,33 @@ const Index = () => {
           {epochs.map((epoch, index) => (
             <EpochCard key={epoch.id} epoch={epoch} index={index} />
           ))}
+          
+          {/* Rozprawka card */}
+          <Link
+            to="/rozprawka"
+            className="group block opacity-0 animate-fade-in"
+            style={{ animationDelay: `${epochs.length * 60}ms` }}
+          >
+            <article className="relative h-full overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1 hover:border-primary/30">
+              <div className="flex flex-col h-full">
+                <div className="flex items-center gap-3 mb-3">
+                  <img src={rozprawkaIcon} alt="Rozprawka" className="w-8 h-8 object-contain" />
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground font-body px-2 py-0.5 rounded-full bg-secondary">
+                    Matura
+                  </span>
+                </div>
+                <h3 className="font-display text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                  Rozprawka
+                </h3>
+                <p className="text-sm text-muted-foreground font-body leading-relaxed line-clamp-2 flex-1">
+                  Jak pisać rozprawkę maturalną – struktura, argumentacja i przykłady.
+                </p>
+                <div className="flex items-center gap-2 mt-4 text-sm font-body font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  Rozpocznij naukę
+                </div>
+              </div>
+            </article>
+          </Link>
         </div>
       </main>
     </div>
