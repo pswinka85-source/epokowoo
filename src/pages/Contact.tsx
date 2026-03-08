@@ -395,7 +395,7 @@ const Contact = () => {
             )}
 
             {/* Unified list */}
-            <div className="flex-1 overflow-y-auto scrollbar-thin">
+            <div className="flex-1 overflow-y-auto overflow-x-visible scrollbar-thin pr-2">
               {unifiedItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
                   <div className="w-16 h-16 rounded-full bg-muted/40 flex items-center justify-center mb-4">
@@ -405,15 +405,15 @@ const Contact = () => {
                   <p className="text-xs text-muted-foreground/50">Wyszukaj użytkownika, aby rozpocząć rozmowę</p>
                 </div>
               ) : (
-                <div className="space-y-8 pt-8 pl-8 pr-2">
+                <div className="space-y-5 pt-2 pb-2">
                   {unifiedItems.map((item) => {
                     if (item.kind === "conversation") {
                       const c = item.data;
                       const isActive = activeConvo?.id === c.id;
                       return (
-                        <div key={`conv-${c.id}`} className="relative ml-0">
-                          {/* Avatar on left edge — center on top-left corner */}
-                          <div className="absolute -left-[26px] -top-[26px] z-10">
+                        <div key={`conv-${c.id}`} className="flex items-start gap-3">
+                          {/* Avatar inline */}
+                          <div className="shrink-0 relative mt-1">
                             <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
                               c.unread_count > 0 ? 'ring-[3px] ring-primary/40' : ''
                             } bg-muted/60 text-muted-foreground`}>
@@ -432,7 +432,7 @@ const Contact = () => {
                           {/* Card */}
                           <button
                             onClick={() => { setActiveConvo(c); setActiveNotification(null); }}
-                            className={`w-full min-w-0 pl-6 pr-3 py-2.5 rounded-2xl border transition-all duration-200 text-left ${
+                            className={`flex-1 min-w-0 px-4 py-2.5 rounded-2xl border transition-all duration-200 text-left ${
                               isActive
                                 ? 'bg-primary/[0.06] border-primary/20'
                                 : 'bg-card border-border/30 hover:border-border/50 hover:shadow-sm'
@@ -466,30 +466,29 @@ const Contact = () => {
                       const n = item.data;
                       const isActive = activeNotification?.id === n.id;
                       return (
-                        <div key={`notif-${n.id}`} className="relative ml-0">
-                          {/* Avatar on left edge — center on top-left corner */}
-                          <div className="absolute -left-[26px] -top-[26px] z-10">
-                            <div className="w-[52px] h-[52px] rounded-full bg-muted/40 flex items-center justify-center text-[14px] font-bold text-muted-foreground relative">
+                        <div key={`notif-${n.id}`} className="flex items-start gap-3">
+                          {/* Avatar inline with notification badge */}
+                          <div className="shrink-0 relative mt-1">
+                            <div className="w-[52px] h-[52px] rounded-full bg-muted/40 flex items-center justify-center text-[14px] font-bold text-muted-foreground">
                               ES
-                              {/* Notification type icon badge */}
-                              <span className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center border-2 border-background ${
-                                n.type === 'warning' || n.type === 'exam_cancelled' ? 'bg-warning' : n.type === 'success' ? 'bg-success' : 'bg-info'
-                              }`}>
-                                {n.type === 'warning' || n.type === 'exam_cancelled' ? (
-                                  <AlertTriangle size={10} className="text-warning-foreground" />
-                                ) : n.type === 'success' ? (
-                                  <Check size={10} className="text-success-foreground" />
-                                ) : (
-                                  <Info size={10} className="text-info-foreground" />
-                                )}
-                              </span>
                             </div>
+                            <span className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center border-2 border-background ${
+                              n.type === 'warning' || n.type === 'exam_cancelled' ? 'bg-warning' : n.type === 'success' ? 'bg-success' : 'bg-info'
+                            }`}>
+                              {n.type === 'warning' || n.type === 'exam_cancelled' ? (
+                                <AlertTriangle size={10} className="text-warning-foreground" />
+                              ) : n.type === 'success' ? (
+                                <Check size={10} className="text-success-foreground" />
+                              ) : (
+                                <Info size={10} className="text-info-foreground" />
+                              )}
+                            </span>
                           </div>
 
                           {/* Card */}
                           <button
                             onClick={() => { setActiveNotification(n); setActiveConvo(null); if (!n.read) markNotificationAsRead(n.id); }}
-                            className={`w-full min-w-0 pl-6 pr-3 py-2.5 rounded-2xl border transition-all duration-200 text-left ${
+                            className={`flex-1 min-w-0 px-4 py-2.5 rounded-2xl border transition-all duration-200 text-left ${
                               isActive
                                 ? 'bg-primary/[0.06] border-primary/20'
                                 : !n.read
