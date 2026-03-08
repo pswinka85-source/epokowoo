@@ -6,6 +6,7 @@ import { Search, Send, ArrowLeft, MessageSquare, Bell, Mail, AlertTriangle, Info
 import { toast } from "sonner";
 import verifiedBadge from "@/assets/verified-badge.png";
 import envelopeIllustration from "@/assets/envelope-illustration.png";
+import notificationIcon from "@/assets/notification-icon.png";
 
 interface Profile {
   user_id: string;
@@ -413,13 +414,13 @@ const Contact = () => {
                       return (
                         <div key={`conv-${c.id}`} className="relative">
                           {/* Avatar overlapping top-left corner */}
-                          <div className={`absolute -left-[26px] -top-[26px] w-[52px] h-[52px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden z-10 ${
+                          <div className={`absolute -left-[30px] -top-[30px] w-[60px] h-[60px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden z-10 ${
                             c.unread_count > 0 ? 'ring-[3px] ring-primary/40' : ''
                           } bg-muted/60 text-muted-foreground`}>
                             {c.other_user?.avatar_url ? (
                               <img src={c.other_user.avatar_url} className="w-full h-full object-cover" alt="" />
                             ) : (
-                              <span className="text-[15px]">{getInitials(c.other_user?.display_name ?? null)}</span>
+                              <span className="text-[17px]">{getInitials(c.other_user?.display_name ?? null)}</span>
                             )}
                           </div>
 
@@ -433,7 +434,7 @@ const Contact = () => {
                             }`}
                           >
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="text-[13px] font-bold text-foreground truncate">
+                              <span className="text-[14px] font-bold text-foreground truncate">
                                 {c.other_user?.display_name || "Użytkownik"}
                               </span>
                               {verifiedUsers.has(c.user1_id === user?.id ? c.user2_id : c.user1_id) && (
@@ -462,8 +463,8 @@ const Contact = () => {
                       return (
                         <div key={`notif-${n.id}`} className="relative">
                           {/* Avatar overlapping top-left corner with notification badge */}
-                          <div className="absolute -left-[26px] -top-[26px] w-[52px] h-[52px] rounded-full bg-primary/10 flex items-center justify-center z-10">
-                            <Bell size={22} className="text-primary" />
+                          <div className="absolute -left-[30px] -top-[30px] w-[60px] h-[60px] rounded-full overflow-hidden z-10">
+                            <img src={notificationIcon} className="w-full h-full object-cover" alt="Powiadomienie" />
                           </div>
 
                           {/* Card */}
@@ -478,7 +479,7 @@ const Contact = () => {
                             }`}
                           >
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="text-[13px] font-bold text-foreground truncate">
+                              <span className="text-[14px] font-bold text-foreground truncate">
                                 Epokowo System
                               </span>
                             </div>
