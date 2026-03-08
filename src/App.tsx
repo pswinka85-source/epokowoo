@@ -36,13 +36,13 @@ const AppLayout = () => {
   }
 
   return (
-    <div className="min-h-screen flex">
-      {/* Sidebar flush left, full height */}
-      <Sidebar />
-      
-      {/* Main content area */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        <Header />
+    <div className="min-h-screen flex flex-col">
+      {/* Header – full width */}
+      <Header />
+
+      {/* Middle: sidebar + content */}
+      <div className="flex-1 flex">
+        <Sidebar />
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Auth />} />
@@ -56,8 +56,10 @@ const AppLayout = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
-        <Footer />
       </div>
+
+      {/* Footer – full width */}
+      <Footer />
     </div>
   );
 };
