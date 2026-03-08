@@ -467,10 +467,22 @@ const Contact = () => {
                       const isActive = activeNotification?.id === n.id;
                       return (
                         <div key={`notif-${n.id}`} className="relative ml-0">
-                          {/* Avatar on left edge */}
-                          <div className="absolute -left-2 -top-[22px] z-10">
-                            <div className="w-[52px] h-[52px] rounded-full bg-muted/40 flex items-center justify-center text-[14px] font-bold text-muted-foreground">
+                          {/* Avatar on left edge — center on top-left corner */}
+                          <div className="absolute -left-[26px] -top-[26px] z-10">
+                            <div className="w-[52px] h-[52px] rounded-full bg-muted/40 flex items-center justify-center text-[14px] font-bold text-muted-foreground relative">
                               ES
+                              {/* Notification type icon badge */}
+                              <span className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center border-2 border-background ${
+                                n.type === 'warning' || n.type === 'exam_cancelled' ? 'bg-warning' : n.type === 'success' ? 'bg-success' : 'bg-info'
+                              }`}>
+                                {n.type === 'warning' || n.type === 'exam_cancelled' ? (
+                                  <AlertTriangle size={10} className="text-warning-foreground" />
+                                ) : n.type === 'success' ? (
+                                  <Check size={10} className="text-success-foreground" />
+                                ) : (
+                                  <Info size={10} className="text-info-foreground" />
+                                )}
+                              </span>
                             </div>
                           </div>
 
