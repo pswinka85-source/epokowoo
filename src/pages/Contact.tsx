@@ -411,21 +411,11 @@ const Contact = () => {
                       const c = item.data;
                       const isActive = activeConvo?.id === c.id;
                       return (
-                        <button
-                          key={`conv-${c.id}`}
-                          onClick={() => { setActiveConvo(c); setActiveNotification(null); }}
-                          className={`w-full flex items-start gap-3 px-3 py-3 rounded-2xl border transition-all duration-200 text-left ${
-                            isActive
-                              ? 'bg-primary/[0.06] border-primary/20'
-                              : 'bg-card border-border/30 hover:border-border/50 hover:shadow-sm'
-                          }`}
-                        >
-                          {/* Avatar */}
-                          <div className="relative shrink-0">
+                        <div key={`conv-${c.id}`} className="flex items-start gap-0">
+                          {/* Avatar outside card */}
+                          <div className="relative shrink-0 -mr-3 z-10 mt-3">
                             <div className={`w-[44px] h-[44px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
-                              c.unread_count > 0
-                                ? 'ring-2 ring-primary/50'
-                                : ''
+                              c.unread_count > 0 ? 'ring-2 ring-primary/50' : ''
                             } bg-muted/60 text-muted-foreground`}>
                               {c.other_user?.avatar_url ? (
                                 <img src={c.other_user.avatar_url} className="w-full h-full object-cover" alt="" />
@@ -433,15 +423,21 @@ const Contact = () => {
                                 <span className="text-[13px]">{getInitials(c.other_user?.display_name ?? null)}</span>
                               )}
                             </div>
-                            {/* Online indicator dots */}
                             <span className="absolute bottom-0 left-0 flex gap-[2px]">
                               <span className="w-2 h-2 rounded-full bg-foreground border border-background" />
                               <span className="w-2 h-2 rounded-full bg-foreground border border-background" />
                             </span>
                           </div>
 
-                          {/* Content */}
-                          <div className="flex-1 min-w-0">
+                          {/* Card */}
+                          <button
+                            onClick={() => { setActiveConvo(c); setActiveNotification(null); }}
+                            className={`flex-1 min-w-0 pl-5 pr-3 py-2.5 rounded-2xl border transition-all duration-200 text-left ${
+                              isActive
+                                ? 'bg-primary/[0.06] border-primary/20'
+                                : 'bg-card border-border/30 hover:border-border/50 hover:shadow-sm'
+                            }`}
+                          >
                             <div className="flex items-center gap-1.5 mb-0.5">
                               <span className="text-[13px] font-bold text-foreground truncate">
                                 {c.other_user?.display_name || "Użytkownik"}
@@ -463,8 +459,8 @@ const Contact = () => {
                                 </p>
                               </>
                             )}
-                          </div>
-                        </button>
+                          </button>
+                        </div>
                       );
                     } else {
                       const n = item.data;
