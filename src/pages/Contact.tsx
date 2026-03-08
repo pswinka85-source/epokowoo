@@ -479,7 +479,7 @@ const Contact = () => {
                             }`}
                           >
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="text-[14px] font-bold text-foreground truncate">
+                              <span className="text-[15px] font-bold text-foreground truncate">
                                 Epokowo System
                               </span>
                             </div>
