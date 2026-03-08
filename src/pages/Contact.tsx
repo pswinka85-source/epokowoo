@@ -580,7 +580,7 @@ const Contact = () => {
           </div>
 
           {/* PRAWA KOLUMNA - PANEL PODGLĄDU */}
-          <div className="flex-1 bg-white flex flex-col">
+          <div className={`${isDetailOpen ? 'flex' : 'hidden md:flex'} flex-1 bg-white flex-col`}>
             {activeConvo ? (
               <>
                 {/* Chat header */}
