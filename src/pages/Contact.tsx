@@ -483,7 +483,7 @@ const Contact = () => {
                                 Epokowo System
                               </span>
                             </div>
-                            <p className="text-[10px] text-muted-foreground/60 mb-1">
+                            <p className="text-[11px] text-muted-foreground/60 mb-1">
                               {getNotificationSubtype(n.type)}
                             </p>
                             <p className="text-[11px] font-bold text-foreground truncate leading-snug">
