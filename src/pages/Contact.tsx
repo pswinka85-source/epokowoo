@@ -731,11 +731,9 @@ const Contact = () => {
                       {activeNotification.title}
                     </h2>
                     
-                    {activeNotification.message && (
-                      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                        {activeNotification.message}
-                      </p>
-                    )}
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                      {activeNotification.message?.trim() || 'To powiadomienie nie zawiera dodatkowej treści.'}
+                    </p>
                   </div>
                 </div>
               </>
