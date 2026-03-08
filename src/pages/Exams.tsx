@@ -358,7 +358,7 @@ const Exams = () => {
                               key={slot.id}
                               onClick={() => handleSlotSelect(slot)}
                               disabled={!canBook}
-                              title={!canBook ? `Zapisy otwierają się ${MAX_DAYS_BEFORE_BOOKING} dni przed terminem` : undefined}
+                              title={!canBook ? `Zapisy otwierają się minimum ${MIN_DAYS_BEFORE_BOOKING} dni przed terminem` : undefined}
                               className={`w-full p-3 rounded-xl border border-border/60 text-sm font-medium transition-colors flex items-center gap-3 ${
                                 canBook
                                   ? "bg-card hover:bg-secondary/50 disabled:opacity-50"
