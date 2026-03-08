@@ -410,19 +410,22 @@ const Contact = () => {
                         >
                           {/* Avatar */}
                           <div className="relative shrink-0 mt-0.5">
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
+                            <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
                               c.unread_count > 0
-                                ? 'ring-[3px] ring-primary/30'
+                                ? 'ring-[3px] ring-primary/40'
                                 : ''
                             } bg-muted/60 text-muted-foreground`}>
                               {c.other_user?.avatar_url ? (
                                 <img src={c.other_user.avatar_url} className="w-full h-full object-cover" alt="" />
                               ) : (
-                                <span>{getInitials(c.other_user?.display_name ?? null)}</span>
+                                <span className="text-base">{getInitials(c.other_user?.display_name ?? null)}</span>
                               )}
                             </div>
-                            {/* Online indicator */}
-                            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-foreground border-[2.5px] border-background" />
+                            {/* Online indicator — two black dots like in reference */}
+                            <span className="absolute bottom-0 left-0 flex gap-0.5">
+                              <span className="w-2.5 h-2.5 rounded-full bg-foreground border-2 border-background" />
+                              <span className="w-2.5 h-2.5 rounded-full bg-foreground border-2 border-background" />
+                            </span>
                           </div>
 
                           {/* Content */}
