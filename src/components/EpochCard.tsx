@@ -5,6 +5,7 @@ import sredniowieczeIcon from "@/assets/sredniowiecze-icon.png";
 import renesansIcon from "@/assets/renesans-icon.png";
 import barokIcon from "@/assets/barok-icon.png";
 import oswiececenieIcon from "@/assets/oswiecenie-icon.png";
+import wspolczesnoscIcon from "@/assets/wspolczesnosc-icon.png";
 
 interface EpochCardProps {
   epoch: EpochData;
@@ -46,6 +47,8 @@ const EpochCard = ({ epoch, index }: EpochCardProps) => {
               <img src={barokIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
             ) : epoch.id === "oswiecenie" ? (
               <img src={oswiececenieIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
+            ) : epoch.id === "wspolczesnosc" ? (
+              <img src={wspolczesnoscIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
             ) : (
               <span className="text-3xl" role="img" aria-label={epoch.name}>
                 {epoch.icon}
