@@ -64,6 +64,7 @@ const Contact = () => {
   }, [searchParams]);
 
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [activeNotification, setActiveNotification] = useState<AppNotification | null>(null);
 
   // Load notifications from database
   const loadNotifications = useCallback(async () => {
