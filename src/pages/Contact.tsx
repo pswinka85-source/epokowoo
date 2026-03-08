@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, Send, ArrowLeft, MessageSquare, Bell, Mail } from "lucide-react";
@@ -42,6 +42,7 @@ interface AppNotification {
 const Contact = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvo, setActiveConvo] = useState<Conversation | null>(null);
@@ -53,6 +54,14 @@ const Contact = () => {
   const [activeTab, setActiveTab] = useState<'messages' | 'notifications'>('messages');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Sync tab from URL param
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'notifications') {
+      setActiveTab('notifications');
+    }
+  }, [searchParams]);
 
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
@@ -430,10 +439,12 @@ const Contact = () => {
               </div>
             </div>
 
-            {/* Lista wiadomości */}
+            {/* Lista wiadomości / powiadomień */}
             <div className="flex-1 overflow-y-auto">
               <div className="px-4 py-3">
-                <p className="text-sm font-medium text-gray-900">Twoje wiadomości</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {activeTab === 'messages' ? 'Twoje wiadomości' : 'Twoje powiadomienia'}
+                </p>
                 <p className="text-xs text-gray-500 mt-1">
                   {getUnreadCount()} nieprzeczytanych
                 </p>

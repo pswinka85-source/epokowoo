@@ -57,9 +57,9 @@ const Header = () => {
         {user && (
           <div className="hidden md:flex items-center gap-2">
             <Link
-              to="/kontakt"
+              to="/kontakt?tab=notifications"
               className="w-10 h-10 rounded-xl flex items-center justify-center text-foreground hover:bg-secondary transition-all duration-200 relative"
-              aria-label="Wiadomości"
+              aria-label="Powiadomienia"
             >
               <Bell size={18} />
               {hasUnreadNotifications && (
