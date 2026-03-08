@@ -473,7 +473,7 @@ const Contact = () => {
                         <button
                           key={`notif-${n.id}`}
                           onClick={() => { setActiveNotification(n); setActiveConvo(null); if (!n.read) markNotificationAsRead(n.id); }}
-                          className={`w-full flex items-start gap-3.5 px-5 py-4 transition-all duration-200 text-left ${
+                          className={`w-full flex items-start gap-3 px-4 py-3 transition-all duration-200 text-left ${
                             isActive
                               ? 'bg-primary/[0.06]'
                               : !n.read
@@ -483,11 +483,11 @@ const Contact = () => {
                         >
                           {/* Notification avatar */}
                           <div className="relative shrink-0">
-                            <div className="w-[48px] h-[48px] rounded-full bg-muted/40 flex items-center justify-center text-[14px] font-bold text-muted-foreground">
+                            <div className="w-[44px] h-[44px] rounded-full bg-muted/40 flex items-center justify-center text-[12px] font-bold text-muted-foreground">
                               ES
                             </div>
                             {/* Icon overlay */}
-                            <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full bg-card border-2 border-background flex items-center justify-center shadow-sm">
+                            <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-card border border-background flex items-center justify-center shadow-sm">
                               {getNotificationIcon(n.type)}
                             </div>
                           </div>
@@ -495,18 +495,18 @@ const Contact = () => {
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="text-[14px] font-bold text-foreground truncate">
+                              <span className="text-[13px] font-bold text-foreground truncate">
                                 Epokowo System
                               </span>
                             </div>
-                            <p className="text-[11px] text-muted-foreground/60 mb-1.5">
+                            <p className="text-[10px] text-muted-foreground/60 mb-1">
                               {getNotificationSubtype(n.type)}
                             </p>
-                            <p className="text-[12px] font-bold text-foreground truncate leading-snug">
+                            <p className="text-[11px] font-bold text-foreground truncate leading-snug">
                               {n.title}
                             </p>
                             {n.message && (
-                              <p className="text-[11px] text-muted-foreground/40 truncate mt-0.5 leading-relaxed">
+                              <p className="text-[10px] text-muted-foreground/40 truncate mt-0.5 leading-relaxed">
                                 {n.message}
                               </p>
                             )}
