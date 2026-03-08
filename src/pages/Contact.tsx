@@ -285,22 +285,15 @@ const Contact = () => {
     <main className="min-h-screen bg-background pb-8">
       {/* Hero / Page header */}
       <div className="relative overflow-hidden">
-        <div className="absolute top-10 left-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 right-10 w-80 h-80 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-2 md:pt-12 md:pb-4">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Sparkles size={20} className="text-primary" />
-            </div>
-            <div>
-              <h1 className="font-display text-2xl md:text-3xl font-extrabold text-foreground leading-tight">
-                Centrum wiadomości
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {getUnreadCount() > 0 ? `${getUnreadCount()} nieprzeczytanych` : "Wszystko przeczytane ✓"}
-              </p>
-            </div>
-          </div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 md:pt-20 md:pb-14">
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2">
+            Centrum wiadomości 💬
+          </h1>
+          <p className="text-lg text-muted-foreground font-body leading-relaxed">
+            {getUnreadCount() > 0 ? `Masz ${getUnreadCount()} nieprzeczytanych wiadomości.` : "Wszystko przeczytane ✓"}
+          </p>
         </div>
       </div>
 
