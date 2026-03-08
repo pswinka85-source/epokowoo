@@ -522,11 +522,17 @@ const Contact = () => {
                   {notifications.map((n) => (
                     <button
                       key={n.id}
-                      onClick={() => !n.read && markNotificationAsRead(n.id)}
+                      onClick={() => {
+                        setActiveNotification(n);
+                        setActiveConvo(null);
+                        if (!n.read) markNotificationAsRead(n.id);
+                      }}
                       className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left mb-1 ${
-                        !n.read
+                        activeNotification?.id === n.id
                           ? 'bg-blue-50 border border-blue-200'
-                          : 'hover:bg-gray-50 border border-transparent'
+                          : !n.read
+                            ? 'bg-blue-50/50 border border-blue-100'
+                            : 'hover:bg-gray-50 border border-transparent'
                       }`}
                     >
                       <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
