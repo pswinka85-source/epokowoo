@@ -579,7 +579,7 @@ const AdminExamManager = () => {
                       )}
                     </div>
                     <button
-                      onClick={() => handleCancelBooking(b.id, b.availability_id)}
+                      onClick={() => openCancelDialog(b)}
                       disabled={cancelling === b.id}
                       className="h-9 px-4 rounded-xl bg-destructive/10 text-destructive font-body text-sm font-medium hover:bg-destructive/20 disabled:opacity-50 flex items-center gap-2 transition-colors"
                     >
