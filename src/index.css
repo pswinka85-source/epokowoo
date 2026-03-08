@@ -154,7 +154,11 @@
   }
 }
 
-/* Custom scrollbar for message list */
+/* Custom scrollbar */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
 }
@@ -162,9 +166,6 @@
   background: transparent;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: hsl(var(--border) / 0.5);
+  background: hsl(var(--border));
   border-radius: 3px;
-}
-.scrollbar-thin:hover::-webkit-scrollbar-thumb {
-  background: hsl(var(--border) / 0.8);
 }

@@ -395,7 +395,7 @@ const Contact = () => {
             )}
 
             {/* Unified list */}
-            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border/50 scrollbar-track-transparent hover:scrollbar-thumb-border/80">
+            <div className="flex-1 overflow-y-auto scrollbar-thin">
               {unifiedItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
                   <div className="w-16 h-16 rounded-full bg-muted/40 flex items-center justify-center mb-4">
@@ -405,15 +405,15 @@ const Contact = () => {
                   <p className="text-xs text-muted-foreground/50">Wyszukaj użytkownika, aby rozpocząć rozmowę</p>
                 </div>
               ) : (
-                <div className="space-y-6 pt-6 pl-6 pr-2">
+                <div className="space-y-6 pt-6 pl-0 pr-2">
                   {unifiedItems.map((item) => {
                     if (item.kind === "conversation") {
                       const c = item.data;
                       const isActive = activeConvo?.id === c.id;
                       return (
-                        <div key={`conv-${c.id}`} className="relative ml-5">
+                        <div key={`conv-${c.id}`} className="relative ml-0">
                           {/* Avatar on left edge, overlapping left and bottom */}
-                          <div className="absolute -left-[26px] -top-[26px] z-10">
+                          <div className="absolute -left-2 -top-[22px] z-10">
                             <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
                               c.unread_count > 0 ? 'ring-2 ring-primary/50' : ''
                             } bg-muted/60 text-muted-foreground`}>
@@ -466,9 +466,9 @@ const Contact = () => {
                       const n = item.data;
                       const isActive = activeNotification?.id === n.id;
                       return (
-                        <div key={`notif-${n.id}`} className="relative ml-5">
+                        <div key={`notif-${n.id}`} className="relative ml-0">
                           {/* Avatar on left edge */}
-                          <div className="absolute -left-[26px] -top-[26px] z-10">
+                          <div className="absolute -left-2 -top-[22px] z-10">
                             <div className="w-[52px] h-[52px] rounded-full bg-muted/40 flex items-center justify-center text-[14px] font-bold text-muted-foreground">
                               ES
                             </div>
