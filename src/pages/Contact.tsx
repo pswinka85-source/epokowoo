@@ -54,7 +54,7 @@ const Contact = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
   // Load notifications from database
   const loadNotifications = useCallback(async () => {
