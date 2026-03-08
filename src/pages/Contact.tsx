@@ -441,7 +441,7 @@ const Contact = () => {
                                 <img src={verifiedBadge} alt="Zweryfikowany" className="w-[15px] h-[15px] shrink-0" />
                               )}
                             </div>
-                            <p className="text-[10px] text-muted-foreground/60 mb-1">
+                            <p className="text-[11px] text-muted-foreground/60 mb-1">
                               Aktywny: {formatTimeAgo(c.last_message_at)}
                             </p>
                             {c.last_message && (
