@@ -423,6 +423,12 @@ const Contact = () => {
                               <span className="text-[17px]">{getInitials(c.other_user?.display_name ?? null)}</span>
                             )}
                           </div>
+                          {/* Status dots */}
+                          <div className="absolute -left-[18px] top-[34px] flex gap-[3px] z-10">
+                            <span className="w-[5px] h-[5px] rounded-full bg-muted-foreground/30" />
+                            <span className="w-[5px] h-[5px] rounded-full bg-muted-foreground/20" />
+                            <span className="w-[5px] h-[5px] rounded-full bg-muted-foreground/10" />
+                          </div>
 
                           {/* Card */}
                           <button
