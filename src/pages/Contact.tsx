@@ -431,21 +431,20 @@ const Contact = () => {
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className={`text-[14px] font-bold text-foreground truncate`}>
+                              <span className="text-[15px] font-bold text-foreground truncate">
                                 {c.other_user?.display_name || "Użytkownik"}
                               </span>
-                              {/* Show verified badge for admins */}
-                              <BadgeCheck size={16} className="text-primary shrink-0" />
+                              <BadgeCheck size={17} className="text-primary shrink-0" />
                             </div>
-                            <p className="text-xs text-muted-foreground mb-1.5">
+                            <p className="text-[12px] text-muted-foreground mb-2">
                               Aktywny: {formatTimeAgo(c.last_message_at)}
                             </p>
                             {c.last_message && (
                               <>
-                                <p className={`text-[13px] font-semibold text-foreground truncate`}>
-                                  {c.last_message.length > 40 ? c.last_message.slice(0, 40) + "..." : c.last_message}
+                                <p className="text-[13px] font-bold text-foreground truncate leading-snug">
+                                  {c.last_message.length > 45 ? "Re: " + c.last_message.slice(0, 35) + "..." : c.last_message}
                                 </p>
-                                <p className="text-xs text-muted-foreground/60 truncate mt-0.5">
+                                <p className="text-[12px] text-muted-foreground/50 truncate mt-1 leading-relaxed">
                                   {c.last_message}
                                 </p>
                               </>
