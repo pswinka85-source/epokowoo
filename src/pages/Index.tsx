@@ -7,6 +7,7 @@ import EpochCard from "@/components/EpochCard";
 import { CheckCircle, Brain, TrendingUp } from "lucide-react";
 import epokiTitle from "@/assets/epoki-title.png";
 import rozprawkaIcon from "@/assets/rozprawka-icon.png";
+import rozprawkaTitle from "@/assets/rozprawka-title.png";
 import { Link } from "react-router-dom";
 
 const Index = () => {
@@ -118,7 +119,10 @@ const Index = () => {
           {epochs.map((epoch, index) => (
             <EpochCard key={epoch.id} epoch={epoch} index={index} />
           ))}
-          
+        </div>
+        
+        <img src={rozprawkaTitle} alt="Rozprawka" className="h-5 md:h-7 w-auto mb-6 mt-10" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {/* Rozprawka card */}
           <Link
             to="/rozprawka"
