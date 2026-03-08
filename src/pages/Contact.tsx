@@ -413,7 +413,7 @@ const Contact = () => {
                       return (
                         <div key={`conv-${c.id}`} className="relative ml-0">
                           {/* Avatar on left edge, overlapping left and bottom */}
-                          <div className="absolute -left-[26px] -top-[26px] z-10">
+                          <div className="absolute -left-2 -top-[22px] z-10">
                             <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
                               c.unread_count > 0 ? 'ring-2 ring-primary/50' : ''
                             } bg-muted/60 text-muted-foreground`}>
