@@ -650,18 +650,10 @@ const Contact = () => {
                 </div>
               </>
             ) : (
-              /* Empty state */
+              /* Empty state — envelope illustration like reference */
               <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-                <div className="mb-6">
-                  <svg width="120" height="100" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-40">
-                    <rect x="10" y="20" width="100" height="65" rx="8" className="stroke-muted-foreground" strokeWidth="2" fill="none" />
-                    <path d="M10 28L60 58L110 28" className="stroke-muted-foreground" strokeWidth="2" fill="none" />
-                    <rect x="35" y="45" width="50" height="3" rx="1.5" className="fill-primary/30" />
-                    <rect x="40" y="52" width="40" height="3" rx="1.5" className="fill-primary/20" />
-                    <rect x="45" y="59" width="30" height="3" rx="1.5" className="fill-primary/10" />
-                  </svg>
-                </div>
-                <p className="text-base text-muted-foreground/50 max-w-xs leading-relaxed">
+                <img src={envelopeIllustration} alt="" className="w-36 h-36 object-contain mb-5 opacity-80" />
+                <p className="text-[15px] text-muted-foreground/60 max-w-xs leading-relaxed font-medium">
                   Naciśnij na wiadomość/powiadomienie,<br />aby zobaczyć całość.
                 </p>
               </div>
