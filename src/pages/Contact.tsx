@@ -414,51 +414,51 @@ const Contact = () => {
                         <button
                           key={`conv-${c.id}`}
                           onClick={() => { setActiveConvo(c); setActiveNotification(null); }}
-                          className={`w-full flex items-start gap-4 px-5 py-5 transition-all duration-200 text-left ${
+                          className={`w-full flex items-start gap-3.5 px-5 py-4 transition-all duration-200 text-left ${
                             isActive
                               ? 'bg-primary/[0.06]'
                               : 'hover:bg-muted/30'
                           }`}
                         >
                           {/* Avatar */}
-                          <div className="relative shrink-0 mt-0.5">
-                            <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
+                          <div className="relative shrink-0">
+                            <div className={`w-[48px] h-[48px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
                               c.unread_count > 0
-                                ? 'ring-[3px] ring-primary/40'
+                                ? 'ring-[2.5px] ring-primary/50'
                                 : ''
                             } bg-muted/60 text-muted-foreground`}>
                               {c.other_user?.avatar_url ? (
                                 <img src={c.other_user.avatar_url} className="w-full h-full object-cover" alt="" />
                               ) : (
-                                <span className="text-base">{getInitials(c.other_user?.display_name ?? null)}</span>
+                                <span className="text-[15px]">{getInitials(c.other_user?.display_name ?? null)}</span>
                               )}
                             </div>
-                            {/* Online indicator — two black dots like in reference */}
-                            <span className="absolute bottom-0 left-0 flex gap-0.5">
-                              <span className="w-2.5 h-2.5 rounded-full bg-foreground border-2 border-background" />
-                              <span className="w-2.5 h-2.5 rounded-full bg-foreground border-2 border-background" />
+                            {/* Online indicator dots */}
+                            <span className="absolute bottom-0 left-0 flex gap-[2px]">
+                              <span className="w-[9px] h-[9px] rounded-full bg-foreground border-[1.5px] border-background" />
+                              <span className="w-[9px] h-[9px] rounded-full bg-foreground border-[1.5px] border-background" />
                             </span>
                           </div>
 
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="text-[15px] font-bold text-foreground truncate">
+                              <span className="text-[14px] font-bold text-foreground truncate">
                                 {c.other_user?.display_name || "Użytkownik"}
                               </span>
                               {verifiedUsers.has(c.user1_id === user?.id ? c.user2_id : c.user1_id) && (
-                                <img src={verifiedBadge} alt="Zweryfikowany" className="w-[18px] h-[18px] shrink-0" />
+                                <img src={verifiedBadge} alt="Zweryfikowany" className="w-4 h-4 shrink-0" />
                               )}
                             </div>
-                            <p className="text-[12px] text-muted-foreground mb-2">
+                            <p className="text-[11px] text-muted-foreground/60 mb-1.5">
                               Aktywny: {formatTimeAgo(c.last_message_at)}
                             </p>
                             {c.last_message && (
                               <>
-                                <p className="text-[13px] font-bold text-foreground truncate leading-snug">
-                                  {c.last_message.length > 45 ? "Re: " + c.last_message.slice(0, 35) + "..." : c.last_message}
+                                <p className="text-[12px] font-bold text-foreground truncate leading-snug">
+                                  {c.last_message.length > 40 ? "Re: " + c.last_message.slice(0, 32) + "..." : c.last_message}
                                 </p>
-                                <p className="text-[12px] text-muted-foreground/50 truncate mt-1 leading-relaxed">
+                                <p className="text-[11px] text-muted-foreground/40 truncate mt-0.5 leading-relaxed">
                                   {c.last_message}
                                 </p>
                               </>
