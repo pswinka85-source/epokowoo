@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Send, ArrowLeft, MessageSquare, Bell, Mail, AlertTriangle, Info, Calendar, Check, BadgeCheck } from "lucide-react";
+import { Search, Send, ArrowLeft, MessageSquare, Bell, Mail, AlertTriangle, Info, Calendar, Check } from "lucide-react";
 import { toast } from "sonner";
+import verifiedBadge from "@/assets/verified-badge.png";
 
 interface Profile {
   user_id: string;
