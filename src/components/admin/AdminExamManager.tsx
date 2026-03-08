@@ -1,12 +1,29 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, RefreshCw, Clock, CalendarDays } from "lucide-react";
+import { Plus, Trash2, RefreshCw, Clock, CalendarDays, X } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const DAYS_PL = ["Niedziela", "Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota"];
 const SLOT_DURATION = 20;
 const GENERATE_WEEKS_AHEAD = 4;
+
+const CANCEL_REASONS = [
+  "Choroba egzaminatora",
+  "Nieobecność egzaminatora",
+  "Problemy techniczne",
+  "Zmiana harmonogramu",
+  "Inne",
+];
 
 interface Examiner {
   user_id: string;
@@ -42,6 +59,14 @@ interface BookingRow {
   exam_availability?: { slot_date: string; slot_time: string; examiner_id: string } | null;
 }
 
+interface CancelDialogData {
+  bookingId: string;
+  availabilityId: string;
+  userId: string;
+  slotDate: string;
+  slotTime: string;
+}
+
 const AdminExamManager = () => {
   const { user } = useAuth();
   const [examiners, setExaminers] = useState<Examiner[]>([]);
@@ -55,6 +80,9 @@ const AdminExamManager = () => {
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [cancelling, setCancelling] = useState<string | null>(null);
+  const [cancelDialog, setCancelDialog] = useState<CancelDialogData | null>(null);
+  const [cancelReason, setCancelReason] = useState(CANCEL_REASONS[0]);
+  const [customReason, setCustomReason] = useState("");
 
   // Load examiners
   useEffect(() => {
@@ -333,12 +361,45 @@ const AdminExamManager = () => {
     loadData();
   };
 
-  const handleCancelBooking = async (bookingId: string, availabilityId: string) => {
-    setCancelling(bookingId);
-    await supabase.from("exam_bookings").update({ status: "refunded" }).eq("id", bookingId);
-    await supabase.from("exam_availability").update({ status: "available" }).eq("id", availabilityId);
-    toast.success("Egzamin anulowany. Zwrot 19,99 zł.");
+  const openCancelDialog = (booking: BookingRow) => {
+    setCancelDialog({
+      bookingId: booking.id,
+      availabilityId: booking.availability_id,
+      userId: booking.user_id,
+      slotDate: booking.exam_availability?.slot_date || "",
+      slotTime: booking.exam_availability?.slot_time || "",
+    });
+    setCancelReason(CANCEL_REASONS[0]);
+    setCustomReason("");
+  };
+
+  const handleCancelBooking = async () => {
+    if (!cancelDialog) return;
+    setCancelling(cancelDialog.bookingId);
+
+    const reason = cancelReason === "Inne" ? customReason : cancelReason;
+    const formattedDate = new Date(cancelDialog.slotDate + "T12:00:00").toLocaleDateString("pl-PL", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+    const formattedTime = cancelDialog.slotTime.slice(0, 5);
+
+    // Cancel booking and free slot
+    await supabase.from("exam_bookings").update({ status: "refunded" }).eq("id", cancelDialog.bookingId);
+    await supabase.from("exam_availability").update({ status: "available" }).eq("id", cancelDialog.availabilityId);
+
+    // Create notification for the user
+    await supabase.from("notifications").insert({
+      user_id: cancelDialog.userId,
+      type: "exam_cancelled",
+      title: "Egzamin został anulowany",
+      message: `Twój egzamin zaplanowany na ${formattedDate} o ${formattedTime} został anulowany. Powód: ${reason}. Kwota 19,99 zł została zwrócona.`,
+    });
+
+    toast.success("Egzamin anulowany. Powiadomienie wysłane.");
     setCancelling(null);
+    setCancelDialog(null);
     loadData();
   };
 
@@ -518,7 +579,7 @@ const AdminExamManager = () => {
                       )}
                     </div>
                     <button
-                      onClick={() => handleCancelBooking(b.id, b.availability_id)}
+                      onClick={() => openCancelDialog(b)}
                       disabled={cancelling === b.id}
                       className="h-9 px-4 rounded-xl bg-destructive/10 text-destructive font-body text-sm font-medium hover:bg-destructive/20 disabled:opacity-50 flex items-center gap-2 transition-colors"
                     >
@@ -532,6 +593,56 @@ const AdminExamManager = () => {
           </div>
         </>
       )}
+
+      {/* Cancel booking dialog */}
+      <Dialog open={!!cancelDialog} onOpenChange={() => setCancelDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Anuluj egzamin</DialogTitle>
+            <DialogDescription>
+              Podaj powód anulowania egzaminu. Użytkownik otrzyma powiadomienie z tym powodem.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium text-foreground block mb-2">Powód anulowania</label>
+              <select
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                {CANCEL_REASONS.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+            </div>
+            {cancelReason === "Inne" && (
+              <div>
+                <label className="text-sm font-medium text-foreground block mb-2">Własny powód</label>
+                <input
+                  type="text"
+                  value={customReason}
+                  onChange={(e) => setCustomReason(e.target.value)}
+                  placeholder="Wpisz powód..."
+                  className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelDialog(null)}>
+              Anuluj
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelBooking}
+              disabled={cancelling !== null || (cancelReason === "Inne" && !customReason.trim())}
+            >
+              {cancelling ? "Anuluję..." : "Anuluj egzamin i zwróć pieniądze"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

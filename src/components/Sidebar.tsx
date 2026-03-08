@@ -1,16 +1,37 @@
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
-import { Lightbulb, Inbox, Clock, PenLine, Settings, ShieldCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Lightbulb, Inbox, Clock, PenLine, Settings, ShieldCheck, Bell } from "lucide-react";
 import UpcomingExamsWidget from "./UpcomingExamsWidget";
 
 const Sidebar = () => {
   const location = useLocation();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const unreadCount = useUnreadMessages();
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    const loadUnreadNotifications = async () => {
+      const { count } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("read", false);
+      setUnreadNotifications(count || 0);
+    };
+    loadUnreadNotifications();
+    
+    // Refresh every 30 seconds
+    const interval = setInterval(loadUnreadNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   const navItems = [
     { name: "Nauka", icon: Lightbulb, path: "/epoki" },
+    { name: "Powiadomienia", icon: Bell, path: "/powiadomienia", badge: unreadNotifications },
     { name: "Skrzynka odbiorcza", icon: Inbox, path: "/kontakt", badge: unreadCount },
     { name: "Egzaminy", icon: Clock, path: "/egzaminy" },
     { name: "Testy & Quizy", icon: PenLine, path: "/testy" },
