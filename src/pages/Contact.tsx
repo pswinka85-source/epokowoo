@@ -50,6 +50,7 @@ const Contact = () => {
   const [searchParams] = useSearchParams();
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [verifiedUsers, setVerifiedUsers] = useState<Set<string>>(new Set());
   const [activeConvo, setActiveConvo] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
