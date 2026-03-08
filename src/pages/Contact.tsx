@@ -459,12 +459,12 @@ const Contact = () => {
                         <button
                           key={`notif-${n.id}`}
                           onClick={() => { setActiveNotification(n); setActiveConvo(null); if (!n.read) markNotificationAsRead(n.id); }}
-                          className={`w-full flex items-start gap-3.5 px-4 py-4 rounded-2xl transition-all duration-200 text-left ${
+                          className={`w-full flex items-start gap-4 px-5 py-5 transition-all duration-200 text-left ${
                             isActive
-                              ? 'bg-primary/8 shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.12)]'
+                              ? 'bg-primary/[0.06]'
                               : !n.read
-                                ? 'bg-primary/[0.03] hover:bg-primary/[0.06]'
-                                : 'hover:bg-muted/40'
+                                ? 'bg-primary/[0.02] hover:bg-primary/[0.05]'
+                                : 'hover:bg-muted/30'
                           }`}
                         >
                           {/* Notification avatar */}
