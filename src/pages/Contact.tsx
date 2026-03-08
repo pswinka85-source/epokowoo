@@ -476,7 +476,10 @@ const Contact = () => {
                     {conversations.map((c) => (
                       <button
                         key={c.id}
-                        onClick={() => setActiveConvo(c)}
+                        onClick={() => {
+                          setActiveConvo(c);
+                          setActiveNotification(null);
+                        }}
                         className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left mb-1 ${
                           activeConvo?.id === c.id
                             ? 'bg-blue-50 border border-blue-200'
