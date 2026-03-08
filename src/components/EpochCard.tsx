@@ -8,6 +8,7 @@ import oswiececenieIcon from "@/assets/oswiecenie-icon.png";
 import wspolczesnoscIcon from "@/assets/wspolczesnosc-icon.png";
 import romantyzmIcon from "@/assets/romantyzm-icon.png";
 import mlodaPolskaIcon from "@/assets/mloda-polska-icon.png";
+import dwudziestolecieIcon from "@/assets/dwudziestolecie-icon.png";
 
 interface EpochCardProps {
   epoch: EpochData;
