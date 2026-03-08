@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import EpochCard from "@/components/EpochCard";
 import { CheckCircle, Brain, TrendingUp } from "lucide-react";
+import epokiTitle from "@/assets/epoki-title.png";
 
 const Index = () => {
   const { user } = useAuth();
