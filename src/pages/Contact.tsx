@@ -405,7 +405,7 @@ const Contact = () => {
                   <p className="text-xs text-muted-foreground/50">Wyszukaj użytkownika, aby rozpocząć rozmowę</p>
                 </div>
               ) : (
-                <div className="space-y-2 px-1">
+                <div className="space-y-6 pt-6 pl-6 pr-2">
                   {unifiedItems.map((item) => {
                     if (item.kind === "conversation") {
                       const c = item.data;
@@ -413,7 +413,7 @@ const Contact = () => {
                       return (
                         <div key={`conv-${c.id}`} className="relative ml-5">
                           {/* Avatar on left edge, overlapping left and bottom */}
-                          <div className="absolute -left-5 top-1/2 -translate-y-1/2 z-10">
+                          <div className="absolute -left-[21px] -top-[21px] z-10">
                             <div className={`w-[42px] h-[42px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
                               c.unread_count > 0 ? 'ring-2 ring-primary/50' : ''
                             } bg-muted/60 text-muted-foreground`}>
@@ -468,7 +468,7 @@ const Contact = () => {
                       return (
                         <div key={`notif-${n.id}`} className="relative ml-5">
                           {/* Avatar on left edge */}
-                          <div className="absolute -left-5 top-1/2 -translate-y-1/2 z-10">
+                          <div className="absolute -left-[21px] -top-[21px] z-10">
                             <div className="w-[42px] h-[42px] rounded-full bg-muted/40 flex items-center justify-center text-[12px] font-bold text-muted-foreground">
                               ES
                             </div>
