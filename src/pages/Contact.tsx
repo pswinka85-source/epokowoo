@@ -481,18 +481,18 @@ const Contact = () => {
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className={`text-[14px] font-bold text-foreground truncate`}>
+                              <span className="text-[15px] font-bold text-foreground truncate">
                                 Epokowo System
                               </span>
                             </div>
-                            <p className="text-xs text-muted-foreground mb-1.5">
+                            <p className="text-[12px] text-muted-foreground mb-2">
                               {getNotificationSubtype(n.type)}
                             </p>
-                            <p className={`text-[13px] font-semibold text-foreground truncate ${!n.read ? '' : ''}`}>
+                            <p className="text-[13px] font-bold text-foreground truncate leading-snug">
                               {n.title}
                             </p>
                             {n.message && (
-                              <p className="text-xs text-muted-foreground/60 truncate mt-0.5">
+                              <p className="text-[12px] text-muted-foreground/50 truncate mt-1 leading-relaxed">
                                 {n.message}
                               </p>
                             )}
