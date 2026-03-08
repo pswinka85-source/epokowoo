@@ -54,54 +54,55 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <header className="relative overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+      {/* Hero header with rounded bottom */}
+      <header className="relative overflow-hidden bg-primary rounded-b-[2.5rem]">
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
+          <div className="absolute top-10 left-10 w-72 h-72 bg-primary-foreground/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-foreground/[0.03] rounded-full blur-2xl" />
+        </div>
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 md:pt-20 md:pb-14">
-          <div>
-            <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-10 md:pt-14 md:pb-12">
+          <div className="mb-1">
+            <h1 className="font-display text-3xl md:text-4xl font-extrabold text-primary-foreground leading-[1.1] mb-2">
               Cześć, <span className="font-normal">{user.user_metadata?.display_name?.split(" ")[0] || user.user_metadata?.full_name?.split(" ")[0] || user.user_metadata?.name?.split(" ")[0] || ""}</span>! 👋
             </h1>
           </div>
-          <p className="text-lg text-muted-foreground font-body leading-relaxed mb-4">
+          <p className="text-base text-primary-foreground/70 font-body leading-relaxed mb-6">
             Oto Twoje postępy w nauce.
           </p>
           <div className="mb-8">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-sm font-body text-muted-foreground">Postęp e-testów</span>
-              <span className="text-sm font-body font-semibold text-foreground">{stats ? `${stats.averageScore}%` : '0%'}</span>
+              <span className="text-sm font-body text-primary-foreground/60">Postęp e-testów</span>
+              <span className="text-sm font-body font-semibold text-primary-foreground">{stats ? `${stats.averageScore}%` : '0%'}</span>
             </div>
-            <div className="h-3 w-full rounded-full bg-white overflow-hidden">
+            <div className="h-3 w-full rounded-full bg-primary-foreground/15 overflow-hidden">
               <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{ width: `${stats?.averageScore ?? 0}%`, backgroundColor: 'hsl(246, 59%, 51%)' }}
+                className="h-full rounded-full bg-primary-foreground transition-all duration-500"
+                style={{ width: `${stats?.averageScore ?? 0}%` }}
               />
             </div>
           </div>
           {stats && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <StatCard
                 icon={<CheckCircle size={20} />}
                 value={stats.completedLessons}
                 label="Opracowanych tematów"
                 sublabel={`${stats.totalAttempts} prób łącznie`}
-                color="primary"
               />
               <StatCard
                 icon={<Brain size={20} />}
                 value={`${stats.averageScore}%`}
                 label="Średni wynik"
                 sublabel="z e-testów"
-                color="accent"
               />
               <StatCard
                 icon={<TrendingUp size={20} />}
                 value={epochs.length}
                 label="Epok"
                 sublabel="do nauki"
-                color="primary"
               />
             </div>
           )}
@@ -120,15 +121,15 @@ const Index = () => {
   );
 };
 
-const StatCard = ({ icon, value, label, sublabel, color }: { icon: React.ReactNode; value: number | string; label: string; sublabel?: string; color: "primary" | "accent" }) => (
-  <div className="rounded-2xl border border-border bg-card p-5 flex items-center gap-4">
-    <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${color === "primary" ? "bg-primary/10 text-primary" : "bg-accent/10 text-accent"}`}>
+const StatCard = ({ icon, value, label, sublabel }: { icon: React.ReactNode; value: number | string; label: string; sublabel?: string }) => (
+  <div className="rounded-2xl bg-primary-foreground/10 backdrop-blur-sm p-5 flex items-center gap-4">
+    <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-primary-foreground/15 text-primary-foreground">
       {icon}
     </div>
     <div>
-      <p className="font-display text-2xl font-bold text-foreground leading-none">{value}</p>
-      <p className="text-sm text-muted-foreground font-body mt-0.5">{label}</p>
-      {sublabel && <p className="text-xs text-muted-foreground/70 font-body">{sublabel}</p>}
+      <p className="font-display text-2xl font-bold text-primary-foreground leading-none">{value}</p>
+      <p className="text-sm text-primary-foreground/70 font-body mt-0.5">{label}</p>
+      {sublabel && <p className="text-xs text-primary-foreground/50 font-body">{sublabel}</p>}
     </div>
   </div>
 );
