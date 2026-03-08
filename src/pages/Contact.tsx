@@ -395,7 +395,7 @@ const Contact = () => {
             )}
 
             {/* Unified list */}
-            <div className="flex-1 overflow-y-auto overflow-x-visible scrollbar-thin pr-2">
+            <div className="flex-1 overflow-y-auto scrollbar-thin pl-8 pt-8 pr-2">
               {unifiedItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
                   <div className="w-16 h-16 rounded-full bg-muted/40 flex items-center justify-center mb-4">
@@ -405,34 +405,33 @@ const Contact = () => {
                   <p className="text-xs text-muted-foreground/50">Wyszukaj użytkownika, aby rozpocząć rozmowę</p>
                 </div>
               ) : (
-                <div className="space-y-5 pt-2 pb-2">
+                <div className="space-y-8 pb-2">
                   {unifiedItems.map((item) => {
                     if (item.kind === "conversation") {
                       const c = item.data;
                       const isActive = activeConvo?.id === c.id;
                       return (
-                        <div key={`conv-${c.id}`} className="flex items-start gap-3">
-                          {/* Avatar inline */}
-                          <div className="shrink-0 relative mt-1">
-                            <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
-                              c.unread_count > 0 ? 'ring-[3px] ring-primary/40' : ''
-                            } bg-muted/60 text-muted-foreground`}>
-                              {c.other_user?.avatar_url ? (
-                                <img src={c.other_user.avatar_url} className="w-full h-full object-cover" alt="" />
-                              ) : (
-                                <span className="text-[15px]">{getInitials(c.other_user?.display_name ?? null)}</span>
-                              )}
-                            </div>
-                            <span className="absolute bottom-0 left-0 flex gap-[2px]">
-                              <span className="w-2 h-2 rounded-full bg-foreground border border-background" />
-                              <span className="w-2 h-2 rounded-full bg-foreground border border-background" />
-                            </span>
+                        <div key={`conv-${c.id}`} className="relative">
+                          {/* Avatar overlapping top-left corner */}
+                          <div className={`absolute -left-[26px] -top-[26px] w-[52px] h-[52px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden z-10 ${
+                            c.unread_count > 0 ? 'ring-[3px] ring-primary/40' : ''
+                          } bg-muted/60 text-muted-foreground`}>
+                            {c.other_user?.avatar_url ? (
+                              <img src={c.other_user.avatar_url} className="w-full h-full object-cover" alt="" />
+                            ) : (
+                              <span className="text-[15px]">{getInitials(c.other_user?.display_name ?? null)}</span>
+                            )}
                           </div>
+                          {/* Online indicator dots */}
+                          <span className="absolute -left-[26px] bottom-auto top-[18px] flex gap-[2px] z-10">
+                            <span className="w-2 h-2 rounded-full bg-foreground border border-background" />
+                            <span className="w-2 h-2 rounded-full bg-foreground border border-background" />
+                          </span>
 
                           {/* Card */}
                           <button
                             onClick={() => { setActiveConvo(c); setActiveNotification(null); }}
-                            className={`flex-1 min-w-0 px-4 py-2.5 rounded-2xl border transition-all duration-200 text-left ${
+                            className={`w-full px-4 py-2.5 rounded-2xl border transition-all duration-200 text-left ${
                               isActive
                                 ? 'bg-primary/[0.06] border-primary/20'
                                 : 'bg-card border-border/30 hover:border-border/50 hover:shadow-sm'
@@ -466,12 +465,10 @@ const Contact = () => {
                       const n = item.data;
                       const isActive = activeNotification?.id === n.id;
                       return (
-                        <div key={`notif-${n.id}`} className="flex items-start gap-3">
-                          {/* Avatar inline with notification badge */}
-                          <div className="shrink-0 relative mt-1">
-                            <div className="w-[52px] h-[52px] rounded-full bg-muted/40 flex items-center justify-center text-[14px] font-bold text-muted-foreground">
-                              ES
-                            </div>
+                        <div key={`notif-${n.id}`} className="relative">
+                          {/* Avatar overlapping top-left corner with notification badge */}
+                          <div className="absolute -left-[26px] -top-[26px] w-[52px] h-[52px] rounded-full bg-muted/40 flex items-center justify-center text-[14px] font-bold text-muted-foreground z-10">
+                            ES
                             <span className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center border-2 border-background ${
                               n.type === 'warning' || n.type === 'exam_cancelled' ? 'bg-warning' : n.type === 'success' ? 'bg-success' : 'bg-info'
                             }`}>
@@ -488,7 +485,7 @@ const Contact = () => {
                           {/* Card */}
                           <button
                             onClick={() => { setActiveNotification(n); setActiveConvo(null); if (!n.read) markNotificationAsRead(n.id); }}
-                            className={`flex-1 min-w-0 px-4 py-2.5 rounded-2xl border transition-all duration-200 text-left ${
+                            className={`w-full px-4 py-2.5 rounded-2xl border transition-all duration-200 text-left ${
                               isActive
                                 ? 'bg-primary/[0.06] border-primary/20'
                                 : !n.read
