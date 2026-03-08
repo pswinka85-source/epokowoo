@@ -346,8 +346,8 @@ const Contact = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-8">
         <div className="flex gap-4 overflow-hidden" style={{ height: "min(560px, calc(100vh - 250px))", minHeight: 380 }}>
 
-          {/* LEFT PANEL */}
-          <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full md:w-[390px] flex-col shrink-0 rounded-3xl bg-card border border-border/30 overflow-hidden`}>
+          {/* LEFT PANEL — messages list (smaller) */}
+          <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full md:w-[340px] flex-col shrink-0 overflow-hidden`}>
 
             {/* Search toggle */}
             {showSearch && (
