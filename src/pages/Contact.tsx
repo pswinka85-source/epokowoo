@@ -406,7 +406,7 @@ const Contact = () => {
                   <p className="text-xs text-muted-foreground/50">Wyszukaj użytkownika, aby rozpocząć rozmowę</p>
                 </div>
               ) : (
-                <div className="space-y-8 pb-2">
+                <div className="space-y-10 pb-2">
                   {unifiedItems.map((item) => {
                     if (item.kind === "conversation") {
                       const c = item.data;
@@ -425,37 +425,37 @@ const Contact = () => {
                           </div>
                           {/* Status dots */}
                           <div className="absolute -left-[18px] top-[34px] flex gap-[3px] z-10">
-                            <span className="w-[5px] h-[5px] rounded-full bg-muted-foreground/30" />
-                            <span className="w-[5px] h-[5px] rounded-full bg-muted-foreground/20" />
-                            <span className="w-[5px] h-[5px] rounded-full bg-muted-foreground/10" />
+                            <span className="w-[5px] h-[5px] rounded-full bg-foreground/70" />
+                            <span className="w-[5px] h-[5px] rounded-full bg-foreground/50" />
+                            <span className="w-[5px] h-[5px] rounded-full bg-foreground/30" />
                           </div>
 
                           {/* Card */}
                           <button
                             onClick={() => { setActiveConvo(c); setActiveNotification(null); }}
-                            className={`w-full px-5 py-3.5 rounded-2xl border transition-all duration-200 text-left ${
+                            className={`w-full px-6 py-4 rounded-2xl border transition-all duration-200 text-left ${
                               isActive
                                 ? 'bg-primary/[0.06] border-primary/20'
                                 : 'bg-card border-border/30 hover:border-border/50 hover:shadow-sm'
                             }`}
                           >
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="text-[15px] font-bold text-foreground truncate">
+                              <span className="text-[17px] font-bold text-foreground truncate">
                                 {c.other_user?.display_name || "Użytkownik"}
                               </span>
                               {verifiedUsers.has(c.user1_id === user?.id ? c.user2_id : c.user1_id) && (
                                 <img src={verifiedBadge} alt="Zweryfikowany" className="w-[15px] h-[15px] shrink-0" />
                               )}
                             </div>
-                            <p className="text-[11px] text-muted-foreground/60 mb-1">
+                            <p className="text-[13px] text-muted-foreground/60 mb-1">
                               Aktywny: {formatTimeAgo(c.last_message_at)}
                             </p>
                             {c.last_message && (
                               <>
-                                <p className="text-[12px] font-bold text-foreground truncate leading-snug">
+                                <p className="text-[14px] font-bold text-foreground truncate leading-snug">
                                   {c.last_message.length > 34 ? "Re: " + c.last_message.slice(0, 28) + "..." : c.last_message}
                                 </p>
-                                <p className="text-[11px] text-muted-foreground/40 truncate mt-0.5 leading-relaxed">
+                                <p className="text-[13px] text-muted-foreground/60 truncate mt-0.5 leading-relaxed">
                                   {c.last_message}
                                 </p>
                               </>
@@ -476,7 +476,7 @@ const Contact = () => {
                           {/* Card */}
                           <button
                             onClick={() => { setActiveNotification(n); setActiveConvo(null); if (!n.read) markNotificationAsRead(n.id); }}
-                            className={`w-full px-5 py-3.5 rounded-2xl border transition-all duration-200 text-left ${
+                            className={`w-full px-6 py-4 rounded-2xl border transition-all duration-200 text-left ${
                               isActive
                                 ? 'bg-primary/[0.06] border-primary/20'
                                 : !n.read
@@ -485,18 +485,18 @@ const Contact = () => {
                             }`}
                           >
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="text-[15px] font-bold text-foreground truncate">
+                              <span className="text-[17px] font-bold text-foreground truncate">
                                 Epokowo System
                               </span>
                             </div>
-                            <p className="text-[11px] text-muted-foreground/60 mb-1">
+                            <p className="text-[13px] text-muted-foreground/60 mb-1">
                               {getNotificationSubtype(n.type)}
                             </p>
-                            <p className="text-[12px] font-bold text-foreground truncate leading-snug">
+                            <p className="text-[14px] font-bold text-foreground truncate leading-snug">
                               {n.title}
                             </p>
                             {n.message && (
-                              <p className="text-[11px] text-muted-foreground/40 truncate mt-0.5 leading-relaxed">
+                              <p className="text-[13px] text-muted-foreground/60 truncate mt-0.5 leading-relaxed">
                                 {n.message}
                               </p>
                             )}
@@ -642,8 +642,8 @@ const Contact = () => {
             ) : (
               /* Empty state — envelope illustration like reference */
               <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-                <img src={envelopeIllustration} alt="" className="w-48 h-48 object-contain mb-5 opacity-70" />
-                <p className="text-[15px] text-muted-foreground/50 max-w-[280px] leading-relaxed font-medium">
+                <img src={envelopeIllustration} alt="" className="w-56 h-56 object-contain mb-5 opacity-70" />
+                <p className="text-[17px] text-muted-foreground/70 max-w-[280px] leading-relaxed font-medium">
                   Naciśnij na wiadomość/powiadomienie,<br />aby zobaczyć całość.
                 </p>
               </div>
