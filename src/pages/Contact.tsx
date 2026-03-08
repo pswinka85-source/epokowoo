@@ -476,7 +476,7 @@ const Contact = () => {
                           {/* Card */}
                           <button
                             onClick={() => { setActiveNotification(n); setActiveConvo(null); if (!n.read) markNotificationAsRead(n.id); }}
-                            className={`w-full px-5 py-3.5 rounded-2xl border transition-all duration-200 text-left ${
+                            className={`w-full px-6 py-4 rounded-2xl border transition-all duration-200 text-left ${
                               isActive
                                 ? 'bg-primary/[0.06] border-primary/20'
                                 : !n.read
