@@ -44,6 +44,8 @@ const EpochCard = ({ epoch, index }: EpochCardProps) => {
               <img src={renesansIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
             ) : epoch.id === "barok" ? (
               <img src={barokIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
+            ) : epoch.id === "oswiecenie" ? (
+              <img src={oswiececenieIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
             ) : (
               <span className="text-3xl" role="img" aria-label={epoch.name}>
                 {epoch.icon}
