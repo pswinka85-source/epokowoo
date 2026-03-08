@@ -486,7 +486,7 @@ const Contact = () => {
                             <p className="text-[11px] text-muted-foreground/60 mb-1">
                               {getNotificationSubtype(n.type)}
                             </p>
-                            <p className="text-[11px] font-bold text-foreground truncate leading-snug">
+                            <p className="text-[12px] font-bold text-foreground truncate leading-snug">
                               {n.title}
                             </p>
                             {n.message && (
