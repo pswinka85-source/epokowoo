@@ -464,17 +464,6 @@ const Contact = () => {
                           {/* Avatar overlapping top-left corner with notification badge */}
                           <div className="absolute -left-[26px] -top-[26px] w-[52px] h-[52px] rounded-full bg-primary/10 flex items-center justify-center z-10">
                             <Bell size={22} className="text-primary" />
-                            <span className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center border-2 border-background ${
-                              n.type === 'warning' || n.type === 'exam_cancelled' ? 'bg-warning' : n.type === 'success' ? 'bg-success' : 'bg-info'
-                            }`}>
-                              {n.type === 'warning' || n.type === 'exam_cancelled' ? (
-                                <AlertTriangle size={10} className="text-warning-foreground" />
-                              ) : n.type === 'success' ? (
-                                <Check size={10} className="text-success-foreground" />
-                              ) : (
-                                <Info size={10} className="text-info-foreground" />
-                              )}
-                            </span>
                           </div>
 
                           {/* Card */}
