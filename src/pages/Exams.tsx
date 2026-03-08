@@ -45,7 +45,7 @@ interface ExaminerProfile {
 }
 
 const EXAM_PRICE = 19.99;
-const MAX_DAYS_BEFORE_BOOKING = 5;
+const MIN_DAYS_BEFORE_BOOKING = 5;
 
 const Exams = () => {
   const { user, loading: authLoading } = useAuth();
@@ -59,9 +59,33 @@ const Exams = () => {
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [confirmSlot, setConfirmSlot] = useState<(ExamAvailability & { examiner_name?: string; examiner_avatar?: string | null }) | null>(null);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [datesWithSlots, setDatesWithSlots] = useState<Set<string>>(new Set());
+
   useEffect(() => {
     if (!authLoading && !user) navigate("/");
   }, [user, authLoading, navigate]);
+
+  // Load dates that have available slots for current month
+  useEffect(() => {
+    const loadDatesWithSlots = async () => {
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+      const firstDay = `${year}-${String(month + 1).padStart(2, "0")}-01`;
+      const lastDay = `${year}-${String(month + 1).padStart(2, "0")}-${new Date(year, month + 1, 0).getDate()}`;
+      
+      const { data } = await supabase
+        .from("exam_availability")
+        .select("slot_date")
+        .eq("status", "available")
+        .gte("slot_date", firstDay)
+        .lte("slot_date", lastDay);
+      
+      if (data) {
+        setDatesWithSlots(new Set(data.map((d: any) => d.slot_date)));
+      }
+    };
+    loadDatesWithSlots();
+  }, [currentMonth]);
 
   // Load user bookings
   useEffect(() => {
@@ -149,13 +173,14 @@ const Exams = () => {
     now.setHours(0, 0, 0, 0);
     const slot = new Date(slotDate + "T00:00:00");
     const diffDays = Math.ceil((slot.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    return diffDays >= 0 && diffDays <= MAX_DAYS_BEFORE_BOOKING;
+    // Musi być minimum MIN_DAYS_BEFORE_BOOKING dni przed terminem
+    return diffDays >= MIN_DAYS_BEFORE_BOOKING;
   };
 
   const handleSlotSelect = async (slot: ExamAvailability & { examiner_name?: string; examiner_avatar?: string | null }) => {
     if (!user) return;
     if (!isWithinBookingWindow(slot.slot_date)) {
-      toast.error(`Zapisy możliwe max ${MAX_DAYS_BEFORE_BOOKING} dni przed terminem`);
+      toast.error(`Zapisy możliwe minimum ${MIN_DAYS_BEFORE_BOOKING} dni przed terminem`);
       return;
     }
 
@@ -285,7 +310,7 @@ const Exams = () => {
               <div className="flex items-center gap-2"><CreditCard size={16} /><span>{EXAM_PRICE} zł</span></div>
             </div>
             <p className="text-xs text-muted-foreground mt-3">
-              Zapisy możliwe max {MAX_DAYS_BEFORE_BOOKING} dni przed terminem
+              Zapisy możliwe minimum {MIN_DAYS_BEFORE_BOOKING} dni przed terminem
             </p>
           </div>
         </div>
@@ -315,25 +340,37 @@ const Exams = () => {
                 </div>
 
                 <div className="grid grid-cols-7 gap-1 mb-8">
-                  {days.map((day, index) => (
-                    <div key={index} className="aspect-square">
-                      {day && (
+                  {days.map((day, index) => {
+                    if (!day) return <div key={index} className="aspect-square" />;
+                    
+                    const dateStr = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;
+                    const hasSlots = datesWithSlots.has(dateStr);
+                    const isPast = day < today;
+                    const isSelected = selectedDate?.toDateString() === day.toDateString();
+                    
+                    return (
+                      <div key={index} className="aspect-square">
                         <button
                           onClick={() => handleDateSelect(day)}
-                          disabled={day < today}
-                          className={`w-full h-full rounded-lg flex items-center justify-center text-sm font-medium transition-colors ${
-                            day < today
+                          disabled={isPast}
+                          className={`w-full h-full rounded-lg flex flex-col items-center justify-center text-sm font-medium transition-colors relative ${
+                            isPast
                               ? "text-muted-foreground/30 cursor-not-allowed"
-                              : selectedDate?.toDateString() === day.toDateString()
+                              : isSelected
                               ? "bg-primary text-primary-foreground"
+                              : hasSlots
+                              ? "hover:bg-secondary bg-accent/20"
                               : "hover:bg-secondary"
                           }`}
                         >
                           {day.getDate()}
+                          {hasSlots && !isPast && (
+                            <span className={`absolute bottom-1 w-1.5 h-1.5 rounded-full ${isSelected ? "bg-primary-foreground" : "bg-primary"}`} />
+                          )}
                         </button>
-                      )}
-                    </div>
-                  ))}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {selectedDate && (
@@ -356,7 +393,7 @@ const Exams = () => {
                               key={slot.id}
                               onClick={() => handleSlotSelect(slot)}
                               disabled={!canBook}
-                              title={!canBook ? `Zapisy otwierają się ${MAX_DAYS_BEFORE_BOOKING} dni przed terminem` : undefined}
+                              title={!canBook ? `Zapisy otwierają się minimum ${MIN_DAYS_BEFORE_BOOKING} dni przed terminem` : undefined}
                               className={`w-full p-3 rounded-xl border border-border/60 text-sm font-medium transition-colors flex items-center gap-3 ${
                                 canBook
                                   ? "bg-card hover:bg-secondary/50 disabled:opacity-50"
