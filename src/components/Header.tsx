@@ -62,10 +62,8 @@ const Header = () => {
               aria-label="Wiadomości"
             >
               <Bell size={18} />
-              {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-primary text-primary-foreground text-[9px] font-bold rounded-full flex items-center justify-center">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
+              {hasUnreadNotifications && (
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-primary rounded-full ring-2 ring-card" />
               )}
             </Link>
             <Link to="/profil">
