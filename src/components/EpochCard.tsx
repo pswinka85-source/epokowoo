@@ -35,6 +35,8 @@ const EpochCard = ({ epoch, index }: EpochCardProps) => {
           <div className="flex items-center gap-3 mb-3">
             {epoch.id === "antyk" ? (
               <img src={antykIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
+            ) : epoch.id === "sredniowiecze" ? (
+              <img src={sredniowieczeIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
             ) : (
               <span className="text-3xl" role="img" aria-label={epoch.name}>
                 {epoch.icon}
