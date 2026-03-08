@@ -636,8 +636,8 @@ const Contact = () => {
             ) : (
               /* Empty state — envelope illustration like reference */
               <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-                <img src={envelopeIllustration} alt="" className="w-32 h-32 object-contain mb-4 opacity-70" />
-                <p className="text-[14px] text-muted-foreground/50 max-w-[260px] leading-relaxed font-medium">
+                <img src={envelopeIllustration} alt="" className="w-48 h-48 object-contain mb-5 opacity-70" />
+                <p className="text-[15px] text-muted-foreground/50 max-w-[280px] leading-relaxed font-medium">
                   Naciśnij na wiadomość/powiadomienie,<br />aby zobaczyć całość.
                 </p>
               </div>
