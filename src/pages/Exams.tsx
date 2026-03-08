@@ -45,7 +45,7 @@ interface ExaminerProfile {
 }
 
 const EXAM_PRICE = 19.99;
-const MAX_DAYS_BEFORE_BOOKING = 5;
+const MIN_DAYS_BEFORE_BOOKING = 5;
 
 const Exams = () => {
   const { user, loading: authLoading } = useAuth();
@@ -59,6 +59,7 @@ const Exams = () => {
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [confirmSlot, setConfirmSlot] = useState<(ExamAvailability & { examiner_name?: string; examiner_avatar?: string | null }) | null>(null);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [datesWithSlots, setDatesWithSlots] = useState<Set<string>>(new Set());
   useEffect(() => {
     if (!authLoading && !user) navigate("/");
   }, [user, authLoading, navigate]);
