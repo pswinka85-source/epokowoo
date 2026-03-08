@@ -64,7 +64,7 @@ const Contact = () => {
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
-    setNotifications((data as Notification[]) || []);
+    setNotifications((data as AppNotification[]) || []);
   }, [user]);
 
   useEffect(() => {
