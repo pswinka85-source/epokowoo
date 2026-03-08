@@ -71,11 +71,10 @@ const UpcomingExamsWidget = () => {
   return (
     <div className="w-full flex flex-col bg-card rounded-3xl shadow-[var(--shadow-elevated)] border border-border/50 overflow-hidden animate-slide-in-sidebar mt-4">
       {/* Title */}
-      <div className="px-6 pt-5 pb-2 flex items-center justify-between">
+      <div className="px-6 pt-5 pb-2">
         <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground/60">
           Nadchodzące egzaminy
         </p>
-        <Calendar size={14} className="text-muted-foreground/40" />
       </div>
 
       {/* Content */}
