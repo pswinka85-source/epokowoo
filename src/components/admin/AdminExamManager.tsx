@@ -1,12 +1,29 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, RefreshCw, Clock, CalendarDays } from "lucide-react";
+import { Plus, Trash2, RefreshCw, Clock, CalendarDays, X } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const DAYS_PL = ["Niedziela", "Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota"];
 const SLOT_DURATION = 20;
 const GENERATE_WEEKS_AHEAD = 4;
+
+const CANCEL_REASONS = [
+  "Choroba egzaminatora",
+  "Nieobecność egzaminatora",
+  "Problemy techniczne",
+  "Zmiana harmonogramu",
+  "Inne",
+];
 
 interface Examiner {
   user_id: string;
@@ -42,6 +59,14 @@ interface BookingRow {
   exam_availability?: { slot_date: string; slot_time: string; examiner_id: string } | null;
 }
 
+interface CancelDialogData {
+  bookingId: string;
+  availabilityId: string;
+  userId: string;
+  slotDate: string;
+  slotTime: string;
+}
+
 const AdminExamManager = () => {
   const { user } = useAuth();
   const [examiners, setExaminers] = useState<Examiner[]>([]);
@@ -55,6 +80,9 @@ const AdminExamManager = () => {
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [cancelling, setCancelling] = useState<string | null>(null);
+  const [cancelDialog, setCancelDialog] = useState<CancelDialogData | null>(null);
+  const [cancelReason, setCancelReason] = useState(CANCEL_REASONS[0]);
+  const [customReason, setCustomReason] = useState("");
 
   // Load examiners
   useEffect(() => {
