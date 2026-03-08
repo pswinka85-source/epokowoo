@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import type { EpochData } from "@/data/epochs";
 import antykIcon from "@/assets/antyk-icon.png";
+import sredniowieczeIcon from "@/assets/sredniowiecze-icon.png";
 
 interface EpochCardProps {
   epoch: EpochData;
