@@ -30,13 +30,13 @@ interface Message {
   created_at: string;
 }
 
-interface SystemMessage {
+interface AppNotification {
   id: string;
+  type: string;
   title: string;
-  content: string;
-  date: string;
+  message: string | null;
   read: boolean;
-  type: 'system' | 'notification';
+  created_at: string;
 }
 
 const Contact = () => {
@@ -54,33 +54,41 @@ const Contact = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Przykładowe wiadomości systemowe
-  const [systemMessages] = useState<SystemMessage[]>([
-    {
-      id: '1',
-      title: 'Sprawdź, co warto wiedzieć przed 1 września',
-      content: 'Przygotuj się na nowy rok szkolny z naszym kompleksowym przewodnikiem.',
-      date: '2024-08-25',
-      read: false,
-      type: 'system'
-    },
-    {
-      id: '2',
-      title: 'EGZAMIN ÓSMOKLASISTY 2026: Miasta egzamin',
-      content: 'Poznaj listę miast, w których odbędzie się egzamin ósmoklasisty w 2026 roku.',
-      date: '2024-08-20',
-      read: false,
-      type: 'notification'
-    },
-    {
-      id: '3',
-      title: 'Przyjdź na spotkania na nowy rok szkolny',
-      content: 'Dołącz do naszych spotkań organizacyjnych przed rozpoczęciem roku szkolnego.',
-      date: '2024-08-15',
-      read: true,
-      type: 'system'
-    }
-  ]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+
+  // Load notifications from database
+  const loadNotifications = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+    setNotifications((data as AppNotification[]) || []);
+  }, [user]);
+
+  useEffect(() => {
+    loadNotifications();
+  }, [loadNotifications]);
+
+  // Realtime notifications
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel("notifications-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+        () => loadNotifications()
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, loadNotifications]);
+
+  const markNotificationAsRead = async (id: string) => {
+    await supabase.from("notifications").update({ read: true }).eq("id", id);
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  };
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/");
@@ -312,7 +320,7 @@ const Contact = () => {
     if (activeTab === 'messages') {
       return conversations.reduce((sum, c) => sum + c.unread_count, 0);
     } else {
-      return systemMessages.filter(m => !m.read).length;
+      return notifications.filter(n => !n.read).length;
     }
   };
 
@@ -360,9 +368,9 @@ const Contact = () => {
                 <div className="flex items-center justify-center gap-2">
                   <Bell size={16} />
                   <span>Powiadomienia</span>
-                  {systemMessages.filter(m => !m.read).length > 0 && (
+                  {notifications.filter(n => !n.read).length > 0 && (
                     <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
-                      {systemMessages.filter(m => !m.read).length}
+                      {notifications.filter(n => !n.read).length}
                     </span>
                   )}
                 </div>
@@ -489,40 +497,51 @@ const Contact = () => {
                     ))}
                   </div>
                 )
+              ) : notifications.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                    <Bell size={32} className="text-gray-400" />
+                  </div>
+                  <p className="text-sm font-medium text-gray-900 mb-1">Brak powiadomień</p>
+                  <p className="text-xs text-gray-500">Tutaj pojawią się powiadomienia o egzaminach</p>
+                </div>
               ) : (
                 <div className="px-2">
-                  {systemMessages.map((msg) => (
+                  {notifications.map((n) => (
                     <button
-                      key={msg.id}
+                      key={n.id}
+                      onClick={() => !n.read && markNotificationAsRead(n.id)}
                       className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left mb-1 ${
-                        !msg.read
+                        !n.read
                           ? 'bg-blue-50 border border-blue-200'
                           : 'hover:bg-gray-50 border border-transparent'
                       }`}
                     >
                       <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                        {msg.type === 'system' ? (
-                          <Bell size={18} className="text-gray-600" />
+                        {n.type === 'exam_cancelled' ? (
+                          <Bell size={18} className="text-amber-500" />
                         ) : (
-                          <Mail size={18} className="text-gray-600" />
+                          <Bell size={18} className="text-gray-600" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
                           <span className={`text-sm font-semibold truncate ${
-                            !msg.read ? 'text-gray-900' : 'text-gray-700'
+                            !n.read ? 'text-gray-900' : 'text-gray-700'
                           }`}>
-                            {msg.title}
+                            {n.title}
                           </span>
                           <span className="text-xs text-gray-500 shrink-0">
-                            {formatDate(msg.date)}
+                            {formatDate(n.created_at)}
                           </span>
                         </div>
-                        <p className={`text-xs truncate mt-1 ${
-                          !msg.read ? 'text-gray-900 font-medium' : 'text-gray-500'
-                        }`}>
-                          {msg.content}
-                        </p>
+                        {n.message && (
+                          <p className={`text-xs truncate mt-1 ${
+                            !n.read ? 'text-gray-900 font-medium' : 'text-gray-500'
+                          }`}>
+                            {n.message}
+                          </p>
+                        )}
                       </div>
                     </button>
                   ))}
