@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { BookOpen, Mail, Calendar } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 export const Footer = () => {
   const location = useLocation();
@@ -9,6 +10,12 @@ export const Footer = () => {
   return (
     <footer className="border-t border-border bg-card text-foreground">
       <div className="px-8 sm:px-10 py-8">
+        <div className="flex items-center gap-3 mb-6">
+          <Link to="/">
+            <img src={logo} alt="Epokowo" className="h-6" />
+          </Link>
+        </div>
+
         <nav
           className="flex flex-wrap gap-x-6 gap-y-2 mb-6"
           aria-label="Stopka - linki"
