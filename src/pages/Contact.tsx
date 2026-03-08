@@ -466,30 +466,28 @@ const Contact = () => {
                       const n = item.data;
                       const isActive = activeNotification?.id === n.id;
                       return (
-                        <button
-                          key={`notif-${n.id}`}
-                          onClick={() => { setActiveNotification(n); setActiveConvo(null); if (!n.read) markNotificationAsRead(n.id); }}
-                          className={`w-full flex items-start gap-3 px-3 py-3 rounded-2xl border transition-all duration-200 text-left ${
-                            isActive
-                              ? 'bg-primary/[0.06] border-primary/20'
-                              : !n.read
-                                ? 'bg-primary/[0.02] border-primary/10 hover:border-primary/20'
-                                : 'bg-card border-border/30 hover:border-border/50 hover:shadow-sm'
-                          }`}
-                        >
-                          {/* Notification avatar */}
-                          <div className="relative shrink-0">
+                        <div key={`notif-${n.id}`} className="flex items-start gap-0">
+                          {/* Avatar outside card */}
+                          <div className="relative shrink-0 -mr-3 z-10 mt-3">
                             <div className="w-[44px] h-[44px] rounded-full bg-muted/40 flex items-center justify-center text-[12px] font-bold text-muted-foreground">
                               ES
                             </div>
-                            {/* Icon overlay */}
                             <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-card border border-background flex items-center justify-center shadow-sm">
                               {getNotificationIcon(n.type)}
                             </div>
                           </div>
 
-                          {/* Content */}
-                          <div className="flex-1 min-w-0">
+                          {/* Card */}
+                          <button
+                            onClick={() => { setActiveNotification(n); setActiveConvo(null); if (!n.read) markNotificationAsRead(n.id); }}
+                            className={`flex-1 min-w-0 pl-5 pr-3 py-2.5 rounded-2xl border transition-all duration-200 text-left ${
+                              isActive
+                                ? 'bg-primary/[0.06] border-primary/20'
+                                : !n.read
+                                  ? 'bg-primary/[0.02] border-primary/10 hover:border-primary/20'
+                                  : 'bg-card border-border/30 hover:border-border/50 hover:shadow-sm'
+                            }`}
+                          >
                             <div className="flex items-center gap-1.5 mb-0.5">
                               <span className="text-[13px] font-bold text-foreground truncate">
                                 Epokowo System
@@ -506,8 +504,8 @@ const Contact = () => {
                                 {n.message}
                               </p>
                             )}
-                          </div>
-                        </button>
+                          </button>
+                        </div>
                       );
                     }
                   })}
