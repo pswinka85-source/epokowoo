@@ -7,6 +7,7 @@ import EpochCard from "@/components/EpochCard";
 import { CheckCircle, Brain, TrendingUp } from "lucide-react";
 import epokiTitle from "@/assets/epoki-title.png";
 import rozprawkaIcon from "@/assets/rozprawka-icon.png";
+import rozprawkaTitle from "@/assets/rozprawka-title.png";
 import { Link } from "react-router-dom";
 
 const Index = () => {
