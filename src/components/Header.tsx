@@ -55,7 +55,7 @@ const Header = () => {
               )}
             </Link>
             <Link to="/profil">
-              <Avatar className="h-9 w-9 hover:ring-2 hover:ring-primary/30 transition-all">
+              <Avatar className="h-9 w-9 border-2 border-border hover:border-primary transition-colors">
                 <AvatarImage src={avatarUrl || undefined} />
                 <AvatarFallback className="bg-secondary text-foreground text-sm font-semibold">
                   {initials}
