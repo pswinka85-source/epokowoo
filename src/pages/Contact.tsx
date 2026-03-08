@@ -430,10 +430,12 @@ const Contact = () => {
               </div>
             </div>
 
-            {/* Lista wiadomości */}
+            {/* Lista wiadomości / powiadomień */}
             <div className="flex-1 overflow-y-auto">
               <div className="px-4 py-3">
-                <p className="text-sm font-medium text-gray-900">Twoje wiadomości</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {activeTab === 'messages' ? 'Twoje wiadomości' : 'Twoje powiadomienia'}
+                </p>
                 <p className="text-xs text-gray-500 mt-1">
                   {getUnreadCount()} nieprzeczytanych
                 </p>
