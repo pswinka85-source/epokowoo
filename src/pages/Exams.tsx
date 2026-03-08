@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Clock, CreditCard, ChevronLeft, ChevronRight, AlertTriangle, XCircle, ShieldCheck, Loader2, GraduationCap, BookOpen, Timer, Wallet, ArrowRight, Zap } from "lucide-react";
+import { Calendar, Clock, CreditCard, ChevronLeft, ChevronRight, AlertTriangle, XCircle, ShieldCheck, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -285,56 +285,30 @@ const Exams = () => {
   today.setHours(0, 0, 0, 0);
   const isToday = (date: Date) => date.toDateString() === new Date().toDateString();
 
-  const infoCards = [
-    { icon: GraduationCap, title: "Egzamin ustny", desc: "Sprawdź wiedzę z epok literackich z egzaminatorem", color: "bg-primary/10 text-primary" },
-    { icon: Timer, title: "20 minut", desc: "Czas trwania jednego podejścia do egzaminu", color: "bg-accent/10 text-accent" },
-    { icon: Wallet, title: `${EXAM_PRICE} zł`, desc: "Koszt jednego egzaminu, możliwość zwrotu", color: "bg-success/10 text-success" },
-  ];
-
   return (
     <div className="min-h-screen bg-background">
       {/* Hero section */}
       <header className="relative overflow-hidden border-b border-border/30">
-        {/* Decorative blobs */}
         <div className="absolute -top-20 -left-20 w-80 h-80 bg-primary/6 rounded-full blur-[100px]" />
         <div className="absolute -bottom-20 right-0 w-96 h-96 bg-accent/6 rounded-full blur-[100px]" />
         
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-12 md:pt-20 md:pb-16">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <BookOpen size={22} className="text-primary" />
-            </div>
-            <span className="text-xs font-bold uppercase tracking-widest text-primary font-body">Egzaminy ustne</span>
-          </div>
-          <h1 className="font-display text-4xl md:text-5xl font-extrabold text-foreground leading-[1.05] mb-3">
-            Zarezerwuj swój
-            <br />
-            <span className="text-primary">egzamin</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-primary font-body mb-3 block">Egzaminy ustne</span>
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-3">
+            Zarezerwuj swój egzamin
           </h1>
-          <p className="text-base md:text-lg text-muted-foreground font-body leading-relaxed max-w-xl">
+          <p className="text-base text-muted-foreground font-body leading-relaxed max-w-xl mb-6">
             Wybierz termin, potwierdź rezerwację i przygotuj się na egzamin ustny z doświadczonym egzaminatorem.
           </p>
+          <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5"><Clock size={15} /> 20 minut</span>
+            <span className="flex items-center gap-1.5"><CreditCard size={15} /> {EXAM_PRICE} zł</span>
+            <span className="flex items-center gap-1.5"><Calendar size={15} /> Min. {MIN_DAYS_BEFORE_BOOKING} dni wcześniej</span>
+          </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        {/* Info cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 -mt-6 relative z-10 mb-10">
-          {infoCards.map((card, i) => {
-            const Icon = card.icon;
-            return (
-              <div key={i} className="rounded-2xl border border-border/40 bg-card shadow-[var(--shadow-card)] p-5 flex items-start gap-4 hover:shadow-[var(--shadow-card-hover)] transition-shadow duration-300">
-                <div className={`w-11 h-11 rounded-xl ${card.color} flex items-center justify-center shrink-0`}>
-                  <Icon size={20} />
-                </div>
-                <div>
-                  <p className="font-display font-bold text-foreground text-[15px]">{card.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{card.desc}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-20">
 
         {/* Main content: calendar + sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
@@ -508,20 +482,15 @@ const Exams = () => {
 
         {/* My exams section */}
         <div className="mt-10 rounded-3xl border border-border/40 bg-card shadow-[var(--shadow-card)] overflow-hidden">
-          <div className="px-6 sm:px-8 py-5 border-b border-border/30 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Zap size={18} className="text-primary" />
-            </div>
-            <div>
-              <h2 className="font-display text-lg font-bold text-foreground">Moje egzaminy</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Zaplanowane i zakończone</p>
-            </div>
+          <div className="px-6 sm:px-8 py-5 border-b border-border/30">
+            <h2 className="font-display text-lg font-bold text-foreground">Moje egzaminy</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Zaplanowane i zakończone</p>
           </div>
           <div className="p-6 sm:p-8">
             {bookings.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-14 text-center">
                 <div className="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center mb-4">
-                  <GraduationCap size={28} className="text-muted-foreground/30" />
+                  <Calendar size={28} className="text-muted-foreground/30" />
                 </div>
                 <p className="text-sm font-semibold text-muted-foreground">Brak zaplanowanych egzaminów</p>
                 <p className="text-xs text-muted-foreground/60 mt-1">Wybierz termin w kalendarzu powyżej</p>
