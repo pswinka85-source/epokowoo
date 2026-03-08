@@ -31,9 +31,9 @@ const Header = () => {
 
   return (
     <header className="px-4 sm:px-6 lg:px-8 pt-4 pb-3 bg-card/80 backdrop-blur-lg rounded-b-[1.5rem] shadow-[var(--shadow-card)] border-b border-border/50">
-      <div className="max-w-6xl mx-auto flex items-center justify-between">
-        {/* Mobile: centered logo */}
-        <div className="md:hidden flex-1 flex justify-center">
+      <div className="flex items-center justify-between">
+        {/* Logo: centered on mobile, left on desktop */}
+        <div className="flex-1 flex justify-center md:justify-start">
           <Link to="/">
             <img src={logo} alt="Epokowo" className="h-7" />
           </Link>
