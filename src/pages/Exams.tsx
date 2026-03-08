@@ -287,7 +287,7 @@ const Exams = () => {
               <div className="flex items-center gap-2"><CreditCard size={16} /><span>{EXAM_PRICE} zł</span></div>
             </div>
             <p className="text-xs text-muted-foreground mt-3">
-              Zapisy możliwe max {MAX_DAYS_BEFORE_BOOKING} dni przed terminem
+              Zapisy możliwe minimum {MIN_DAYS_BEFORE_BOOKING} dni przed terminem
             </p>
           </div>
         </div>
