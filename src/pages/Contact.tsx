@@ -496,7 +496,7 @@ const Contact = () => {
                               {n.title}
                             </p>
                             {n.message && (
-                              <p className="text-[11px] text-muted-foreground/40 truncate mt-0.5 leading-relaxed">
+                              <p className="text-[13px] text-muted-foreground/60 truncate mt-0.5 leading-relaxed">
                                 {n.message}
                               </p>
                             )}
