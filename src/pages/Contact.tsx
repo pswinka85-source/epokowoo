@@ -344,10 +344,10 @@ const Contact = () => {
 
       {/* Main container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-8">
-        <div className="flex gap-0 overflow-hidden rounded-xl border border-border/20" style={{ height: "calc(100vh - 240px)", minHeight: 420 }}>
+        <div className="flex gap-4 overflow-hidden" style={{ height: "min(560px, calc(100vh - 250px))", minHeight: 380 }}>
 
           {/* LEFT PANEL */}
-          <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full md:w-[420px] flex-col shrink-0 border-r border-border/30 overflow-hidden`}>
+          <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full md:w-[390px] flex-col shrink-0 rounded-3xl bg-card border border-border/30 overflow-hidden`}>
 
             {/* Search toggle */}
             {showSearch && (
@@ -414,7 +414,7 @@ const Contact = () => {
                         <button
                           key={`conv-${c.id}`}
                           onClick={() => { setActiveConvo(c); setActiveNotification(null); }}
-                          className={`w-full flex items-start gap-3.5 px-5 py-4 transition-all duration-200 text-left ${
+                          className={`w-full flex items-start gap-3 px-4 py-3 transition-all duration-200 text-left ${
                             isActive
                               ? 'bg-primary/[0.06]'
                               : 'hover:bg-muted/30'
@@ -422,43 +422,43 @@ const Contact = () => {
                         >
                           {/* Avatar */}
                           <div className="relative shrink-0">
-                            <div className={`w-[48px] h-[48px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
+                            <div className={`w-[44px] h-[44px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
                               c.unread_count > 0
-                                ? 'ring-[2.5px] ring-primary/50'
+                                ? 'ring-2 ring-primary/50'
                                 : ''
                             } bg-muted/60 text-muted-foreground`}>
                               {c.other_user?.avatar_url ? (
                                 <img src={c.other_user.avatar_url} className="w-full h-full object-cover" alt="" />
                               ) : (
-                                <span className="text-[15px]">{getInitials(c.other_user?.display_name ?? null)}</span>
+                                <span className="text-[13px]">{getInitials(c.other_user?.display_name ?? null)}</span>
                               )}
                             </div>
                             {/* Online indicator dots */}
                             <span className="absolute bottom-0 left-0 flex gap-[2px]">
-                              <span className="w-[9px] h-[9px] rounded-full bg-foreground border-[1.5px] border-background" />
-                              <span className="w-[9px] h-[9px] rounded-full bg-foreground border-[1.5px] border-background" />
+                              <span className="w-2 h-2 rounded-full bg-foreground border border-background" />
+                              <span className="w-2 h-2 rounded-full bg-foreground border border-background" />
                             </span>
                           </div>
 
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="text-[14px] font-bold text-foreground truncate">
+                              <span className="text-[13px] font-bold text-foreground truncate">
                                 {c.other_user?.display_name || "Użytkownik"}
                               </span>
                               {verifiedUsers.has(c.user1_id === user?.id ? c.user2_id : c.user1_id) && (
-                                <img src={verifiedBadge} alt="Zweryfikowany" className="w-4 h-4 shrink-0" />
+                                <img src={verifiedBadge} alt="Zweryfikowany" className="w-[15px] h-[15px] shrink-0" />
                               )}
                             </div>
-                            <p className="text-[11px] text-muted-foreground/60 mb-1.5">
+                            <p className="text-[10px] text-muted-foreground/60 mb-1">
                               Aktywny: {formatTimeAgo(c.last_message_at)}
                             </p>
                             {c.last_message && (
                               <>
-                                <p className="text-[12px] font-bold text-foreground truncate leading-snug">
-                                  {c.last_message.length > 40 ? "Re: " + c.last_message.slice(0, 32) + "..." : c.last_message}
+                                <p className="text-[11px] font-bold text-foreground truncate leading-snug">
+                                  {c.last_message.length > 34 ? "Re: " + c.last_message.slice(0, 28) + "..." : c.last_message}
                                 </p>
-                                <p className="text-[11px] text-muted-foreground/40 truncate mt-0.5 leading-relaxed">
+                                <p className="text-[10px] text-muted-foreground/40 truncate mt-0.5 leading-relaxed">
                                   {c.last_message}
                                 </p>
                               </>
@@ -473,7 +473,7 @@ const Contact = () => {
                         <button
                           key={`notif-${n.id}`}
                           onClick={() => { setActiveNotification(n); setActiveConvo(null); if (!n.read) markNotificationAsRead(n.id); }}
-                          className={`w-full flex items-start gap-3.5 px-5 py-4 transition-all duration-200 text-left ${
+                          className={`w-full flex items-start gap-3 px-4 py-3 transition-all duration-200 text-left ${
                             isActive
                               ? 'bg-primary/[0.06]'
                               : !n.read
@@ -483,11 +483,11 @@ const Contact = () => {
                         >
                           {/* Notification avatar */}
                           <div className="relative shrink-0">
-                            <div className="w-[48px] h-[48px] rounded-full bg-muted/40 flex items-center justify-center text-[14px] font-bold text-muted-foreground">
+                            <div className="w-[44px] h-[44px] rounded-full bg-muted/40 flex items-center justify-center text-[12px] font-bold text-muted-foreground">
                               ES
                             </div>
                             {/* Icon overlay */}
-                            <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full bg-card border-2 border-background flex items-center justify-center shadow-sm">
+                            <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-card border border-background flex items-center justify-center shadow-sm">
                               {getNotificationIcon(n.type)}
                             </div>
                           </div>
@@ -495,18 +495,18 @@ const Contact = () => {
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="text-[14px] font-bold text-foreground truncate">
+                              <span className="text-[13px] font-bold text-foreground truncate">
                                 Epokowo System
                               </span>
                             </div>
-                            <p className="text-[11px] text-muted-foreground/60 mb-1.5">
+                            <p className="text-[10px] text-muted-foreground/60 mb-1">
                               {getNotificationSubtype(n.type)}
                             </p>
-                            <p className="text-[12px] font-bold text-foreground truncate leading-snug">
+                            <p className="text-[11px] font-bold text-foreground truncate leading-snug">
                               {n.title}
                             </p>
                             {n.message && (
-                              <p className="text-[11px] text-muted-foreground/40 truncate mt-0.5 leading-relaxed">
+                              <p className="text-[10px] text-muted-foreground/40 truncate mt-0.5 leading-relaxed">
                                 {n.message}
                               </p>
                             )}
@@ -521,7 +521,7 @@ const Contact = () => {
           </div>
 
           {/* RIGHT PANEL */}
-          <div className={`${isDetailOpen ? 'flex' : 'hidden md:flex'} flex-1 flex-col overflow-hidden`}>
+          <div className={`${isDetailOpen ? 'flex' : 'hidden md:flex'} flex-1 flex-col rounded-3xl bg-card border border-border/30 overflow-hidden`}>
             {activeConvo ? (
               <>
                 {/* Chat header */}
