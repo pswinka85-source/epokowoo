@@ -30,13 +30,13 @@ interface Message {
   created_at: string;
 }
 
-interface SystemMessage {
+interface AppNotification {
   id: string;
+  type: string;
   title: string;
-  content: string;
-  date: string;
+  message: string | null;
   read: boolean;
-  type: 'system' | 'notification';
+  created_at: string;
 }
 
 const Contact = () => {
