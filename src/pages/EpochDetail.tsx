@@ -236,6 +236,8 @@ const EpochDetail = () => {
                 <img src={romantyzmIcon} alt={epoch.name} className="w-12 h-12 object-contain" />
               ) : epoch.id === "mloda-polska" ? (
                 <img src={mlodaPolskaIcon} alt={epoch.name} className="w-12 h-12 object-contain" />
+              ) : epoch.id === "dwudziestolecie" ? (
+                <img src={dwudziestolecieIcon} alt={epoch.name} className="w-12 h-12 object-contain" />
               ) : (
                 <span className="text-5xl">{epoch.icon}</span>
               )}
