@@ -340,25 +340,37 @@ const Exams = () => {
                 </div>
 
                 <div className="grid grid-cols-7 gap-1 mb-8">
-                  {days.map((day, index) => (
-                    <div key={index} className="aspect-square">
-                      {day && (
+                  {days.map((day, index) => {
+                    if (!day) return <div key={index} className="aspect-square" />;
+                    
+                    const dateStr = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;
+                    const hasSlots = datesWithSlots.has(dateStr);
+                    const isPast = day < today;
+                    const isSelected = selectedDate?.toDateString() === day.toDateString();
+                    
+                    return (
+                      <div key={index} className="aspect-square">
                         <button
                           onClick={() => handleDateSelect(day)}
-                          disabled={day < today}
-                          className={`w-full h-full rounded-lg flex items-center justify-center text-sm font-medium transition-colors ${
-                            day < today
+                          disabled={isPast}
+                          className={`w-full h-full rounded-lg flex flex-col items-center justify-center text-sm font-medium transition-colors relative ${
+                            isPast
                               ? "text-muted-foreground/30 cursor-not-allowed"
-                              : selectedDate?.toDateString() === day.toDateString()
+                              : isSelected
                               ? "bg-primary text-primary-foreground"
+                              : hasSlots
+                              ? "hover:bg-secondary bg-accent/20"
                               : "hover:bg-secondary"
                           }`}
                         >
                           {day.getDate()}
+                          {hasSlots && !isPast && (
+                            <span className={`absolute bottom-1 w-1.5 h-1.5 rounded-full ${isSelected ? "bg-primary-foreground" : "bg-primary"}`} />
+                          )}
                         </button>
-                      )}
-                    </div>
-                  ))}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {selectedDate && (
