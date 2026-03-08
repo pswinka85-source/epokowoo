@@ -60,8 +60,8 @@
     --info: 199 89% 48%;
     --info-foreground: 0 0% 100%;
 
-    --font-display: 'Figtree', system-ui, sans-serif;
-    --font-body: 'Figtree', system-ui, sans-serif;
+    --font-display: 'Singing Sans', 'Figtree', system-ui, sans-serif;
+    --font-body: 'Singing Sans', 'Figtree', system-ui, sans-serif;
 
     --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
     --shadow-card-hover: 0 10px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04);
