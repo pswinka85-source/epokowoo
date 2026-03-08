@@ -593,6 +593,56 @@ const AdminExamManager = () => {
           </div>
         </>
       )}
+
+      {/* Cancel booking dialog */}
+      <Dialog open={!!cancelDialog} onOpenChange={() => setCancelDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Anuluj egzamin</DialogTitle>
+            <DialogDescription>
+              Podaj powód anulowania egzaminu. Użytkownik otrzyma powiadomienie z tym powodem.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium text-foreground block mb-2">Powód anulowania</label>
+              <select
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                {CANCEL_REASONS.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+            </div>
+            {cancelReason === "Inne" && (
+              <div>
+                <label className="text-sm font-medium text-foreground block mb-2">Własny powód</label>
+                <input
+                  type="text"
+                  value={customReason}
+                  onChange={(e) => setCustomReason(e.target.value)}
+                  placeholder="Wpisz powód..."
+                  className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelDialog(null)}>
+              Anuluj
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelBooking}
+              disabled={cancelling !== null || (cancelReason === "Inne" && !customReason.trim())}
+            >
+              {cancelling ? "Anuluję..." : "Anuluj egzamin i zwróć pieniądze"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
