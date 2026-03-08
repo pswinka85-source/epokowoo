@@ -24,6 +24,8 @@ const Sidebar = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const isHome = location.pathname === "/epoki" || location.pathname === "/";
+
   return (
     <aside className="hidden md:flex flex-col w-[300px] shrink-0 px-6 pt-6 pb-6 self-start sticky top-0">
       <div className="w-full flex flex-col bg-card rounded-3xl shadow-[var(--shadow-elevated)] border border-border/50 overflow-hidden animate-slide-in-sidebar">
@@ -84,8 +86,8 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Upcoming Exams Widget */}
-      <UpcomingExamsWidget />
+      {/* Upcoming Exams Widget — only on home page */}
+      {isHome && <UpcomingExamsWidget />}
     </aside>
   );
 };
