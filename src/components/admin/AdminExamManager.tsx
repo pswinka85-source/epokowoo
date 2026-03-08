@@ -184,7 +184,7 @@ const AdminExamManager = () => {
       slotsByDate.set(slot.slot_date, dateSlots);
     }
 
-    const toUpdate: { id: string; newTime: string }[] = [];
+    const toUpdate: { id: string; newTime: string; oldTime: string }[] = [];
     const toInsert: any[] = [];
     const toRemoveIds: string[] = [];
 
@@ -193,45 +193,35 @@ const AdminExamManager = () => {
         a.slot_time.localeCompare(b.slot_time)
       );
 
-      // Map old slots to new times by index (preserving order)
       const bookedSlots = existingForDate.filter((s) => s.status === "booked");
       const availableSlots = existingForDate.filter((s) => s.status === "available");
 
-      // Remap booked slots to new times based on their order
+      // Track which new times will be used by booked slots
+      const bookedNewTimes = new Set<string>();
+
+      // Remap booked slots to new times based on their order (1st booked -> 1st new time, etc.)
       for (let i = 0; i < bookedSlots.length; i++) {
         if (i < newTimes.length) {
-          // Update to new time at same index
-          toUpdate.push({ id: bookedSlots[i].id, newTime: newTimes[i] });
+          toUpdate.push({ 
+            id: bookedSlots[i].id, 
+            newTime: newTimes[i],
+            oldTime: bookedSlots[i].slot_time 
+          });
+          bookedNewTimes.add(newTimes[i]);
         } else {
-          // No corresponding new slot - will need to refund (edge case)
+          // No corresponding new slot - will need to refund
           toRemoveIds.push(bookedSlots[i].id);
         }
       }
 
-      // Mark slots to remove - available slots that don't match new times
-      const usedNewTimes = new Set(toUpdate.filter((u) => 
-        existingForDate.some((s) => s.id === u.id)
-      ).map((u) => u.newTime));
-
+      // Delete ALL old available slots (they have old times)
       for (const slot of availableSlots) {
-        if (!newTimes.includes(slot.slot_time)) {
-          toRemoveIds.push(slot.id);
-        }
+        toRemoveIds.push(slot.id);
       }
 
-      // Figure out which new times need new slots
-      const existingTimesAfterUpdate = new Set<string>();
-      for (const slot of existingForDate) {
-        const update = toUpdate.find((u) => u.id === slot.id);
-        if (update) {
-          existingTimesAfterUpdate.add(update.newTime);
-        } else if (!toRemoveIds.includes(slot.id)) {
-          existingTimesAfterUpdate.add(slot.slot_time);
-        }
-      }
-
+      // Create new available slots for times NOT used by rescheduled bookings
       for (const time of newTimes) {
-        if (!existingTimesAfterUpdate.has(time)) {
+        if (!bookedNewTimes.has(time)) {
           toInsert.push({
             examiner_id: schedule.examiner_id,
             schedule_id: schedule.id,
@@ -245,18 +235,17 @@ const AdminExamManager = () => {
 
     // Execute updates for rescheduled booked slots
     for (const update of toUpdate) {
-      const oldSlot = existingSlots.find((s) => s.id === update.id);
       await supabase
         .from("exam_availability")
         .update({ slot_time: update.newTime })
         .eq("id", update.id);
 
-      // Mark booking as rescheduled if time changed
-      if (oldSlot && oldSlot.slot_time !== update.newTime) {
+      // Mark booking as rescheduled if time actually changed
+      if (update.oldTime !== update.newTime) {
         await supabase
           .from("exam_bookings")
           .update({
-            original_slot_time: oldSlot.slot_time,
+            original_slot_time: update.oldTime,
             rescheduled: true,
           })
           .eq("availability_id", update.id)
@@ -264,7 +253,7 @@ const AdminExamManager = () => {
       }
     }
 
-    // Handle edge case: booked slots that couldn't be remapped (refund)
+    // Handle booked slots that couldn't be remapped (refund)
     const bookedToRefund = toRemoveIds.filter((id) =>
       existingSlots.find((s) => s.id === id && s.status === "booked")
     );
@@ -274,6 +263,9 @@ const AdminExamManager = () => {
         .update({ status: "refunded" })
         .in("availability_id", bookedToRefund)
         .eq("status", "scheduled");
+      
+      // Also delete those booked slots that are refunded
+      await supabase.from("exam_availability").delete().in("id", bookedToRefund);
     }
 
     // Remove old available slots
@@ -284,7 +276,7 @@ const AdminExamManager = () => {
       await supabase.from("exam_availability").delete().in("id", availableToRemove);
     }
 
-    // Insert new slots
+    // Insert new available slots
     if (toInsert.length > 0) {
       await supabase.from("exam_availability").insert(toInsert);
     }
