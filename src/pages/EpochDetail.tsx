@@ -8,6 +8,7 @@ import wspolczesnoscIcon from "@/assets/wspolczesnosc-icon.png";
 import romantyzmIcon from "@/assets/romantyzm-icon.png";
 import mlodaPolskaIcon from "@/assets/mloda-polska-icon.png";
 import dwudziestolecieIcon from "@/assets/dwudziestolecie-icon.png";
+import pozytywizmIcon from "@/assets/pozytywizm-icon.png";
 import { useParams, Link } from "react-router-dom";
 import { epochs } from "@/data/epochs";
 import type { Lesson, LessonBlock } from "@/data/lessons";
@@ -238,6 +239,8 @@ const EpochDetail = () => {
                 <img src={mlodaPolskaIcon} alt={epoch.name} className="w-12 h-12 object-contain" />
               ) : epoch.id === "dwudziestolecie" ? (
                 <img src={dwudziestolecieIcon} alt={epoch.name} className="w-12 h-12 object-contain" />
+              ) : epoch.id === "pozytywizm" ? (
+                <img src={pozytywizmIcon} alt={epoch.name} className="w-12 h-12 object-contain" />
               ) : (
                 <span className="text-5xl">{epoch.icon}</span>
               )}

@@ -9,6 +9,7 @@ import wspolczesnoscIcon from "@/assets/wspolczesnosc-icon.png";
 import romantyzmIcon from "@/assets/romantyzm-icon.png";
 import mlodaPolskaIcon from "@/assets/mloda-polska-icon.png";
 import dwudziestolecieIcon from "@/assets/dwudziestolecie-icon.png";
+import pozytywizmIcon from "@/assets/pozytywizm-icon.png";
 
 interface EpochCardProps {
   epoch: EpochData;
@@ -58,6 +59,8 @@ const EpochCard = ({ epoch, index }: EpochCardProps) => {
               <img src={mlodaPolskaIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
             ) : epoch.id === "dwudziestolecie" ? (
               <img src={dwudziestolecieIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
+            ) : epoch.id === "pozytywizm" ? (
+              <img src={pozytywizmIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
             ) : (
               <span className="text-3xl" role="img" aria-label={epoch.name}>
                 {epoch.icon}
