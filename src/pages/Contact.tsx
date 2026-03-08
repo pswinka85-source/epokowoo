@@ -468,12 +468,9 @@ const Contact = () => {
                       return (
                         <div key={`notif-${n.id}`} className="relative ml-5">
                           {/* Avatar on left edge */}
-                          <div className="absolute -left-[21px] -top-[21px] z-10">
-                            <div className="w-[42px] h-[42px] rounded-full bg-muted/40 flex items-center justify-center text-[12px] font-bold text-muted-foreground">
+                          <div className="absolute -left-[26px] -top-[26px] z-10">
+                            <div className="w-[52px] h-[52px] rounded-full bg-muted/40 flex items-center justify-center text-[14px] font-bold text-muted-foreground">
                               ES
-                            </div>
-                            <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-card border border-background flex items-center justify-center shadow-sm">
-                              {getNotificationIcon(n.type)}
                             </div>
                           </div>
 
