@@ -5,6 +5,7 @@ import renesansIcon from "@/assets/renesans-icon.png";
 import barokIcon from "@/assets/barok-icon.png";
 import oswiececenieIcon from "@/assets/oswiecenie-icon.png";
 import wspolczesnoscIcon from "@/assets/wspolczesnosc-icon.png";
+import romantyzmIcon from "@/assets/romantyzm-icon.png";
 import { useParams, Link } from "react-router-dom";
 import { epochs } from "@/data/epochs";
 import type { Lesson, LessonBlock } from "@/data/lessons";
@@ -229,6 +230,8 @@ const EpochDetail = () => {
                 <img src={oswiececenieIcon} alt={epoch.name} className="w-12 h-12 object-contain" />
               ) : epoch.id === "wspolczesnosc" ? (
                 <img src={wspolczesnoscIcon} alt={epoch.name} className="w-12 h-12 object-contain" />
+              ) : epoch.id === "romantyzm" ? (
+                <img src={romantyzmIcon} alt={epoch.name} className="w-12 h-12 object-contain" />
               ) : (
                 <span className="text-5xl">{epoch.icon}</span>
               )}
