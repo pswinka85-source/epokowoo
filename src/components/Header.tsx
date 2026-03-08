@@ -30,7 +30,7 @@ const Header = () => {
   if (location.pathname === "/") return null;
 
   return (
-    <header className="px-4 sm:px-6 lg:px-8 pt-4 pb-3 bg-card/80 backdrop-blur-lg rounded-b-2xl shadow-[var(--shadow-card)] border-b border-border/50">
+    <header className="px-4 sm:px-6 lg:px-8 pt-4 pb-3 bg-card/80 backdrop-blur-lg rounded-b-[1.5rem] shadow-[var(--shadow-card)] border-b border-border/50">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         {/* Mobile: centered logo */}
         <div className="md:hidden flex-1 flex justify-center">
