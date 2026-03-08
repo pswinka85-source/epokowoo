@@ -161,26 +161,77 @@ const AdminExamManager = () => {
   };
 
   const generateSlotsForSchedule = async (schedule: Schedule) => {
-    const times = generateTimeSlots(schedule.start_time, schedule.end_time);
+    const newTimes = generateTimeSlots(schedule.start_time, schedule.end_time);
     const dates = getFutureDates(schedule.day_of_week);
-    if (!times.length || !dates.length) return;
+    if (!newTimes.length || !dates.length) return;
     const todayStr = formatLocalDate(new Date());
+
+    // Get existing slots for this schedule
     const { data: existing } = await supabase
       .from("exam_availability")
       .select("id, slot_date, slot_time, status")
       .eq("examiner_id", schedule.examiner_id)
       .eq("schedule_id", schedule.id)
       .gte("slot_date", todayStr);
-    const existingMap = new Map(
-      (existing || []).map((e: any) => [`${e.slot_date}_${e.slot_time}`, e])
-    );
-    const desiredKeys = new Set<string>();
+
+    const existingSlots = existing || [];
+
+    // Group existing slots by date
+    const slotsByDate = new Map<string, typeof existingSlots>();
+    for (const slot of existingSlots) {
+      const dateSlots = slotsByDate.get(slot.slot_date) || [];
+      dateSlots.push(slot);
+      slotsByDate.set(slot.slot_date, dateSlots);
+    }
+
+    const toUpdate: { id: string; newTime: string }[] = [];
     const toInsert: any[] = [];
+    const toRemoveIds: string[] = [];
+
     for (const date of dates) {
-      for (const time of times) {
-        const key = `${date}_${time}`;
-        desiredKeys.add(key);
-        if (!existingMap.has(key)) {
+      const existingForDate = (slotsByDate.get(date) || []).sort((a, b) =>
+        a.slot_time.localeCompare(b.slot_time)
+      );
+
+      // Map old slots to new times by index (preserving order)
+      const bookedSlots = existingForDate.filter((s) => s.status === "booked");
+      const availableSlots = existingForDate.filter((s) => s.status === "available");
+
+      // Remap booked slots to new times based on their order
+      for (let i = 0; i < bookedSlots.length; i++) {
+        if (i < newTimes.length) {
+          // Update to new time at same index
+          toUpdate.push({ id: bookedSlots[i].id, newTime: newTimes[i] });
+        } else {
+          // No corresponding new slot - will need to refund (edge case)
+          toRemoveIds.push(bookedSlots[i].id);
+        }
+      }
+
+      // Mark slots to remove - available slots that don't match new times
+      const usedNewTimes = new Set(toUpdate.filter((u) => 
+        existingForDate.some((s) => s.id === u.id)
+      ).map((u) => u.newTime));
+
+      for (const slot of availableSlots) {
+        if (!newTimes.includes(slot.slot_time)) {
+          toRemoveIds.push(slot.id);
+        }
+      }
+
+      // Figure out which new times need new slots
+      const existingTimesAfterUpdate = new Set<string>();
+      for (const slot of existingForDate) {
+        const update = toUpdate.find((u) => u.id === slot.id);
+        if (update) {
+          existingTimesAfterUpdate.add(update.newTime);
+        } else if (!toRemoveIds.includes(slot.id)) {
+          existingTimesAfterUpdate.add(slot.slot_time);
+        }
+      }
+
+      for (const time of newTimes) {
+        if (!existingTimesAfterUpdate.has(time)) {
           toInsert.push({
             examiner_id: schedule.examiner_id,
             schedule_id: schedule.id,
@@ -191,62 +242,51 @@ const AdminExamManager = () => {
         }
       }
     }
-    const toRemoveIds: string[] = [];
-    const bookedToReschedule: any[] = [];
-    for (const [key, slot] of existingMap) {
-      if (!desiredKeys.has(key)) {
-        if ((slot as any).status === "available") toRemoveIds.push((slot as any).id);
-        else if ((slot as any).status === "booked") bookedToReschedule.push(slot);
+
+    // Execute updates for rescheduled booked slots
+    for (const update of toUpdate) {
+      const oldSlot = existingSlots.find((s) => s.id === update.id);
+      await supabase
+        .from("exam_availability")
+        .update({ slot_time: update.newTime })
+        .eq("id", update.id);
+
+      // Mark booking as rescheduled if time changed
+      if (oldSlot && oldSlot.slot_time !== update.newTime) {
+        await supabase
+          .from("exam_bookings")
+          .update({
+            original_slot_time: oldSlot.slot_time,
+            rescheduled: true,
+          })
+          .eq("availability_id", update.id)
+          .eq("status", "scheduled");
       }
     }
-    if (bookedToReschedule.length > 0) {
-      const bookedSlotIds = bookedToReschedule.map((s: any) => s.id);
-      const { data: affectedBookings } = await supabase
+
+    // Handle edge case: booked slots that couldn't be remapped (refund)
+    const bookedToRefund = toRemoveIds.filter((id) =>
+      existingSlots.find((s) => s.id === id && s.status === "booked")
+    );
+    if (bookedToRefund.length > 0) {
+      await supabase
         .from("exam_bookings")
-        .select("*")
-        .in("availability_id", bookedSlotIds)
+        .update({ status: "refunded" })
+        .in("availability_id", bookedToRefund)
         .eq("status", "scheduled");
-      if (affectedBookings?.length) {
-        const allNewSlots = [...toInsert];
-        let slotIndex = 0;
-        for (const booking of affectedBookings) {
-          if (slotIndex < allNewSlots.length) {
-            allNewSlots[slotIndex].status = "booked";
-            slotIndex++;
-          }
-          toRemoveIds.push(bookedToReschedule.find((s: any) => s.id === booking.availability_id)?.id);
-        }
-        if (toInsert.length > 0) {
-          const { data: inserted } = await supabase
-            .from("exam_availability")
-            .insert(toInsert)
-            .select();
-          if (inserted) {
-            let idx = 0;
-            for (const booking of affectedBookings) {
-              if (idx < inserted.length) {
-                const oldSlot = bookedToReschedule.find((s: any) => s.id === booking.availability_id);
-                await supabase
-                  .from("exam_bookings")
-                  .update({
-                    availability_id: inserted[idx].id,
-                    original_slot_time: oldSlot?.slot_time || null,
-                    rescheduled: true,
-                  })
-                  .eq("id", booking.id);
-                idx++;
-              }
-            }
-          }
-        }
-      }
-    } else {
-      if (toInsert.length > 0) {
-        await supabase.from("exam_availability").insert(toInsert);
-      }
     }
-    if (toRemoveIds.length > 0) {
-      await supabase.from("exam_availability").delete().in("id", toRemoveIds.filter(Boolean));
+
+    // Remove old available slots
+    const availableToRemove = toRemoveIds.filter((id) =>
+      existingSlots.find((s) => s.id === id && s.status === "available")
+    );
+    if (availableToRemove.length > 0) {
+      await supabase.from("exam_availability").delete().in("id", availableToRemove);
+    }
+
+    // Insert new slots
+    if (toInsert.length > 0) {
+      await supabase.from("exam_availability").insert(toInsert);
     }
   };
 
