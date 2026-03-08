@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Send, ArrowLeft, MessageSquare, Bell, Mail } from "lucide-react";
+import { Search, Send, ArrowLeft, MessageSquare, Bell, Mail, Sparkles, AlertTriangle, Info, Calendar, Check } from "lucide-react";
 import { toast } from "sonner";
 
 interface Profile {
@@ -55,18 +55,14 @@ const Contact = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sync tab from URL param
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab === 'notifications') {
-      setActiveTab('notifications');
-    }
+    if (tab === 'notifications') setActiveTab('notifications');
   }, [searchParams]);
 
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [activeNotification, setActiveNotification] = useState<AppNotification | null>(null);
 
-  // Load notifications from database
   const loadNotifications = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase
@@ -77,20 +73,13 @@ const Contact = () => {
     setNotifications((data as AppNotification[]) || []);
   }, [user]);
 
-  useEffect(() => {
-    loadNotifications();
-  }, [loadNotifications]);
+  useEffect(() => { loadNotifications(); }, [loadNotifications]);
 
-  // Realtime notifications
   useEffect(() => {
     if (!user) return;
     const channel = supabase
       .channel("notifications-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
-        () => loadNotifications()
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, () => loadNotifications())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [user, loadNotifications]);
@@ -104,7 +93,6 @@ const Contact = () => {
     if (!authLoading && !user) navigate("/");
   }, [user, authLoading, navigate]);
 
-  // Load conversations
   const loadConversations = useCallback(async () => {
     if (!user) return;
     const { data: convos } = await supabase
@@ -115,10 +103,7 @@ const Contact = () => {
 
     if (!convos) return;
 
-    const otherIds = convos.map((c) =>
-      c.user1_id === user.id ? c.user2_id : c.user1_id
-    );
-
+    const otherIds = convos.map((c) => c.user1_id === user.id ? c.user2_id : c.user1_id);
     const { data: profiles } = await supabase
       .from("profiles")
       .select("user_id, display_name, avatar_url")
@@ -126,11 +111,9 @@ const Contact = () => {
 
     const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
 
-    // Get last message and unread count for each conversation
     const enriched = await Promise.all(
       convos.map(async (c) => {
         const otherId = c.user1_id === user.id ? c.user2_id : c.user1_id;
-
         const { data: lastMsg } = await supabase
           .from("messages")
           .select("content")
@@ -154,82 +137,55 @@ const Contact = () => {
         };
       })
     );
-
     setConversations(enriched);
   }, [user]);
 
-  useEffect(() => {
-    loadConversations();
-  }, [loadConversations]);
+  useEffect(() => { loadConversations(); }, [loadConversations]);
 
-  // Realtime subscription
   useEffect(() => {
     if (!user) return;
     const channel = supabase
       .channel("messages-realtime")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages" },
-        (payload) => {
-          const msg = payload.new as Message;
-          if (activeConvo && msg.conversation_id === activeConvo.id) {
-            setMessages((prev) => [...prev, msg]);
-            // Mark as read if we're viewing
-            if (msg.sender_id !== user.id) {
-              supabase
-                .from("messages")
-                .update({ read: true })
-                .eq("id", msg.id)
-                .then();
-            }
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
+        const msg = payload.new as Message;
+        if (activeConvo && msg.conversation_id === activeConvo.id) {
+          setMessages((prev) => [...prev, msg]);
+          if (msg.sender_id !== user.id) {
+            supabase.from("messages").update({ read: true }).eq("id", msg.id).then();
           }
-          loadConversations();
         }
-      )
+        loadConversations();
+      })
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [user, activeConvo, loadConversations]);
 
-  // Load messages for active conversation
   useEffect(() => {
     if (!activeConvo || !user) return;
-
     const load = async () => {
       const { data } = await supabase
         .from("messages")
         .select("*")
         .eq("conversation_id", activeConvo.id)
         .order("created_at", { ascending: true });
-
       setMessages(data || []);
-
-      // Mark unread messages as read
       await supabase
         .from("messages")
         .update({ read: true })
         .eq("conversation_id", activeConvo.id)
         .neq("sender_id", user.id)
         .eq("read", false);
-
       loadConversations();
     };
     load();
   }, [activeConvo, user, loadConversations]);
 
-  // Scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Search users
   useEffect(() => {
-    if (!searchQuery.trim() || !user) {
-      setSearchResults([]);
-      return;
-    }
+    if (!searchQuery.trim() || !user) { setSearchResults([]); return; }
     setSearching(true);
     const timeout = setTimeout(async () => {
       const { data } = await supabase
@@ -246,39 +202,22 @@ const Contact = () => {
 
   const startConversation = async (otherUser: Profile) => {
     if (!user) return;
-
-    // Check if conversation already exists
     const { data: existing } = await supabase
       .from("conversations")
       .select("*")
-      .or(
-        `and(user1_id.eq.${user.id},user2_id.eq.${otherUser.user_id}),and(user1_id.eq.${otherUser.user_id},user2_id.eq.${user.id})`
-      )
+      .or(`and(user1_id.eq.${user.id},user2_id.eq.${otherUser.user_id}),and(user1_id.eq.${otherUser.user_id},user2_id.eq.${user.id})`)
       .maybeSingle();
 
     if (existing) {
-      const convo: Conversation = {
-        ...existing,
-        other_user: otherUser,
-        unread_count: 0,
-      };
-      setActiveConvo(convo);
+      setActiveConvo({ ...existing, other_user: otherUser, unread_count: 0 });
     } else {
       const { data: newConvo } = await supabase
         .from("conversations")
-        .insert({
-          user1_id: user.id,
-          user2_id: otherUser.user_id,
-        })
+        .insert({ user1_id: user.id, user2_id: otherUser.user_id })
         .select()
         .single();
-
       if (newConvo) {
-        setActiveConvo({
-          ...newConvo,
-          other_user: otherUser,
-          unread_count: 0,
-        });
+        setActiveConvo({ ...newConvo, other_user: otherUser, unread_count: 0 });
         loadConversations();
       }
     }
@@ -289,27 +228,13 @@ const Contact = () => {
     if (!newMessage.trim() || !activeConvo || !user) return;
     const content = newMessage.trim();
     setNewMessage("");
-
-    await supabase.from("messages").insert({
-      conversation_id: activeConvo.id,
-      sender_id: user.id,
-      content,
-    });
-
-    await supabase
-      .from("conversations")
-      .update({ last_message_at: new Date().toISOString() })
-      .eq("id", activeConvo.id);
+    await supabase.from("messages").insert({ conversation_id: activeConvo.id, sender_id: user.id, content });
+    await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", activeConvo.id);
   };
 
   const getInitials = (name: string | null) => {
     if (!name) return "?";
-    return name
-      .split(" ")
-      .map((w) => w[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+    return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
   };
 
   const formatTime = (date: string) => {
@@ -327,19 +252,28 @@ const Contact = () => {
   };
 
   const getUnreadCount = () => {
-    if (activeTab === 'messages') {
-      return conversations.reduce((sum, c) => sum + c.unread_count, 0);
-    } else {
-      return notifications.filter(n => !n.read).length;
-    }
+    return activeTab === 'messages'
+      ? conversations.reduce((sum, c) => sum + c.unread_count, 0)
+      : notifications.filter(n => !n.read).length;
   };
 
   const handleTabChange = (tab: 'messages' | 'notifications') => {
     setActiveTab(tab);
-    if (tab === 'messages') {
-      setActiveNotification(null);
-    } else {
-      setActiveConvo(null);
+    if (tab === 'messages') setActiveNotification(null);
+    else setActiveConvo(null);
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case "warning":
+      case "exam_cancelled":
+        return <AlertTriangle size={16} className="text-warning" />;
+      case "success":
+        return <Check size={16} className="text-success" />;
+      case "exam":
+        return <Calendar size={16} className="text-primary" />;
+      default:
+        return <Info size={16} className="text-info" />;
     }
   };
 
@@ -348,424 +282,357 @@ const Contact = () => {
   if (authLoading) return null;
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto h-screen flex flex-col">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">Skrzynka odbiorcza</h1>
-        </div>
-
-        <div className="flex flex-1 overflow-hidden">
-          {/* ŚRODKOWA KOLUMNA - LISTA WIADOMOŚCI */}
-          <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full md:w-96 bg-white border-r border-gray-200 flex-col`}>
-            {/* Zakładki */}
-            <div className="flex border-b border-gray-200">
-              <button
-                onClick={() => handleTabChange('messages')}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                  activeTab === 'messages'
-                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <Mail size={16} />
-                  <span>Wiadomości</span>
-                  {conversations.reduce((sum, c) => sum + c.unread_count, 0) > 0 && (
-                    <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
-                      {conversations.reduce((sum, c) => sum + c.unread_count, 0)}
-                    </span>
-                  )}
-                </div>
-              </button>
-              <button
-                onClick={() => handleTabChange('notifications')}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                  activeTab === 'notifications'
-                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <Bell size={16} />
-                  <span>Powiadomienia</span>
-                  {notifications.filter(n => !n.read).length > 0 && (
-                    <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
-                      {notifications.filter(n => !n.read).length}
-                    </span>
-                  )}
-                </div>
-              </button>
+    <main className="min-h-screen bg-background pb-8">
+      {/* Hero / Page header */}
+      <div className="relative overflow-hidden">
+        <div className="absolute top-10 left-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-10 w-80 h-80 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-2 md:pt-12 md:pb-4">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Sparkles size={20} className="text-primary" />
             </div>
+            <div>
+              <h1 className="font-display text-2xl md:text-3xl font-extrabold text-foreground leading-tight">
+                Centrum wiadomości
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {getUnreadCount() > 0 ? `${getUnreadCount()} nieprzeczytanych` : "Wszystko przeczytane ✓"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            {/* Search bar */}
-            <div className="p-4 border-b border-gray-200">
-              <div className="relative">
-                <Search
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                />
-                <input
-                  type="text"
-                  placeholder={activeTab === 'messages' ? "Szukaj użytkownika..." : "Szukaj powiadomień..."}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-100 text-sm text-gray-900 placeholder:text-gray-500 border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                />
-                {searchQuery && activeTab === 'messages' && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-20 max-h-64 overflow-y-auto">
-                    {searching ? (
-                      <div className="px-4 py-6 text-center text-sm text-gray-500">
-                        Szukam...
-                      </div>
-                    ) : searchResults.length === 0 ? (
-                      <div className="px-4 py-6 text-center text-sm text-gray-500">
-                        Nie znaleziono użytkowników
-                      </div>
-                    ) : (
-                      searchResults.map((p) => (
+      {/* Main content card */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="rounded-2xl border border-border/60 bg-card shadow-[var(--shadow-card)] overflow-hidden flex flex-col" style={{ height: "calc(100vh - 200px)", minHeight: 400 }}>
+          <div className="flex flex-1 overflow-hidden">
+            
+            {/* LEFT PANEL — list */}
+            <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full md:w-[360px] flex-col border-r border-border/40`}>
+              
+              {/* Tabs as pill toggles */}
+              <div className="p-3 pb-0">
+                <div className="flex gap-1 p-1 rounded-xl bg-secondary/60">
+                  <button
+                    onClick={() => handleTabChange('messages')}
+                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'messages'
+                        ? 'bg-card text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Mail size={15} />
+                    <span>Wiadomości</span>
+                    {conversations.reduce((sum, c) => sum + c.unread_count, 0) > 0 && (
+                      <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                        {conversations.reduce((sum, c) => sum + c.unread_count, 0)}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleTabChange('notifications')}
+                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'notifications'
+                        ? 'bg-card text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Bell size={15} />
+                    <span>Powiadomienia</span>
+                    {notifications.filter(n => !n.read).length > 0 && (
+                      <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                        {notifications.filter(n => !n.read).length}
+                      </span>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Search */}
+              <div className="p-3">
+                <div className="relative">
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder={activeTab === 'messages' ? "Szukaj użytkownika..." : "Szukaj powiadomień..."}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-secondary/50 text-sm text-foreground placeholder:text-muted-foreground border border-border/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all"
+                  />
+                  {searchQuery && activeTab === 'messages' && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl shadow-[var(--shadow-elevated)] border border-border/60 z-20 max-h-64 overflow-y-auto">
+                      {searching ? (
+                        <div className="px-4 py-6 text-center text-sm text-muted-foreground">Szukam...</div>
+                      ) : searchResults.length === 0 ? (
+                        <div className="px-4 py-6 text-center text-sm text-muted-foreground">Nie znaleziono użytkowników</div>
+                      ) : (
+                        searchResults.map((p) => (
+                          <button
+                            key={p.user_id}
+                            onClick={() => startConversation(p)}
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/50 transition-colors text-left"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
+                              {p.avatar_url ? (
+                                <img src={p.avatar_url} className="w-full h-full rounded-full object-cover" alt="" />
+                              ) : (
+                                <span>{getInitials(p.display_name)}</span>
+                              )}
+                            </div>
+                            <span className="text-sm font-medium text-foreground truncate">
+                              {p.display_name || "Użytkownik"}
+                            </span>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* List */}
+              <div className="flex-1 overflow-y-auto px-2 pb-2">
+                {activeTab === 'messages' ? (
+                  conversations.length === 0 ? (
+                    <EmptyState icon={<MessageSquare size={28} className="text-muted-foreground/40" />} title="Brak wiadomości" subtitle="Wyszukaj użytkownika, aby rozpocząć rozmowę" />
+                  ) : (
+                    <div className="space-y-1">
+                      {conversations.map((c) => (
                         <button
-                          key={p.user_id}
-                          onClick={() => startConversation(p)}
-                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left"
+                          key={c.id}
+                          onClick={() => { setActiveConvo(c); setActiveNotification(null); }}
+                          className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left group ${
+                            activeConvo?.id === c.id
+                              ? 'bg-primary/8 ring-1 ring-primary/20'
+                              : 'hover:bg-secondary/60'
+                          }`}
                         >
-                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-semibold text-blue-600 shrink-0">
-                            {p.avatar_url ? (
-                              <img
-                                src={p.avatar_url}
-                                className="w-full h-full rounded-full object-cover"
-                                alt={p.display_name || "avatar"}
-                              />
-                            ) : (
-                              <span>{getInitials(p.display_name)}</span>
+                          <div className="relative shrink-0">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 ${
+                              c.unread_count > 0 ? 'bg-primary/15 text-primary' : 'bg-secondary text-muted-foreground'
+                            }`}>
+                              {c.other_user?.avatar_url ? (
+                                <img src={c.other_user.avatar_url} className="w-full h-full rounded-full object-cover" alt="" />
+                              ) : (
+                                <span>{getInitials(c.other_user?.display_name ?? null)}</span>
+                              )}
+                            </div>
+                            {c.unread_count > 0 && (
+                              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary text-primary-foreground text-[9px] font-bold rounded-full flex items-center justify-center ring-2 ring-card">
+                                {c.unread_count > 9 ? "9+" : c.unread_count}
+                              </span>
                             )}
                           </div>
-                          <span className="text-sm font-medium text-gray-900 truncate">
-                            {p.display_name || "Użytkownik"}
-                          </span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className={`text-sm truncate ${c.unread_count > 0 ? 'font-bold text-foreground' : 'font-medium text-foreground/80'}`}>
+                                {c.other_user?.display_name || "Użytkownik"}
+                              </span>
+                              <span className="text-[11px] text-muted-foreground shrink-0">{formatTime(c.last_message_at)}</span>
+                            </div>
+                            <p className={`text-xs truncate mt-0.5 ${c.unread_count > 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                              {c.last_message || "Rozpocznij rozmowę"}
+                            </p>
+                          </div>
                         </button>
-                      ))
-                    )}
+                      ))}
+                    </div>
+                  )
+                ) : notifications.length === 0 ? (
+                  <EmptyState icon={<Bell size={28} className="text-muted-foreground/40" />} title="Brak powiadomień" subtitle="Tutaj pojawią się powiadomienia o egzaminach" />
+                ) : (
+                  <div className="space-y-1">
+                    {notifications.map((n) => (
+                      <button
+                        key={n.id}
+                        onClick={() => { setActiveNotification(n); setActiveConvo(null); if (!n.read) markNotificationAsRead(n.id); }}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left ${
+                          activeNotification?.id === n.id
+                            ? 'bg-primary/8 ring-1 ring-primary/20'
+                            : !n.read
+                              ? 'bg-primary/5 hover:bg-primary/8'
+                              : 'hover:bg-secondary/60'
+                        }`}
+                      >
+                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                          !n.read ? 'bg-primary/10' : 'bg-secondary'
+                        }`}>
+                          {getNotificationIcon(n.type)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className={`text-sm truncate ${!n.read ? 'font-bold text-foreground' : 'font-medium text-foreground/80'}`}>
+                              {n.title}
+                            </span>
+                            <span className="text-[11px] text-muted-foreground shrink-0">{formatTime(n.created_at)}</span>
+                          </div>
+                          {n.message && (
+                            <p className={`text-xs truncate mt-0.5 ${!n.read ? 'text-foreground/80' : 'text-muted-foreground'}`}>
+                              {n.message}
+                            </p>
+                          )}
+                        </div>
+                        {!n.read && <span className="w-2 h-2 rounded-full bg-primary shrink-0" />}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Lista wiadomości / powiadomień */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="px-4 py-3">
-                <p className="text-sm font-medium text-gray-900">
-                  {activeTab === 'messages' ? 'Twoje wiadomości' : 'Twoje powiadomienia'}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {getUnreadCount()} nieprzeczytanych
-                </p>
-              </div>
-
-              {activeTab === 'messages' ? (
-                conversations.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                      <MessageSquare size={32} className="text-gray-400" />
-                    </div>
-                    <p className="text-sm font-medium text-gray-900 mb-1">Brak wiadomości</p>
-                    <p className="text-xs text-gray-500">Wyszukaj użytkownika, aby rozpocząć rozmowę</p>
-                  </div>
-                ) : (
-                  <div className="px-2">
-                    {conversations.map((c) => (
-                      <button
-                        key={c.id}
-                        onClick={() => {
-                          setActiveConvo(c);
-                          setActiveNotification(null);
-                        }}
-                        className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left mb-1 ${
-                          activeConvo?.id === c.id
-                            ? 'bg-blue-50 border border-blue-200'
-                            : 'hover:bg-gray-50 border border-transparent'
-                        }`}
-                      >
-                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-sm font-semibold text-blue-600 shrink-0 relative">
-                          {c.other_user?.avatar_url ? (
-                            <img
-                              src={c.other_user.avatar_url}
-                              className="w-full h-full rounded-full object-cover"
-                              alt={c.other_user?.display_name || "avatar"}
-                            />
-                          ) : (
-                            <span>{getInitials(c.other_user?.display_name ?? null)}</span>
-                          )}
-                          {c.unread_count > 0 && (
-                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                              {c.unread_count > 9 ? "9+" : c.unread_count}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className={`text-sm font-semibold truncate ${
-                              c.unread_count > 0 ? 'text-gray-900' : 'text-gray-700'
-                            }`}>
-                              {c.other_user?.display_name || "Użytkownik"}
-                            </span>
-                            <span className="text-xs text-gray-500 shrink-0">
-                              {formatTime(c.last_message_at)}
-                            </span>
-                          </div>
-                          <p className={`text-xs truncate mt-1 ${
-                            c.unread_count > 0 ? 'text-gray-900 font-medium' : 'text-gray-500'
-                          }`}>
-                            {c.last_message || "Rozpocznij rozmowę"}
-                          </p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )
-              ) : notifications.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                    <Bell size={32} className="text-gray-400" />
-                  </div>
-                  <p className="text-sm font-medium text-gray-900 mb-1">Brak powiadomień</p>
-                  <p className="text-xs text-gray-500">Tutaj pojawią się powiadomienia o egzaminach</p>
-                </div>
-              ) : (
-                <div className="px-2">
-                  {notifications.map((n) => (
+            {/* RIGHT PANEL — detail */}
+            <div className={`${isDetailOpen ? 'flex' : 'hidden md:flex'} flex-1 flex-col bg-background/50`}>
+              {activeConvo ? (
+                <>
+                  {/* Chat header */}
+                  <div className="shrink-0 px-5 py-3.5 border-b border-border/40 bg-card flex items-center gap-3">
                     <button
-                      key={n.id}
-                      onClick={() => {
-                        setActiveNotification(n);
-                        setActiveConvo(null);
-                        if (!n.read) markNotificationAsRead(n.id);
-                      }}
-                      className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left mb-1 ${
-                        activeNotification?.id === n.id
-                          ? 'bg-blue-50 border border-blue-200'
-                          : !n.read
-                            ? 'bg-blue-50/50 border border-blue-100'
-                            : 'hover:bg-gray-50 border border-transparent'
-                      }`}
+                      onClick={() => setActiveConvo(null)}
+                      className="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary transition-colors"
                     >
-                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                        {n.type === 'exam_cancelled' ? (
-                          <Bell size={18} className="text-amber-500" />
-                        ) : (
-                          <Bell size={18} className="text-gray-600" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className={`text-sm font-semibold truncate ${
-                            !n.read ? 'text-gray-900' : 'text-gray-700'
-                          }`}>
-                            {n.title}
-                          </span>
-                          <span className="text-xs text-gray-500 shrink-0">
-                            {formatDate(n.created_at)}
-                          </span>
-                        </div>
-                        {n.message && (
-                          <p className={`text-xs truncate mt-1 ${
-                            !n.read ? 'text-gray-900 font-medium' : 'text-gray-500'
-                          }`}>
-                            {n.message}
-                          </p>
-                        )}
-                      </div>
+                      <ArrowLeft size={16} />
                     </button>
-                  ))}
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary shrink-0">
+                      {activeConvo.other_user?.avatar_url ? (
+                        <img src={activeConvo.other_user.avatar_url} className="w-full h-full rounded-full object-cover" alt="" />
+                      ) : (
+                        <span>{getInitials(activeConvo.other_user?.display_name ?? null)}</span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="font-semibold text-foreground block truncate text-sm">
+                        {activeConvo.other_user?.display_name || "Użytkownik"}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {activeConvo.last_message_at ? formatTime(activeConvo.last_message_at) : "Aktywny"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Messages */}
+                  <div className="flex-1 overflow-y-auto px-5 py-4 space-y-2.5">
+                    {messages.length === 0 ? (
+                      <EmptyState icon={<MessageSquare size={28} className="text-muted-foreground/40" />} title="Nie ma jeszcze wiadomości" subtitle="Napisz pierwszą wiadomość!" />
+                    ) : (
+                      messages.map((msg) => {
+                        const isMine = msg.sender_id === user?.id;
+                        return (
+                          <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+                            <div className={`max-w-[75%] px-4 py-2.5 text-sm ${
+                              isMine
+                                ? "bg-primary text-primary-foreground rounded-2xl rounded-br-md"
+                                : "bg-card text-foreground rounded-2xl rounded-bl-md border border-border/40 shadow-sm"
+                            }`}>
+                              <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                              <p className={`text-[10px] mt-1.5 ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+                                {formatTime(msg.created_at)}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                    <div ref={messagesEndRef} />
+                  </div>
+
+                  {/* Input */}
+                  <div className="shrink-0 px-5 py-3.5 border-t border-border/40 bg-card">
+                    <div className="flex items-center gap-2">
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        placeholder="Napisz wiadomość..."
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                        className="flex-1 px-4 py-2.5 rounded-xl bg-secondary/50 text-sm text-foreground placeholder:text-muted-foreground border border-border/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all"
+                      />
+                      <button
+                        onClick={sendMessage}
+                        disabled={!newMessage.trim()}
+                        className="w-9 h-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                      >
+                        <Send size={15} />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : activeNotification ? (
+                <>
+                  <div className="shrink-0 px-5 py-3.5 border-b border-border/40 bg-card flex items-center gap-3">
+                    <button
+                      onClick={() => setActiveNotification(null)}
+                      className="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary transition-colors"
+                    >
+                      <ArrowLeft size={16} />
+                    </button>
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                      activeNotification.type === 'exam_cancelled' ? 'bg-warning/10' : 'bg-primary/10'
+                    }`}>
+                      {getNotificationIcon(activeNotification.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="font-semibold text-foreground block truncate text-sm">{activeNotification.title}</span>
+                      <span className="text-xs text-muted-foreground">{formatDate(activeNotification.created_at)}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto px-6 py-6">
+                    <div className="max-w-2xl">
+                      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium mb-5 ${
+                        activeNotification.type === 'exam_cancelled'
+                          ? 'bg-warning/10 text-warning'
+                          : 'bg-primary/10 text-primary'
+                      }`}>
+                        {getNotificationIcon(activeNotification.type)}
+                        {activeNotification.type === 'exam_cancelled' ? 'Egzamin anulowany' : 'Powiadomienie'}
+                      </div>
+                      <h2 className="text-lg font-bold text-foreground mb-3">{activeNotification.title}</h2>
+                      <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                        {activeNotification.message?.trim() || 'To powiadomienie nie zawiera dodatkowej treści.'}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                /* Empty state */
+                <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
+                  <div className="w-16 h-16 rounded-2xl bg-secondary/60 flex items-center justify-center mb-4">
+                    {activeTab === 'notifications' ? (
+                      <Bell size={28} className="text-muted-foreground/40" />
+                    ) : (
+                      <MessageSquare size={28} className="text-muted-foreground/40" />
+                    )}
+                  </div>
+                  <h2 className="text-base font-bold text-foreground mb-1">
+                    {activeTab === 'notifications' ? 'Powiadomienia' : 'Wiadomości'}
+                  </h2>
+                  <p className="text-sm text-muted-foreground max-w-xs">
+                    {activeTab === 'notifications'
+                      ? 'Wybierz powiadomienie z listy, aby zobaczyć szczegóły'
+                      : 'Wybierz rozmowę lub wyszukaj użytkownika, aby rozpocząć'}
+                  </p>
                 </div>
               )}
             </div>
-          </div>
-
-          {/* PRAWA KOLUMNA - PANEL PODGLĄDU */}
-          <div className={`${isDetailOpen ? 'flex' : 'hidden md:flex'} flex-1 bg-white flex-col`}>
-            {activeConvo ? (
-              <>
-                {/* Chat header */}
-                <div className="shrink-0 px-6 py-4 border-b border-gray-200 flex items-center gap-3">
-                  <button
-                    onClick={() => setActiveConvo(null)}
-                    className="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
-                  >
-                    <ArrowLeft size={16} />
-                  </button>
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-sm font-semibold text-blue-600 shrink-0">
-                    {activeConvo.other_user?.avatar_url ? (
-                      <img
-                        src={activeConvo.other_user.avatar_url}
-                        className="w-full h-full rounded-full object-cover"
-                        alt={activeConvo.other_user?.display_name || "avatar"}
-                      />
-                    ) : (
-                      <span>{getInitials(activeConvo.other_user?.display_name ?? null)}</span>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="font-semibold text-gray-900 block truncate">
-                      {activeConvo.other_user?.display_name || "Użytkownik"}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {activeConvo.last_message_at
-                        ? formatTime(activeConvo.last_message_at)
-                        : "Aktywny"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
-                  {messages.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                        <MessageSquare size={32} className="text-gray-400" />
-                      </div>
-                      <p className="text-sm font-medium text-gray-900 mb-1">
-                        Nie ma jeszcze wiadomości
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Napisz pierwszą wiadomość!
-                      </p>
-                    </div>
-                  ) : (
-                    messages.map((msg) => {
-                      const isMine = msg.sender_id === user?.id;
-                      return (
-                        <div
-                          key={msg.id}
-                          className={`flex ${isMine ? "justify-end" : "justify-start"}`}
-                        >
-                          <div
-                            className={`max-w-[70%] px-4 py-2 rounded-2xl text-sm ${
-                              isMine
-                                ? "bg-blue-600 text-white"
-                                : "bg-gray-100 text-gray-900"
-                            }`}
-                          >
-                            <p className="whitespace-pre-wrap break-words">
-                              {msg.content}
-                            </p>
-                            <p
-                              className={`text-xs mt-1 ${
-                                isMine
-                                  ? "text-blue-100"
-                                  : "text-gray-500"
-                              }`}
-                            >
-                              {formatTime(msg.created_at)}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-
-                {/* Input */}
-                <div className="shrink-0 px-6 py-4 border-t border-gray-200">
-                  <div className="flex items-center gap-2">
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      placeholder="Napisz wiadomość..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" && !e.shiftKey && sendMessage()
-                      }
-                      className="flex-1 px-4 py-2 rounded-full bg-gray-100 text-sm text-gray-900 placeholder:text-gray-500 border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                    />
-                    <button
-                      onClick={sendMessage}
-                      disabled={!newMessage.trim()}
-                      className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
-                    >
-                      <Send size={16} />
-                    </button>
-                  </div>
-                </div>
-              </>
-            ) : activeNotification ? (
-              <>
-                {/* Notification header */}
-                <div className="shrink-0 px-6 py-4 border-b border-gray-200 flex items-center gap-3">
-                  <button
-                    onClick={() => setActiveNotification(null)}
-                    className="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
-                  >
-                    <ArrowLeft size={16} />
-                  </button>
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                    activeNotification.type === 'exam_cancelled' ? 'bg-amber-100' : 'bg-gray-100'
-                  }`}>
-                    <Bell size={18} className={activeNotification.type === 'exam_cancelled' ? 'text-amber-500' : 'text-gray-600'} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="font-semibold text-gray-900 block truncate">
-                      {activeNotification.title}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {formatDate(activeNotification.created_at)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Notification content */}
-                <div className="flex-1 overflow-y-auto px-6 py-6">
-                  <div className="max-w-2xl">
-                    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-4 ${
-                      activeNotification.type === 'exam_cancelled' 
-                        ? 'bg-amber-100 text-amber-700'
-                        : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      <Bell size={12} />
-                      {activeNotification.type === 'exam_cancelled' ? 'Egzamin anulowany' : 'Powiadomienie'}
-                    </div>
-                    
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                      {activeNotification.title}
-                    </h2>
-                    
-                    <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                      {activeNotification.message?.trim() || 'To powiadomienie nie zawiera dodatkowej treści.'}
-                    </p>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-                <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center mb-6">
-                  {activeTab === 'notifications' ? (
-                    <Bell size={48} className="text-gray-400" />
-                  ) : (
-                    <MessageSquare size={48} className="text-gray-400" />
-                  )}
-                </div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">
-                  Witaj w skrzynce odbiorczej
-                </h2>
-                <p className="text-sm text-gray-600 max-w-md mb-2">
-                  {activeTab === 'notifications' 
-                    ? 'Tutaj pojawiają się powiadomienia o egzaminach i ważne informacje.'
-                    : 'Tutaj pojawiają się wszystkie Twoje wiadomości i rozmowy.'}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {activeTab === 'notifications'
-                    ? 'Wybierz powiadomienie, aby zobaczyć szczegóły'
-                    : 'Wybierz wiadomość, którą chcesz odczytać'}
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>
     </main>
   );
 };
+
+/* Shared empty state component */
+const EmptyState = ({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) => (
+  <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+    <div className="w-14 h-14 rounded-2xl bg-secondary/60 flex items-center justify-center mb-3">
+      {icon}
+    </div>
+    <p className="text-sm font-semibold text-foreground mb-0.5">{title}</p>
+    <p className="text-xs text-muted-foreground">{subtitle}</p>
+  </div>
+);
 
 export default Contact;
