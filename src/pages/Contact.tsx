@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Send, ArrowLeft, MessageSquare, Bell, Mail, Sparkles, AlertTriangle, Info, Calendar, Check } from "lucide-react";
+import { Search, Send, ArrowLeft, MessageSquare, Bell, Mail, AlertTriangle, Info, Calendar, Check, Smile, MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 
 interface Profile {
@@ -279,17 +279,36 @@ const Contact = () => {
 
   const isDetailOpen = Boolean(activeConvo || activeNotification);
 
+  // Group messages by date
+  const groupMessagesByDate = (msgs: Message[]) => {
+    const groups: { date: string; messages: Message[] }[] = [];
+    let currentDate = "";
+    msgs.forEach((msg) => {
+      const msgDate = new Date(msg.created_at).toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" });
+      if (msgDate !== currentDate) {
+        currentDate = msgDate;
+        groups.push({ date: msgDate, messages: [msg] });
+      } else {
+        groups[groups.length - 1].messages.push(msg);
+      }
+    });
+    return groups;
+  };
+
   if (authLoading) return null;
 
+  const totalUnreadMessages = conversations.reduce((sum, c) => sum + c.unread_count, 0);
+  const totalUnreadNotifications = notifications.filter(n => !n.read).length;
+
   return (
-    <main className="min-h-screen bg-background pb-8">
+    <main className="min-h-screen bg-background">
       {/* Hero / Page header */}
       <div className="relative overflow-hidden">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 md:pt-20 md:pb-14">
           <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2">
-            Centrum wiadomości 💬
+            Centrum wiadomości
           </h1>
           <p className="text-lg text-muted-foreground font-body leading-relaxed">
             {getUnreadCount() > 0 ? `Masz ${getUnreadCount()} nieprzeczytanych wiadomości.` : "Wszystko przeczytane ✓"}
@@ -297,46 +316,54 @@ const Contact = () => {
         </div>
       </div>
 
-      {/* Main content card */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="rounded-2xl border border-border/60 bg-card shadow-[var(--shadow-card)] overflow-hidden flex flex-col" style={{ height: "calc(100vh - 200px)", minHeight: 400 }}>
+      {/* Main chat container */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-8">
+        <div className="rounded-3xl border border-border/40 bg-card/80 backdrop-blur-sm overflow-hidden flex flex-col shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.08)]" style={{ height: "calc(100vh - 220px)", minHeight: 480 }}>
           <div className="flex flex-1 overflow-hidden">
-            
-            {/* LEFT PANEL — list */}
-            <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full md:w-[360px] flex-col border-r border-border/40`}>
-              
-              {/* Tabs as pill toggles */}
-              <div className="p-3 pb-0">
-                <div className="flex gap-1 p-1 rounded-xl bg-secondary/60">
+
+            {/* LEFT PANEL */}
+            <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full md:w-[380px] flex-col border-r border-border/30`}>
+
+              {/* Tab switcher */}
+              <div className="p-4 pb-2">
+                <div className="flex gap-1 p-1 rounded-2xl bg-muted/50">
                   <button
                     onClick={() => handleTabChange('messages')}
-                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
                       activeTab === 'messages'
-                        ? 'bg-card text-foreground shadow-sm'
+                        ? 'bg-primary text-primary-foreground shadow-[0_2px_12px_-2px_hsl(var(--primary)/0.4)]'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <Mail size={15} />
                     <span>Wiadomości</span>
-                    {conversations.reduce((sum, c) => sum + c.unread_count, 0) > 0 && (
-                      <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
-                        {conversations.reduce((sum, c) => sum + c.unread_count, 0)}
+                    {totalUnreadMessages > 0 && (
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none ${
+                        activeTab === 'messages'
+                          ? 'bg-primary-foreground/20 text-primary-foreground'
+                          : 'bg-primary text-primary-foreground'
+                      }`}>
+                        {totalUnreadMessages}
                       </span>
                     )}
                   </button>
                   <button
                     onClick={() => handleTabChange('notifications')}
-                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
                       activeTab === 'notifications'
-                        ? 'bg-card text-foreground shadow-sm'
+                        ? 'bg-primary text-primary-foreground shadow-[0_2px_12px_-2px_hsl(var(--primary)/0.4)]'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <Bell size={15} />
                     <span>Powiadomienia</span>
-                    {notifications.filter(n => !n.read).length > 0 && (
-                      <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
-                        {notifications.filter(n => !n.read).length}
+                    {totalUnreadNotifications > 0 && (
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none ${
+                        activeTab === 'notifications'
+                          ? 'bg-primary-foreground/20 text-primary-foreground'
+                          : 'bg-primary text-primary-foreground'
+                      }`}>
+                        {totalUnreadNotifications}
                       </span>
                     )}
                   </button>
@@ -344,18 +371,18 @@ const Contact = () => {
               </div>
 
               {/* Search */}
-              <div className="p-3">
-                <div className="relative">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              <div className="px-4 pb-3">
+                <div className="relative group">
+                  <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 pointer-events-none transition-colors group-focus-within:text-primary" />
                   <input
                     type="text"
                     placeholder={activeTab === 'messages' ? "Szukaj użytkownika..." : "Szukaj powiadomień..."}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-secondary/50 text-sm text-foreground placeholder:text-muted-foreground border border-border/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-muted/40 text-sm text-foreground placeholder:text-muted-foreground/50 border-0 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:bg-muted/60 transition-all duration-200"
                   />
                   {searchQuery && activeTab === 'messages' && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl shadow-[var(--shadow-elevated)] border border-border/60 z-20 max-h-64 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-2xl shadow-[var(--shadow-elevated)] border border-border/40 z-20 max-h-64 overflow-y-auto">
                       {searching ? (
                         <div className="px-4 py-6 text-center text-sm text-muted-foreground">Szukam...</div>
                       ) : searchResults.length === 0 ? (
@@ -365,9 +392,9 @@ const Contact = () => {
                           <button
                             key={p.user_id}
                             onClick={() => startConversation(p)}
-                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/50 transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left first:rounded-t-2xl last:rounded-b-2xl"
                           >
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-xs font-bold text-primary shrink-0">
                               {p.avatar_url ? (
                                 <img src={p.avatar_url} className="w-full h-full rounded-full object-cover" alt="" />
                               ) : (
@@ -385,26 +412,29 @@ const Contact = () => {
                 </div>
               </div>
 
-              {/* List */}
-              <div className="flex-1 overflow-y-auto px-2 pb-2">
+              {/* Conversation / Notification list */}
+              <div className="flex-1 overflow-y-auto px-2 pb-2 scrollbar-thin">
                 {activeTab === 'messages' ? (
                   conversations.length === 0 ? (
-                    <EmptyState icon={<MessageSquare size={28} className="text-muted-foreground/40" />} title="Brak wiadomości" subtitle="Wyszukaj użytkownika, aby rozpocząć rozmowę" />
+                    <EmptyState icon={<MessageSquare size={32} className="text-primary/30" />} title="Brak wiadomości" subtitle="Wyszukaj użytkownika, aby rozpocząć rozmowę" />
                   ) : (
-                    <div className="space-y-1">
+                    <div className="space-y-0.5 px-1">
                       {conversations.map((c) => (
                         <button
                           key={c.id}
                           onClick={() => { setActiveConvo(c); setActiveNotification(null); }}
-                          className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left group ${
+                          className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all duration-200 text-left group relative ${
                             activeConvo?.id === c.id
-                              ? 'bg-primary/8 ring-1 ring-primary/20'
-                              : 'hover:bg-secondary/60'
+                              ? 'bg-primary/10 shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.15)]'
+                              : 'hover:bg-muted/50'
                           }`}
                         >
+                          {/* Avatar */}
                           <div className="relative shrink-0">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 ${
-                              c.unread_count > 0 ? 'bg-primary/15 text-primary' : 'bg-secondary text-muted-foreground'
+                            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all ${
+                              c.unread_count > 0
+                                ? 'bg-gradient-to-br from-primary/20 to-primary/10 text-primary ring-2 ring-primary/20'
+                                : 'bg-muted/60 text-muted-foreground'
                             }`}>
                               {c.other_user?.avatar_url ? (
                                 <img src={c.other_user.avatar_url} className="w-full h-full rounded-full object-cover" alt="" />
@@ -413,19 +443,22 @@ const Contact = () => {
                               )}
                             </div>
                             {c.unread_count > 0 && (
-                              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary text-primary-foreground text-[9px] font-bold rounded-full flex items-center justify-center ring-2 ring-card">
+                              <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-card shadow-sm">
                                 {c.unread_count > 9 ? "9+" : c.unread_count}
                               </span>
                             )}
                           </div>
+                          {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2">
-                              <span className={`text-sm truncate ${c.unread_count > 0 ? 'font-bold text-foreground' : 'font-medium text-foreground/80'}`}>
+                              <span className={`text-[13px] truncate ${c.unread_count > 0 ? 'font-bold text-foreground' : 'font-semibold text-foreground/80'}`}>
                                 {c.other_user?.display_name || "Użytkownik"}
                               </span>
-                              <span className="text-[11px] text-muted-foreground shrink-0">{formatTime(c.last_message_at)}</span>
+                              <span className={`text-[11px] shrink-0 ${c.unread_count > 0 ? 'text-primary font-semibold' : 'text-muted-foreground/60'}`}>
+                                {formatTime(c.last_message_at)}
+                              </span>
                             </div>
-                            <p className={`text-xs truncate mt-0.5 ${c.unread_count > 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                            <p className={`text-xs truncate mt-0.5 leading-relaxed ${c.unread_count > 0 ? 'text-foreground/70 font-medium' : 'text-muted-foreground/60'}`}>
                               {c.last_message || "Rozpocznij rozmowę"}
                             </p>
                           </div>
@@ -434,40 +467,40 @@ const Contact = () => {
                     </div>
                   )
                 ) : notifications.length === 0 ? (
-                  <EmptyState icon={<Bell size={28} className="text-muted-foreground/40" />} title="Brak powiadomień" subtitle="Tutaj pojawią się powiadomienia o egzaminach" />
+                  <EmptyState icon={<Bell size={32} className="text-primary/30" />} title="Brak powiadomień" subtitle="Tutaj pojawią się powiadomienia o egzaminach" />
                 ) : (
-                  <div className="space-y-1">
+                  <div className="space-y-0.5 px-1">
                     {notifications.map((n) => (
                       <button
                         key={n.id}
                         onClick={() => { setActiveNotification(n); setActiveConvo(null); if (!n.read) markNotificationAsRead(n.id); }}
-                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left ${
+                        className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all duration-200 text-left ${
                           activeNotification?.id === n.id
-                            ? 'bg-primary/8 ring-1 ring-primary/20'
+                            ? 'bg-primary/10 shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.15)]'
                             : !n.read
                               ? 'bg-primary/5 hover:bg-primary/8'
-                              : 'hover:bg-secondary/60'
+                              : 'hover:bg-muted/50'
                         }`}
                       >
-                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                          !n.read ? 'bg-primary/10' : 'bg-secondary'
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                          !n.read ? 'bg-primary/10' : 'bg-muted/50'
                         }`}>
                           {getNotificationIcon(n.type)}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <span className={`text-sm truncate ${!n.read ? 'font-bold text-foreground' : 'font-medium text-foreground/80'}`}>
+                            <span className={`text-[13px] truncate ${!n.read ? 'font-bold text-foreground' : 'font-medium text-foreground/80'}`}>
                               {n.title}
                             </span>
-                            <span className="text-[11px] text-muted-foreground shrink-0">{formatTime(n.created_at)}</span>
+                            <span className="text-[11px] text-muted-foreground/60 shrink-0">{formatTime(n.created_at)}</span>
                           </div>
                           {n.message && (
-                            <p className={`text-xs truncate mt-0.5 ${!n.read ? 'text-foreground/80' : 'text-muted-foreground'}`}>
+                            <p className={`text-xs truncate mt-0.5 ${!n.read ? 'text-foreground/60' : 'text-muted-foreground/50'}`}>
                               {n.message}
                             </p>
                           )}
                         </div>
-                        {!n.read && <span className="w-2 h-2 rounded-full bg-primary shrink-0" />}
+                        {!n.read && <span className="w-2.5 h-2.5 rounded-full bg-primary shrink-0 shadow-[0_0_8px_hsl(var(--primary)/0.4)]" />}
                       </button>
                     ))}
                   </div>
@@ -475,19 +508,19 @@ const Contact = () => {
               </div>
             </div>
 
-            {/* RIGHT PANEL — detail */}
-            <div className={`${isDetailOpen ? 'flex' : 'hidden md:flex'} flex-1 flex-col bg-background/50`}>
+            {/* RIGHT PANEL — Chat / Detail */}
+            <div className={`${isDetailOpen ? 'flex' : 'hidden md:flex'} flex-1 flex-col`}>
               {activeConvo ? (
                 <>
-                  {/* Chat header */}
-                  <div className="shrink-0 px-5 py-3.5 border-b border-border/40 bg-card flex items-center gap-3">
+                  {/* Chat header with glass effect */}
+                  <div className="shrink-0 px-5 py-3 border-b border-border/30 bg-card/90 backdrop-blur-sm flex items-center gap-3">
                     <button
                       onClick={() => setActiveConvo(null)}
-                      className="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary transition-colors"
+                      className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all"
                     >
-                      <ArrowLeft size={16} />
+                      <ArrowLeft size={18} />
                     </button>
-                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/15 flex items-center justify-center text-sm font-bold text-primary shrink-0 ring-2 ring-primary/10">
                       {activeConvo.other_user?.avatar_url ? (
                         <img src={activeConvo.other_user.avatar_url} className="w-full h-full rounded-full object-cover" alt="" />
                       ) : (
@@ -495,86 +528,110 @@ const Contact = () => {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <span className="font-semibold text-foreground block truncate text-sm">
+                      <span className="font-bold text-foreground block truncate text-sm">
                         {activeConvo.other_user?.display_name || "Użytkownik"}
                       </span>
-                      <span className="text-xs text-muted-foreground">
-                        {activeConvo.last_message_at ? formatTime(activeConvo.last_message_at) : "Aktywny"}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                        <span className="text-xs text-muted-foreground/70">Online</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Messages */}
-                  <div className="flex-1 overflow-y-auto px-5 py-4 space-y-2.5">
+                  {/* Messages area with subtle pattern bg */}
+                  <div className="flex-1 overflow-y-auto px-4 md:px-6 py-5" style={{ background: 'linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted)/0.3) 100%)' }}>
                     {messages.length === 0 ? (
-                      <EmptyState icon={<MessageSquare size={28} className="text-muted-foreground/40" />} title="Nie ma jeszcze wiadomości" subtitle="Napisz pierwszą wiadomość!" />
+                      <EmptyState icon={<MessageSquare size={32} className="text-primary/30" />} title="Nie ma jeszcze wiadomości" subtitle="Napisz pierwszą wiadomość!" />
                     ) : (
-                      messages.map((msg) => {
-                        const isMine = msg.sender_id === user?.id;
-                        return (
-                          <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-                            <div className={`max-w-[75%] px-4 py-2.5 text-sm ${
-                              isMine
-                                ? "bg-primary text-primary-foreground rounded-2xl rounded-br-md"
-                                : "bg-card text-foreground rounded-2xl rounded-bl-md border border-border/40 shadow-sm"
-                            }`}>
-                              <p className="whitespace-pre-wrap break-words">{msg.content}</p>
-                              <p className={`text-[10px] mt-1.5 ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                                {formatTime(msg.created_at)}
-                              </p>
-                            </div>
+                      groupMessagesByDate(messages).map((group) => (
+                        <div key={group.date}>
+                          {/* Date separator */}
+                          <div className="flex items-center gap-3 my-5">
+                            <div className="flex-1 h-px bg-border/30" />
+                            <span className="text-[11px] font-medium text-muted-foreground/50 bg-background/80 px-3 py-1 rounded-full">{group.date}</span>
+                            <div className="flex-1 h-px bg-border/30" />
                           </div>
-                        );
-                      })
+                          <div className="space-y-1.5">
+                            {group.messages.map((msg, idx) => {
+                              const isMine = msg.sender_id === user?.id;
+                              const prevMsg = idx > 0 ? group.messages[idx - 1] : null;
+                              const isConsecutive = prevMsg && prevMsg.sender_id === msg.sender_id;
+                              return (
+                                <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"} ${!isConsecutive ? 'mt-3' : ''}`}>
+                                  {/* Other user avatar for first in group */}
+                                  {!isMine && !isConsecutive && (
+                                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary/15 to-accent/10 flex items-center justify-center text-[10px] font-bold text-primary shrink-0 mr-2 mt-1">
+                                      {getInitials(activeConvo.other_user?.display_name ?? null)}
+                                    </div>
+                                  )}
+                                  {!isMine && isConsecutive && <div className="w-7 mr-2 shrink-0" />}
+                                  <div className={`max-w-[70%] group relative ${
+                                    isMine
+                                      ? `px-4 py-2.5 text-sm bg-primary text-primary-foreground ${!isConsecutive ? 'rounded-[20px] rounded-br-[6px]' : 'rounded-[20px] rounded-br-[6px]'} shadow-[0_2px_8px_-2px_hsl(var(--primary)/0.3)]`
+                                      : `px-4 py-2.5 text-sm bg-card text-foreground ${!isConsecutive ? 'rounded-[20px] rounded-bl-[6px]' : 'rounded-[20px] rounded-bl-[6px]'} border border-border/30 shadow-sm`
+                                  }`}>
+                                    <p className="whitespace-pre-wrap break-words leading-relaxed">{msg.content}</p>
+                                    <p className={`text-[10px] mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isMine ? "text-primary-foreground/50" : "text-muted-foreground/50"}`}>
+                                      {formatTime(msg.created_at)}
+                                    </p>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))
                     )}
                     <div ref={messagesEndRef} />
                   </div>
 
-                  {/* Input */}
-                  <div className="shrink-0 px-5 py-3.5 border-t border-border/40 bg-card">
-                    <div className="flex items-center gap-2">
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        placeholder="Napisz wiadomość..."
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
-                        className="flex-1 px-4 py-2.5 rounded-xl bg-secondary/50 text-sm text-foreground placeholder:text-muted-foreground border border-border/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all"
-                      />
+                  {/* Message input — floating style */}
+                  <div className="shrink-0 px-4 md:px-5 py-3 bg-card/90 backdrop-blur-sm border-t border-border/20">
+                    <div className="flex items-end gap-2">
+                      <div className="flex-1 relative">
+                        <input
+                          ref={inputRef}
+                          type="text"
+                          placeholder="Napisz wiadomość..."
+                          value={newMessage}
+                          onChange={(e) => setNewMessage(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                          className="w-full px-4 py-3 rounded-2xl bg-muted/40 text-sm text-foreground placeholder:text-muted-foreground/40 border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-muted/60 transition-all duration-200"
+                        />
+                      </div>
                       <button
                         onClick={sendMessage}
                         disabled={!newMessage.trim()}
-                        className="w-9 h-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                        className="w-11 h-11 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center hover:shadow-[0_4px_16px_-2px_hsl(var(--primary)/0.5)] active:scale-[0.96] transition-all duration-200 disabled:opacity-20 disabled:shadow-none disabled:cursor-not-allowed shrink-0"
                       >
-                        <Send size={15} />
+                        <Send size={16} className="translate-x-[1px]" />
                       </button>
                     </div>
                   </div>
                 </>
               ) : activeNotification ? (
                 <>
-                  <div className="shrink-0 px-5 py-3.5 border-b border-border/40 bg-card flex items-center gap-3">
+                  <div className="shrink-0 px-5 py-3 border-b border-border/30 bg-card/90 backdrop-blur-sm flex items-center gap-3">
                     <button
                       onClick={() => setActiveNotification(null)}
-                      className="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary transition-colors"
+                      className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all"
                     >
-                      <ArrowLeft size={16} />
+                      <ArrowLeft size={18} />
                     </button>
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                       activeNotification.type === 'exam_cancelled' ? 'bg-warning/10' : 'bg-primary/10'
                     }`}>
                       {getNotificationIcon(activeNotification.type)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <span className="font-semibold text-foreground block truncate text-sm">{activeNotification.title}</span>
-                      <span className="text-xs text-muted-foreground">{formatDate(activeNotification.created_at)}</span>
+                      <span className="font-bold text-foreground block truncate text-sm">{activeNotification.title}</span>
+                      <span className="text-xs text-muted-foreground/60">{formatDate(activeNotification.created_at)}</span>
                     </div>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto px-6 py-6">
-                    <div className="max-w-2xl">
-                      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium mb-5 ${
+                  <div className="flex-1 overflow-y-auto px-6 py-8" style={{ background: 'linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted)/0.3) 100%)' }}>
+                    <div className="max-w-xl mx-auto">
+                      <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold mb-6 ${
                         activeNotification.type === 'exam_cancelled'
                           ? 'bg-warning/10 text-warning'
                           : 'bg-primary/10 text-primary'
@@ -582,27 +639,29 @@ const Contact = () => {
                         {getNotificationIcon(activeNotification.type)}
                         {activeNotification.type === 'exam_cancelled' ? 'Egzamin anulowany' : 'Powiadomienie'}
                       </div>
-                      <h2 className="text-lg font-bold text-foreground mb-3">{activeNotification.title}</h2>
-                      <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                        {activeNotification.message?.trim() || 'To powiadomienie nie zawiera dodatkowej treści.'}
-                      </p>
+                      <h2 className="text-xl font-bold text-foreground mb-4 leading-tight">{activeNotification.title}</h2>
+                      <div className="bg-card rounded-2xl border border-border/30 p-5 shadow-sm">
+                        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                          {activeNotification.message?.trim() || 'To powiadomienie nie zawiera dodatkowej treści.'}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </>
               ) : (
-                /* Empty state */
-                <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-                  <div className="w-16 h-16 rounded-2xl bg-secondary/60 flex items-center justify-center mb-4">
+                /* Empty state — right panel */
+                <div className="flex-1 flex flex-col items-center justify-center text-center px-8" style={{ background: 'linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted)/0.2) 100%)' }}>
+                  <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mb-5 shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.15)]">
                     {activeTab === 'notifications' ? (
-                      <Bell size={28} className="text-muted-foreground/40" />
+                      <Bell size={32} className="text-primary/40" />
                     ) : (
-                      <MessageSquare size={28} className="text-muted-foreground/40" />
+                      <MessageSquare size={32} className="text-primary/40" />
                     )}
                   </div>
-                  <h2 className="text-base font-bold text-foreground mb-1">
+                  <h2 className="text-lg font-bold text-foreground mb-1.5">
                     {activeTab === 'notifications' ? 'Powiadomienia' : 'Wiadomości'}
                   </h2>
-                  <p className="text-sm text-muted-foreground max-w-xs">
+                  <p className="text-sm text-muted-foreground/60 max-w-xs leading-relaxed">
                     {activeTab === 'notifications'
                       ? 'Wybierz powiadomienie z listy, aby zobaczyć szczegóły'
                       : 'Wybierz rozmowę lub wyszukaj użytkownika, aby rozpocząć'}
@@ -617,14 +676,14 @@ const Contact = () => {
   );
 };
 
-/* Shared empty state component */
+/* Shared empty state */
 const EmptyState = ({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) => (
-  <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-    <div className="w-14 h-14 rounded-2xl bg-secondary/60 flex items-center justify-center mb-3">
+  <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+    <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mb-4 shadow-[0_4px_16px_-4px_hsl(var(--primary)/0.1)]">
       {icon}
     </div>
-    <p className="text-sm font-semibold text-foreground mb-0.5">{title}</p>
-    <p className="text-xs text-muted-foreground">{subtitle}</p>
+    <p className="text-sm font-bold text-foreground mb-1">{title}</p>
+    <p className="text-xs text-muted-foreground/50">{subtitle}</p>
   </div>
 );
 
