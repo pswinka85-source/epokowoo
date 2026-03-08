@@ -446,7 +446,9 @@ const Contact = () => {
                               <span className="text-[15px] font-bold text-foreground truncate">
                                 {c.other_user?.display_name || "Użytkownik"}
                               </span>
-                              <BadgeCheck size={17} className="text-primary shrink-0" />
+                              {verifiedUsers.has(c.user1_id === user?.id ? c.user2_id : c.user1_id) && (
+                                <img src={verifiedBadge} alt="Zweryfikowany" className="w-[18px] h-[18px] shrink-0" />
+                              )}
                             </div>
                             <p className="text-[12px] text-muted-foreground mb-2">
                               Aktywny: {formatTimeAgo(c.last_message_at)}
