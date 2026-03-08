@@ -105,7 +105,11 @@ const Exams = () => {
     if (!selectedDate) return;
     const loadSlots = async () => {
       setLoadingSlots(true);
-      const dateStr = selectedDate.toISOString().split("T")[0];
+      // Use local date format to avoid timezone issues
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+      const day = String(selectedDate.getDate()).padStart(2, "0");
+      const dateStr = `${year}-${month}-${day}`;
       const { data } = await supabase
         .from("exam_availability")
         .select("*")
