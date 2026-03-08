@@ -368,9 +368,9 @@ const Contact = () => {
                 <div className="flex items-center justify-center gap-2">
                   <Bell size={16} />
                   <span>Powiadomienia</span>
-                  {systemMessages.filter(m => !m.read).length > 0 && (
+                  {notifications.filter(n => !n.read).length > 0 && (
                     <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
-                      {systemMessages.filter(m => !m.read).length}
+                      {notifications.filter(n => !n.read).length}
                     </span>
                   )}
                 </div>
