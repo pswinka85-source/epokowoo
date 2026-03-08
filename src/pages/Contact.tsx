@@ -334,6 +334,17 @@ const Contact = () => {
     }
   };
 
+  const handleTabChange = (tab: 'messages' | 'notifications') => {
+    setActiveTab(tab);
+    if (tab === 'messages') {
+      setActiveNotification(null);
+    } else {
+      setActiveConvo(null);
+    }
+  };
+
+  const isDetailOpen = Boolean(activeConvo || activeNotification);
+
   if (authLoading) return null;
 
   return (
