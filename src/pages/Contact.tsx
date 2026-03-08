@@ -339,7 +339,7 @@ const Contact = () => {
           <p className="text-[15px] text-muted-foreground/70 font-body leading-relaxed">
             Bądź na bieżąco z najnowszymi wiadomościami!
           </p>
-          <div className="mt-4 h-px bg-border/50" />
+          <div className="mt-4 h-px bg-border" />
         </div>
       </div>
 
