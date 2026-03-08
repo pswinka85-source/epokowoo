@@ -463,8 +463,8 @@ const Contact = () => {
                       return (
                         <div key={`notif-${n.id}`} className="relative">
                           {/* Avatar overlapping top-left corner with notification badge */}
-                          <div className="absolute -left-[26px] -top-[26px] w-[52px] h-[52px] rounded-full bg-primary/10 flex items-center justify-center z-10">
-                            <Bell size={22} className="text-primary" />
+                          <div className="absolute -left-[30px] -top-[30px] w-[60px] h-[60px] rounded-full overflow-hidden z-10">
+                            <img src={notificationIcon} className="w-full h-full object-cover" alt="Powiadomienie" />
                           </div>
 
                           {/* Card */}
