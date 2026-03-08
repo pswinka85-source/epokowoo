@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { Lightbulb, Inbox, Clock, PenLine, Settings, ShieldCheck } from "lucide-react";
+import UpcomingExamsWidget from "./UpcomingExamsWidget";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -80,6 +81,9 @@ const Sidebar = () => {
           </p>
         </div>
       </div>
+
+      {/* Upcoming Exams Widget */}
+      <UpcomingExamsWidget />
     </aside>
   );
 };
