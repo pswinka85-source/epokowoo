@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Send, ArrowLeft, MessageSquare, Bell } from "lucide-react";
+import { Search, Send, ArrowLeft, MessageSquare, Bell, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 interface Profile {
