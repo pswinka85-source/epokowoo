@@ -473,12 +473,12 @@ const Contact = () => {
                         <button
                           key={`notif-${n.id}`}
                           onClick={() => { setActiveNotification(n); setActiveConvo(null); if (!n.read) markNotificationAsRead(n.id); }}
-                          className={`w-full flex items-start gap-3 px-4 py-3 transition-all duration-200 text-left ${
+                          className={`w-full flex items-start gap-3 px-3 py-3 rounded-2xl border transition-all duration-200 text-left ${
                             isActive
-                              ? 'bg-primary/[0.06]'
+                              ? 'bg-primary/[0.06] border-primary/20'
                               : !n.read
-                                ? 'bg-primary/[0.02] hover:bg-primary/[0.05]'
-                                : 'hover:bg-muted/30'
+                                ? 'bg-primary/[0.02] border-primary/10 hover:border-primary/20'
+                                : 'bg-card border-border/30 hover:border-border/50 hover:shadow-sm'
                           }`}
                         >
                           {/* Notification avatar */}
