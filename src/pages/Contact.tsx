@@ -64,6 +64,7 @@ const Contact = () => {
   }, [searchParams]);
 
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [activeNotification, setActiveNotification] = useState<AppNotification | null>(null);
 
   // Load notifications from database
   const loadNotifications = useCallback(async () => {
@@ -521,11 +522,17 @@ const Contact = () => {
                   {notifications.map((n) => (
                     <button
                       key={n.id}
-                      onClick={() => !n.read && markNotificationAsRead(n.id)}
+                      onClick={() => {
+                        setActiveNotification(n);
+                        setActiveConvo(null);
+                        if (!n.read) markNotificationAsRead(n.id);
+                      }}
                       className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left mb-1 ${
-                        !n.read
+                        activeNotification?.id === n.id
                           ? 'bg-blue-50 border border-blue-200'
-                          : 'hover:bg-gray-50 border border-transparent'
+                          : !n.read
+                            ? 'bg-blue-50/50 border border-blue-100'
+                            : 'hover:bg-gray-50 border border-transparent'
                       }`}
                     >
                       <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
@@ -669,19 +676,76 @@ const Contact = () => {
                   </div>
                 </div>
               </>
+            ) : activeNotification ? (
+              <>
+                {/* Notification header */}
+                <div className="shrink-0 px-6 py-4 border-b border-gray-200 flex items-center gap-3">
+                  <button
+                    onClick={() => setActiveNotification(null)}
+                    className="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
+                  >
+                    <ArrowLeft size={16} />
+                  </button>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                    activeNotification.type === 'exam_cancelled' ? 'bg-amber-100' : 'bg-gray-100'
+                  }`}>
+                    <Bell size={18} className={activeNotification.type === 'exam_cancelled' ? 'text-amber-500' : 'text-gray-600'} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-semibold text-gray-900 block truncate">
+                      {activeNotification.title}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {formatDate(activeNotification.created_at)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Notification content */}
+                <div className="flex-1 overflow-y-auto px-6 py-6">
+                  <div className="max-w-2xl">
+                    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-4 ${
+                      activeNotification.type === 'exam_cancelled' 
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      <Bell size={12} />
+                      {activeNotification.type === 'exam_cancelled' ? 'Egzamin anulowany' : 'Powiadomienie'}
+                    </div>
+                    
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                      {activeNotification.title}
+                    </h2>
+                    
+                    {activeNotification.message && (
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                        {activeNotification.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
                 <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center mb-6">
-                  <MessageSquare size={48} className="text-gray-400" />
+                  {activeTab === 'notifications' ? (
+                    <Bell size={48} className="text-gray-400" />
+                  ) : (
+                    <MessageSquare size={48} className="text-gray-400" />
+                  )}
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-3">
                   Witaj w skrzynce odbiorczej
                 </h2>
                 <p className="text-sm text-gray-600 max-w-md mb-2">
-                  Tutaj pojawiają się wszystkie Twoje wiadomości i powiadomienia systemowe.
+                  {activeTab === 'notifications' 
+                    ? 'Tutaj pojawiają się powiadomienia o egzaminach i ważne informacje.'
+                    : 'Tutaj pojawiają się wszystkie Twoje wiadomości i rozmowy.'}
                 </p>
                 <p className="text-sm text-gray-500">
-                  Wybierz wiadomość, którą chcesz odczytać
+                  {activeTab === 'notifications'
+                    ? 'Wybierz powiadomienie, aby zobaczyć szczegóły'
+                    : 'Wybierz wiadomość, którą chcesz odczytać'}
                 </p>
               </div>
             )}
