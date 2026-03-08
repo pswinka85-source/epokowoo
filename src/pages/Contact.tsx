@@ -357,7 +357,7 @@ const Contact = () => {
 
         <div className="flex flex-1 overflow-hidden">
           {/* ŚRODKOWA KOLUMNA - LISTA WIADOMOŚCI */}
-          <div className="w-full md:w-96 bg-white border-r border-gray-200 flex flex-col">
+          <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full md:w-96 bg-white border-r border-gray-200 flex-col`}>
             {/* Zakładki */}
             <div className="flex border-b border-gray-200">
               <button
