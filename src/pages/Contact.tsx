@@ -320,7 +320,7 @@ const Contact = () => {
     if (activeTab === 'messages') {
       return conversations.reduce((sum, c) => sum + c.unread_count, 0);
     } else {
-      return systemMessages.filter(m => !m.read).length;
+      return notifications.filter(n => !n.read).length;
     }
   };
 
