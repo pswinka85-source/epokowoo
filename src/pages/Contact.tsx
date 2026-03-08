@@ -331,14 +331,14 @@ const Contact = () => {
     <main className="min-h-screen bg-background">
       {/* Header */}
       <div className="relative overflow-hidden">
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-6 md:pt-20 md:pb-8">
-          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-1">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-4 md:pt-16 md:pb-5">
+          <h1 className="font-display text-3xl md:text-[2.5rem] font-extrabold text-foreground leading-[1.1] mb-0.5">
             Centrum Wiadomości
           </h1>
-          <p className="text-base text-muted-foreground font-body leading-relaxed">
+          <p className="text-[15px] text-muted-foreground/70 font-body leading-relaxed">
             Bądź na bieżąco z najnowszymi wiadomościami!
           </p>
-          <div className="mt-5 h-px bg-border/60" />
+          <div className="mt-4 h-px bg-border/50" />
         </div>
       </div>
 
