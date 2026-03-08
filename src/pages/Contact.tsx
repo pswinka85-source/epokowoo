@@ -54,33 +54,41 @@ const Contact = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Przykładowe wiadomości systemowe
-  const [systemMessages] = useState<SystemMessage[]>([
-    {
-      id: '1',
-      title: 'Sprawdź, co warto wiedzieć przed 1 września',
-      content: 'Przygotuj się na nowy rok szkolny z naszym kompleksowym przewodnikiem.',
-      date: '2024-08-25',
-      read: false,
-      type: 'system'
-    },
-    {
-      id: '2',
-      title: 'EGZAMIN ÓSMOKLASISTY 2026: Miasta egzamin',
-      content: 'Poznaj listę miast, w których odbędzie się egzamin ósmoklasisty w 2026 roku.',
-      date: '2024-08-20',
-      read: false,
-      type: 'notification'
-    },
-    {
-      id: '3',
-      title: 'Przyjdź na spotkania na nowy rok szkolny',
-      content: 'Dołącz do naszych spotkań organizacyjnych przed rozpoczęciem roku szkolnego.',
-      date: '2024-08-15',
-      read: true,
-      type: 'system'
-    }
-  ]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  // Load notifications from database
+  const loadNotifications = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+    setNotifications((data as Notification[]) || []);
+  }, [user]);
+
+  useEffect(() => {
+    loadNotifications();
+  }, [loadNotifications]);
+
+  // Realtime notifications
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel("notifications-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+        () => loadNotifications()
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, loadNotifications]);
+
+  const markNotificationAsRead = async (id: string) => {
+    await supabase.from("notifications").update({ read: true }).eq("id", id);
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  };
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/");
