@@ -466,9 +466,9 @@ const Contact = () => {
                       const n = item.data;
                       const isActive = activeNotification?.id === n.id;
                       return (
-                        <div key={`notif-${n.id}`} className="relative pt-5">
-                          {/* Avatar overlapping top of card */}
-                          <div className="absolute left-4 -top-0 z-10">
+                        <div key={`notif-${n.id}`} className="relative ml-5">
+                          {/* Avatar on left edge */}
+                          <div className="absolute -left-5 top-1/2 -translate-y-1/2 z-10">
                             <div className="w-[42px] h-[42px] rounded-full bg-muted/40 flex items-center justify-center text-[12px] font-bold text-muted-foreground">
                               ES
                             </div>
@@ -480,7 +480,7 @@ const Contact = () => {
                           {/* Card */}
                           <button
                             onClick={() => { setActiveNotification(n); setActiveConvo(null); if (!n.read) markNotificationAsRead(n.id); }}
-                            className={`w-full min-w-0 px-3 pt-6 pb-2.5 rounded-2xl border transition-all duration-200 text-left ${
+                            className={`w-full min-w-0 pl-6 pr-3 py-2.5 rounded-2xl border transition-all duration-200 text-left ${
                               isActive
                                 ? 'bg-primary/[0.06] border-primary/20'
                                 : !n.read
