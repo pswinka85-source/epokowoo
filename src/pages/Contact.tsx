@@ -347,7 +347,7 @@ const Contact = () => {
         <div className="flex gap-0 overflow-hidden" style={{ height: "calc(100vh - 260px)", minHeight: 480 }}>
 
           {/* LEFT PANEL — Unified list */}
-          <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full flex-col`}>
+          <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full md:w-[480px] flex-col shrink-0 border-r border-border/40`}>
 
             {/* Search toggle */}
             {showSearch && (
@@ -520,6 +520,153 @@ const Contact = () => {
             </div>
           </div>
 
+          {/* RIGHT PANEL */}
+          <div className={`${isDetailOpen ? 'flex' : 'hidden md:flex'} flex-1 flex-col overflow-hidden`}>
+            {activeConvo ? (
+              <>
+                {/* Chat header */}
+                <div className="shrink-0 px-5 py-3.5 border-b border-border/30 flex items-center gap-3">
+                  <button
+                    onClick={() => setActiveConvo(null)}
+                    className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all"
+                  >
+                    <ArrowLeft size={18} />
+                  </button>
+                  <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center text-sm font-bold text-muted-foreground shrink-0 overflow-hidden">
+                    {activeConvo.other_user?.avatar_url ? (
+                      <img src={activeConvo.other_user.avatar_url} className="w-full h-full object-cover" alt="" />
+                    ) : (
+                      <span>{getInitials(activeConvo.other_user?.display_name ?? null)}</span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-bold text-foreground block truncate text-sm">
+                      {activeConvo.other_user?.display_name || "Użytkownik"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto px-4 md:px-6 py-5">
+                  {messages.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center">
+                      <MessageSquare size={32} className="text-muted-foreground/30 mb-3" />
+                      <p className="text-sm text-muted-foreground/60">Napisz pierwszą wiadomość!</p>
+                    </div>
+                  ) : (
+                    groupMessagesByDate(messages).map((group) => (
+                      <div key={group.date}>
+                        <div className="flex items-center gap-3 my-5">
+                          <div className="flex-1 h-px bg-border/30" />
+                          <span className="text-[11px] font-medium text-muted-foreground/50 px-3 py-1">{group.date}</span>
+                          <div className="flex-1 h-px bg-border/30" />
+                        </div>
+                        <div className="space-y-1.5">
+                          {group.messages.map((msg, idx) => {
+                            const isMine = msg.sender_id === user?.id;
+                            const prevMsg = idx > 0 ? group.messages[idx - 1] : null;
+                            const isConsecutive = prevMsg && prevMsg.sender_id === msg.sender_id;
+                            return (
+                              <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"} ${!isConsecutive ? 'mt-3' : ''}`}>
+                                {!isMine && !isConsecutive && (
+                                  <div className="w-7 h-7 rounded-full bg-muted/60 flex items-center justify-center text-[10px] font-bold text-muted-foreground shrink-0 mr-2 mt-1">
+                                    {getInitials(activeConvo.other_user?.display_name ?? null)}
+                                  </div>
+                                )}
+                                {!isMine && isConsecutive && <div className="w-7 mr-2 shrink-0" />}
+                                <div className={`max-w-[70%] group relative ${
+                                  isMine
+                                    ? 'px-4 py-2.5 text-sm bg-primary text-primary-foreground rounded-[20px] rounded-br-[6px] shadow-sm'
+                                    : 'px-4 py-2.5 text-sm bg-card text-foreground rounded-[20px] rounded-bl-[6px] border border-border/30 shadow-sm'
+                                }`}>
+                                  <p className="whitespace-pre-wrap break-words leading-relaxed">{msg.content}</p>
+                                  <p className={`text-[10px] mt-1 opacity-0 group-hover:opacity-100 transition-opacity ${isMine ? "text-primary-foreground/50" : "text-muted-foreground/50"}`}>
+                                    {formatTime(msg.created_at)}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Input */}
+                <div className="shrink-0 px-4 md:px-5 py-3 border-t border-border/20">
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1">
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        placeholder="Napisz wiadomość..."
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                        className="w-full px-4 py-3 rounded-2xl bg-muted/40 text-sm text-foreground placeholder:text-muted-foreground/40 border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                      />
+                    </div>
+                    <button
+                      onClick={sendMessage}
+                      disabled={!newMessage.trim()}
+                      className="w-11 h-11 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center hover:shadow-[0_4px_16px_-2px_hsl(var(--primary)/0.5)] active:scale-[0.96] transition-all disabled:opacity-20 disabled:cursor-not-allowed shrink-0"
+                    >
+                      <Send size={16} className="translate-x-[1px]" />
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : activeNotification ? (
+              <>
+                <div className="shrink-0 px-5 py-3.5 border-b border-border/30 flex items-center gap-3">
+                  <button
+                    onClick={() => setActiveNotification(null)}
+                    className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all"
+                  >
+                    <ArrowLeft size={18} />
+                  </button>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                    activeNotification.type === 'exam_cancelled' ? 'bg-warning/10' : 'bg-primary/10'
+                  }`}>
+                    {getNotificationIcon(activeNotification.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-bold text-foreground block truncate text-sm">{activeNotification.title}</span>
+                    <span className="text-xs text-muted-foreground/60">{formatDate(activeNotification.created_at)}</span>
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto px-6 py-8">
+                  <div className="max-w-xl mx-auto">
+                    <h2 className="text-xl font-bold text-foreground mb-4 leading-tight">{activeNotification.title}</h2>
+                    <div className="bg-card rounded-2xl border border-border/30 p-5 shadow-sm">
+                      <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                        {activeNotification.message?.trim() || 'To powiadomienie nie zawiera dodatkowej treści.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* Empty state */
+              <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
+                <div className="mb-6">
+                  <svg width="120" height="100" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-40">
+                    <rect x="10" y="20" width="100" height="65" rx="8" className="stroke-muted-foreground" strokeWidth="2" fill="none" />
+                    <path d="M10 28L60 58L110 28" className="stroke-muted-foreground" strokeWidth="2" fill="none" />
+                    <rect x="35" y="45" width="50" height="3" rx="1.5" className="fill-primary/30" />
+                    <rect x="40" y="52" width="40" height="3" rx="1.5" className="fill-primary/20" />
+                    <rect x="45" y="59" width="30" height="3" rx="1.5" className="fill-primary/10" />
+                  </svg>
+                </div>
+                <p className="text-base text-muted-foreground/50 max-w-xs leading-relaxed">
+                  Naciśnij na wiadomość/powiadomienie,<br />aby zobaczyć całość.
+                </p>
+              </div>
+            )}
+          </div>
 
         </div>
       </div>
