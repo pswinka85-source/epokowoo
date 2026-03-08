@@ -1,7 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Bell } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -10,9 +9,9 @@ import logo from "@/assets/logo.png";
 const Header = () => {
   const location = useLocation();
   const { user } = useAuth();
-  const unreadCount = useUnreadMessages();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [initials, setInitials] = useState("U");
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -25,6 +24,21 @@ const Header = () => {
         if (data?.avatar_url) setAvatarUrl(data.avatar_url);
         if (data?.display_name) setInitials(data.display_name.charAt(0).toUpperCase());
       });
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const checkUnread = async () => {
+      const { count } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("read", false);
+      setHasUnreadNotifications((count || 0) > 0);
+    };
+    checkUnread();
+    const interval = setInterval(checkUnread, 30000);
+    return () => clearInterval(interval);
   }, [user]);
 
   if (location.pathname === "/") return null;
@@ -48,10 +62,8 @@ const Header = () => {
               aria-label="Wiadomości"
             >
               <Bell size={18} />
-              {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-primary text-primary-foreground text-[9px] font-bold rounded-full flex items-center justify-center">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
+              {hasUnreadNotifications && (
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-primary rounded-full ring-2 ring-card" />
               )}
             </Link>
             <Link to="/profil">
