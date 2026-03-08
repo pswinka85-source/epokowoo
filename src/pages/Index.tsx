@@ -121,15 +121,15 @@ const Index = () => {
   );
 };
 
-const StatCard = ({ icon, value, label, sublabel, color }: { icon: React.ReactNode; value: number | string; label: string; sublabel?: string; color: "primary" | "accent" }) => (
-  <div className="rounded-2xl border border-border bg-card p-5 flex items-center gap-4">
-    <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${color === "primary" ? "bg-primary/10 text-primary" : "bg-accent/10 text-accent"}`}>
+const StatCard = ({ icon, value, label, sublabel }: { icon: React.ReactNode; value: number | string; label: string; sublabel?: string }) => (
+  <div className="rounded-2xl bg-primary-foreground/10 backdrop-blur-sm p-5 flex items-center gap-4">
+    <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-primary-foreground/15 text-primary-foreground">
       {icon}
     </div>
     <div>
-      <p className="font-display text-2xl font-bold text-foreground leading-none">{value}</p>
-      <p className="text-sm text-muted-foreground font-body mt-0.5">{label}</p>
-      {sublabel && <p className="text-xs text-muted-foreground/70 font-body">{sublabel}</p>}
+      <p className="font-display text-2xl font-bold text-primary-foreground leading-none">{value}</p>
+      <p className="text-sm text-primary-foreground/70 font-body mt-0.5">{label}</p>
+      {sublabel && <p className="text-xs text-primary-foreground/50 font-body">{sublabel}</p>}
     </div>
   </div>
 );
