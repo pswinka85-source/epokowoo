@@ -7,6 +7,7 @@ import barokIcon from "@/assets/barok-icon.png";
 import oswiececenieIcon from "@/assets/oswiecenie-icon.png";
 import wspolczesnoscIcon from "@/assets/wspolczesnosc-icon.png";
 import romantyzmIcon from "@/assets/romantyzm-icon.png";
+import mlodaPolskaIcon from "@/assets/mloda-polska-icon.png";
 
 interface EpochCardProps {
   epoch: EpochData;
