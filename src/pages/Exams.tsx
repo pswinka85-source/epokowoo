@@ -508,20 +508,15 @@ const Exams = () => {
 
         {/* My exams section */}
         <div className="mt-10 rounded-3xl border border-border/40 bg-card shadow-[var(--shadow-card)] overflow-hidden">
-          <div className="px-6 sm:px-8 py-5 border-b border-border/30 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Zap size={18} className="text-primary" />
-            </div>
-            <div>
-              <h2 className="font-display text-lg font-bold text-foreground">Moje egzaminy</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Zaplanowane i zakończone</p>
-            </div>
+          <div className="px-6 sm:px-8 py-5 border-b border-border/30">
+            <h2 className="font-display text-lg font-bold text-foreground">Moje egzaminy</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Zaplanowane i zakończone</p>
           </div>
           <div className="p-6 sm:p-8">
             {bookings.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-14 text-center">
                 <div className="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center mb-4">
-                  <GraduationCap size={28} className="text-muted-foreground/30" />
+                  <Calendar size={28} className="text-muted-foreground/30" />
                 </div>
                 <p className="text-sm font-semibold text-muted-foreground">Brak zaplanowanych egzaminów</p>
                 <p className="text-xs text-muted-foreground/60 mt-1">Wybierz termin w kalendarzu powyżej</p>
