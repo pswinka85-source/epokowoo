@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Clock, CreditCard, CheckCircle, ChevronLeft, ChevronRight, AlertTriangle, XCircle, ShieldCheck, Loader2, Sparkles } from "lucide-react";
+import { Calendar, Clock, CreditCard, ChevronLeft, ChevronRight, AlertTriangle, XCircle, ShieldCheck, Loader2, GraduationCap, BookOpen, Timer, Wallet, ArrowRight, Zap } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -254,7 +254,6 @@ const Exams = () => {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const days: (Date | null)[] = [];
-    // Monday-start: getDay() returns 0=Sun, we want Mon=0
     const startDay = (firstDay.getDay() + 6) % 7;
     for (let i = 0; i < startDay; i++) days.push(null);
     for (let i = 1; i <= lastDay.getDate(); i++) days.push(new Date(year, month, i));
@@ -286,190 +285,251 @@ const Exams = () => {
   today.setHours(0, 0, 0, 0);
   const isToday = (date: Date) => date.toDateString() === new Date().toDateString();
 
+  const infoCards = [
+    { icon: GraduationCap, title: "Egzamin ustny", desc: "Sprawdź wiedzę z epok literackich z egzaminatorem", color: "bg-primary/10 text-primary" },
+    { icon: Timer, title: "20 minut", desc: "Czas trwania jednego podejścia do egzaminu", color: "bg-accent/10 text-accent" },
+    { icon: Wallet, title: `${EXAM_PRICE} zł`, desc: "Koszt jednego egzaminu, możliwość zwrotu", color: "bg-success/10 text-success" },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero — matching Index.tsx */}
-      <header className="relative overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 md:pt-20 md:pb-14">
-          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2">
-            Egzaminy
-          </h1>
-          <p className="text-lg text-muted-foreground font-body leading-relaxed mb-4">
-            Egzamin z egzaminatorem – 20 minut, {EXAM_PRICE} zł
-          </p>
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2"><Clock size={16} /><span>20 minut</span></div>
-            <div className="flex items-center gap-2"><CreditCard size={16} /><span>{EXAM_PRICE} zł</span></div>
-            <div className="flex items-center gap-2"><Calendar size={16} /><span>Min. {MIN_DAYS_BEFORE_BOOKING} dni wcześniej</span></div>
+      {/* Hero section */}
+      <header className="relative overflow-hidden border-b border-border/30">
+        {/* Decorative blobs */}
+        <div className="absolute -top-20 -left-20 w-80 h-80 bg-primary/6 rounded-full blur-[100px]" />
+        <div className="absolute -bottom-20 right-0 w-96 h-96 bg-accent/6 rounded-full blur-[100px]" />
+        
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-12 md:pt-20 md:pb-16">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <BookOpen size={22} className="text-primary" />
+            </div>
+            <span className="text-xs font-bold uppercase tracking-widest text-primary font-body">Egzaminy ustne</span>
           </div>
+          <h1 className="font-display text-4xl md:text-5xl font-extrabold text-foreground leading-[1.05] mb-3">
+            Zarezerwuj swój
+            <br />
+            <span className="text-primary">egzamin</span>
+          </h1>
+          <p className="text-base md:text-lg text-muted-foreground font-body leading-relaxed max-w-xl">
+            Wybierz termin, potwierdź rezerwację i przygotuj się na egzamin ustny z doświadczonym egzaminatorem.
+          </p>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        {/* Calendar — modern design */}
-        <div className="rounded-3xl border border-border/40 bg-card shadow-[var(--shadow-elevated)] overflow-hidden">
-          {/* Calendar header */}
-          <div className="px-6 sm:px-8 py-5 flex items-center justify-between">
-            <div>
-              <h2 className="font-display text-xl font-bold text-foreground capitalize">{monthYear}</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">Wybierz dzień, aby zobaczyć dostępne terminy</p>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        {/* Info cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 -mt-6 relative z-10 mb-10">
+          {infoCards.map((card, i) => {
+            const Icon = card.icon;
+            return (
+              <div key={i} className="rounded-2xl border border-border/40 bg-card shadow-[var(--shadow-card)] p-5 flex items-start gap-4 hover:shadow-[var(--shadow-card-hover)] transition-shadow duration-300">
+                <div className={`w-11 h-11 rounded-xl ${card.color} flex items-center justify-center shrink-0`}>
+                  <Icon size={20} />
+                </div>
+                <div>
+                  <p className="font-display font-bold text-foreground text-[15px]">{card.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{card.desc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Main content: calendar + sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
+          {/* Calendar */}
+          <div className="rounded-3xl border border-border/40 bg-card shadow-[var(--shadow-card)] overflow-hidden">
+            {/* Calendar header */}
+            <div className="px-6 sm:px-8 py-5 flex items-center justify-between border-b border-border/30">
+              <div>
+                <h2 className="font-display text-xl font-bold text-foreground capitalize">{monthYear}</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">Kliknij dzień, aby zobaczyć wolne terminy</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => changeMonth(-1)}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button
+                  onClick={() => changeMonth(1)}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => changeMonth(-1)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <button
-                onClick={() => changeMonth(1)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-              >
-                <ChevronRight size={20} />
-              </button>
+
+            <div className="px-4 sm:px-6 pb-6 pt-4">
+              {/* Day names */}
+              <div className="grid grid-cols-7 mb-2">
+                {["Pn", "Wt", "Śr", "Cz", "Pt", "Sb", "Nd"].map((day, i) => (
+                  <div key={i} className="text-center text-[11px] font-bold text-muted-foreground/50 uppercase tracking-wider py-2">
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              {/* Calendar grid */}
+              <div className="grid grid-cols-7 gap-1">
+                {days.map((day, index) => {
+                  if (!day) return <div key={index} />;
+                  
+                  const dateStr = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;
+                  const hasSlots = datesWithSlots.has(dateStr);
+                  const isPast = day < today;
+                  const isSelected = selectedDate?.toDateString() === day.toDateString();
+                  const isTodayDate = isToday(day);
+                  
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => handleDateSelect(day)}
+                      disabled={isPast}
+                      className={`
+                        relative aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-semibold transition-all duration-200
+                        ${isPast
+                          ? "text-muted-foreground/20 cursor-not-allowed"
+                          : isSelected
+                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-[1.08]"
+                          : isTodayDate
+                          ? "bg-primary/8 ring-2 ring-primary/15 text-foreground hover:bg-primary/12"
+                          : hasSlots
+                          ? "bg-accent/8 text-foreground hover:bg-accent/15 hover:scale-105"
+                          : "text-foreground/80 hover:bg-secondary hover:scale-105"
+                        }
+                      `}
+                    >
+                      <span className="relative z-10">{day.getDate()}</span>
+                      {hasSlots && !isPast && (
+                        <span className="absolute bottom-1 flex gap-[3px]">
+                          <span className={`w-[5px] h-[5px] rounded-full ${isSelected ? "bg-primary-foreground" : "bg-accent"}`} />
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Legend */}
+              <div className="mt-5 pt-4 border-t border-border/30 flex items-center gap-5 text-[11px] text-muted-foreground">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-accent" />
+                  Dostępne terminy
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-primary" />
+                  Wybrany dzień
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full ring-2 ring-primary/20 bg-primary/10" />
+                  Dzisiaj
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="px-4 sm:px-6 pb-6">
-            {/* Day names — Monday first */}
-            <div className="grid grid-cols-7 mb-2">
-              {["Pn", "Wt", "Śr", "Cz", "Pt", "Sb", "Nd"].map((day, i) => (
-                <div key={i} className="text-center text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider py-3">
-                  {day}
-                </div>
-              ))}
+          {/* Right sidebar: selected day slots */}
+          <div className="rounded-3xl border border-border/40 bg-card shadow-[var(--shadow-card)] overflow-hidden lg:sticky lg:top-24">
+            <div className="px-6 py-5 border-b border-border/30">
+              <h3 className="font-display font-bold text-foreground text-base">
+                {selectedDate 
+                  ? selectedDate.toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long" })
+                  : "Wolne terminy"
+                }
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {selectedDate ? "Wybierz godzinę egzaminu" : "Wybierz dzień w kalendarzu"}
+              </p>
             </div>
 
-            {/* Calendar grid */}
-            <div className="grid grid-cols-7 gap-1.5">
-              {days.map((day, index) => {
-                if (!day) return <div key={index} />;
-                
-                const dateStr = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;
-                const hasSlots = datesWithSlots.has(dateStr);
-                const isPast = day < today;
-                const isSelected = selectedDate?.toDateString() === day.toDateString();
-                const isTodayDate = isToday(day);
-                
-                return (
-                  <button
-                    key={index}
-                    onClick={() => handleDateSelect(day)}
-                    disabled={isPast}
-                    className={`
-                      relative aspect-square rounded-2xl flex flex-col items-center justify-center text-sm font-medium transition-all duration-200
-                      ${isPast
-                        ? "text-muted-foreground/25 cursor-not-allowed"
-                        : isSelected
-                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-105"
-                        : isTodayDate
-                        ? "bg-secondary ring-2 ring-primary/20 text-foreground hover:bg-primary/10"
-                        : hasSlots
-                        ? "bg-accent/10 text-foreground hover:bg-accent/20 hover:scale-105"
-                        : "text-foreground hover:bg-secondary hover:scale-105"
-                      }
-                    `}
-                  >
-                    <span className="relative z-10">{day.getDate()}</span>
-                    {hasSlots && !isPast && (
-                      <span className={`absolute bottom-1.5 flex gap-0.5`}>
-                        <span className={`w-1 h-1 rounded-full ${isSelected ? "bg-primary-foreground" : "bg-accent"}`} />
-                        <span className={`w-1 h-1 rounded-full ${isSelected ? "bg-primary-foreground/60" : "bg-accent/50"}`} />
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Available slots for selected date */}
-            {selectedDate && (
-              <div className="mt-8 pt-6 border-t border-border/40">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Sparkles size={18} className="text-primary" />
+            <div className="p-5">
+              {!selectedDate ? (
+                <div className="flex flex-col items-center justify-center py-10 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-secondary/60 flex items-center justify-center mb-4">
+                    <Calendar size={26} className="text-muted-foreground/30" />
                   </div>
-                  <div>
-                    <h3 className="font-display font-bold text-foreground">
-                      {selectedDate.toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long" })}
-                    </h3>
-                    <p className="text-xs text-muted-foreground">Dostępne godziny</p>
-                  </div>
+                  <p className="text-sm text-muted-foreground/60 font-medium">Kliknij dzień w kalendarzu,<br/>aby zobaczyć dostępne godziny</p>
                 </div>
-                {loadingSlots ? (
-                  <div className="flex items-center justify-center py-10">
-                    <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+              ) : loadingSlots ? (
+                <div className="flex items-center justify-center py-14">
+                  <div className="w-7 h-7 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                </div>
+              ) : availableSlots.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-center">
+                  <div className="w-14 h-14 rounded-2xl bg-secondary/50 flex items-center justify-center mb-3">
+                    <Calendar size={22} className="text-muted-foreground/30" />
                   </div>
-                ) : availableSlots.length === 0 ? (
-                  <div className="text-center py-10">
-                    <div className="w-14 h-14 rounded-2xl bg-secondary/50 flex items-center justify-center mx-auto mb-3">
-                      <Calendar size={24} className="text-muted-foreground/40" />
-                    </div>
-                    <p className="text-sm text-muted-foreground">Brak dostępnych terminów w tym dniu</p>
-                  </div>
-                ) : (
-                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {availableSlots.map((slot) => {
-                      const canBook = isWithinBookingWindow(slot.slot_date);
-                      return (
-                        <button
-                          key={slot.id}
-                          onClick={() => handleSlotSelect(slot)}
-                          disabled={!canBook}
-                          title={!canBook ? `Zapisy otwierają się minimum ${MIN_DAYS_BEFORE_BOOKING} dni przed terminem` : undefined}
-                          className={`group p-4 rounded-2xl border text-left transition-all duration-200 ${
-                            canBook
-                              ? "border-border/40 bg-secondary/30 hover:bg-primary/5 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5"
-                              : "border-border/20 bg-muted/30 text-muted-foreground cursor-not-allowed opacity-50"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            {slot.examiner_avatar ? (
-                              <img src={slot.examiner_avatar} alt="" className="w-9 h-9 rounded-xl object-cover shrink-0" />
-                            ) : (
-                              <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
-                                {(slot.examiner_name || "E")[0].toUpperCase()}
-                              </div>
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-base font-bold text-foreground">{formatTime(slot.slot_time)}</p>
-                              <p className="text-xs text-muted-foreground truncate">{slot.examiner_name}</p>
+                  <p className="text-sm text-muted-foreground font-medium">Brak wolnych terminów</p>
+                  <p className="text-xs text-muted-foreground/60 mt-1">Spróbuj inny dzień</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {availableSlots.map((slot) => {
+                    const canBook = isWithinBookingWindow(slot.slot_date);
+                    return (
+                      <button
+                        key={slot.id}
+                        onClick={() => handleSlotSelect(slot)}
+                        disabled={!canBook}
+                        title={!canBook ? `Zapisy min. ${MIN_DAYS_BEFORE_BOOKING} dni przed terminem` : undefined}
+                        className={`group w-full p-3.5 rounded-xl border text-left transition-all duration-200 ${
+                          canBook
+                            ? "border-border/40 bg-secondary/20 hover:bg-primary/5 hover:border-primary/30 hover:shadow-md"
+                            : "border-border/20 bg-muted/20 text-muted-foreground cursor-not-allowed opacity-40"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          {slot.examiner_avatar ? (
+                            <img src={slot.examiner_avatar} alt="" className="w-9 h-9 rounded-lg object-cover shrink-0" />
+                          ) : (
+                            <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                              {(slot.examiner_name || "E")[0].toUpperCase()}
                             </div>
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${canBook ? "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground" : ""}`}>
-                              <Clock size={14} />
-                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[15px] font-bold text-foreground">{formatTime(slot.slot_time)}</p>
+                            <p className="text-[11px] text-muted-foreground truncate">{slot.examiner_name}</p>
                           </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${canBook ? "bg-primary/8 text-primary group-hover:bg-primary group-hover:text-primary-foreground" : ""}`}>
+                            <ArrowRight size={14} />
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Moje egzaminy — full width below calendar */}
-        <div className="mt-8 rounded-3xl border border-border/40 bg-card shadow-[var(--shadow-card)] overflow-hidden">
-          <div className="px-6 sm:px-8 py-5 border-b border-border/30">
-            <h2 className="font-display text-lg font-bold text-foreground">Moje egzaminy</h2>
-            <p className="text-sm text-muted-foreground mt-0.5">Twoje zaplanowane i zakończone egzaminy</p>
+        {/* My exams section */}
+        <div className="mt-10 rounded-3xl border border-border/40 bg-card shadow-[var(--shadow-card)] overflow-hidden">
+          <div className="px-6 sm:px-8 py-5 border-b border-border/30 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Zap size={18} className="text-primary" />
+            </div>
+            <div>
+              <h2 className="font-display text-lg font-bold text-foreground">Moje egzaminy</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Zaplanowane i zakończone</p>
+            </div>
           </div>
           <div className="p-6 sm:p-8">
             {bookings.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-14 text-center">
                 <div className="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center mb-4">
-                  <Calendar size={28} className="text-muted-foreground/40" />
+                  <GraduationCap size={28} className="text-muted-foreground/30" />
                 </div>
-                <p className="text-sm font-medium text-muted-foreground">Brak wykupionych egzaminów</p>
-                <p className="text-xs text-muted-foreground/70 mt-1">Wybierz termin w kalendarzu powyżej</p>
+                <p className="text-sm font-semibold text-muted-foreground">Brak zaplanowanych egzaminów</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">Wybierz termin w kalendarzu powyżej</p>
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {bookings.map((b) => (
-                  <div key={b.id} className="p-5 rounded-2xl border border-border/40 bg-secondary/20 hover:bg-secondary/30 transition-colors">
+                  <div key={b.id} className="p-5 rounded-2xl border border-border/40 bg-secondary/15 hover:bg-secondary/25 transition-all duration-200 hover:shadow-[var(--shadow-card)]">
                     <div className="flex items-start gap-3">
                       {b.examiner_avatar ? (
                         <img src={b.examiner_avatar} alt="" className="w-11 h-11 rounded-xl object-cover shrink-0" />
@@ -479,10 +539,10 @@ const Exams = () => {
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-display font-bold text-foreground truncate">
+                        <p className="font-display font-bold text-foreground text-[14px] truncate">
                           {b.exam_availability && formatDate(b.exam_availability.slot_date)}
                         </p>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1.5">
                           <span className="flex items-center gap-1"><Clock size={12} /> {b.exam_availability && formatTime(b.exam_availability.slot_time)}</span>
                           <span className="truncate">{b.examiner_name}</span>
                         </div>
@@ -490,20 +550,20 @@ const Exams = () => {
                         {b.rescheduled && (
                           <div className="mt-3 p-3 rounded-xl bg-warning/10 border border-warning/20">
                             <div className="flex items-center gap-1.5 text-warning">
-                              <AlertTriangle size={14} />
-                              <span className="text-xs font-semibold">Termin zmieniony</span>
+                              <AlertTriangle size={13} />
+                              <span className="text-xs font-bold">Termin zmieniony</span>
                             </div>
                             {b.original_slot_time && (
-                              <p className="text-xs text-warning/80 mt-1">
+                              <p className="text-[11px] text-warning/80 mt-1">
                                 Poprzednia godzina: {formatTime(b.original_slot_time)}
                               </p>
                             )}
                             <button
                               onClick={() => handleCancelBooking(b)}
                               disabled={cancellingId === b.id}
-                              className="mt-2 h-8 px-3 rounded-lg bg-destructive/10 text-destructive text-xs font-medium hover:bg-destructive/20 disabled:opacity-50 flex items-center gap-1.5 transition-colors"
+                              className="mt-2 h-7 px-3 rounded-lg bg-destructive/10 text-destructive text-[11px] font-semibold hover:bg-destructive/20 disabled:opacity-50 flex items-center gap-1.5 transition-colors"
                             >
-                              <XCircle size={13} />
+                              <XCircle size={12} />
                               {cancellingId === b.id ? "Anuluję..." : "Wypisz się (zwrot 19,99 zł)"}
                             </button>
                           </div>
