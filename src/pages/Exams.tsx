@@ -176,15 +176,17 @@ const Exams = () => {
     if (!user || !confirmSlot) return;
     setPaymentProcessing(true);
 
-    const { data: activeBooking } = await supabase
+    // Check if user already has an exam on this specific day
+    const { data: existingBookingOnDay } = await supabase
       .from("exam_bookings")
-      .select("id")
+      .select("id, exam_availability!inner(slot_date)")
       .eq("user_id", user.id)
       .eq("status", "scheduled")
+      .eq("exam_availability.slot_date", confirmSlot.slot_date)
       .maybeSingle();
 
-    if (activeBooking) {
-      toast.error("Masz już aktywny egzamin. Zakończ go lub anuluj przed zakupem kolejnego.");
+    if (existingBookingOnDay) {
+      toast.error("Masz już egzamin zaplanowany na ten dzień. Wypisz się najpierw lub wybierz inny termin.");
       setPaymentProcessing(false);
       setConfirmSlot(null);
       return;
