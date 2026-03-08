@@ -414,7 +414,7 @@ const Contact = () => {
                         <button
                           key={`conv-${c.id}`}
                           onClick={() => { setActiveConvo(c); setActiveNotification(null); }}
-                          className={`w-full flex items-start gap-3.5 px-5 py-4 transition-all duration-200 text-left ${
+                          className={`w-full flex items-start gap-3 px-4 py-3 transition-all duration-200 text-left ${
                             isActive
                               ? 'bg-primary/[0.06]'
                               : 'hover:bg-muted/30'
@@ -422,43 +422,43 @@ const Contact = () => {
                         >
                           {/* Avatar */}
                           <div className="relative shrink-0">
-                            <div className={`w-[48px] h-[48px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
+                            <div className={`w-[44px] h-[44px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
                               c.unread_count > 0
-                                ? 'ring-[2.5px] ring-primary/50'
+                                ? 'ring-2 ring-primary/50'
                                 : ''
                             } bg-muted/60 text-muted-foreground`}>
                               {c.other_user?.avatar_url ? (
                                 <img src={c.other_user.avatar_url} className="w-full h-full object-cover" alt="" />
                               ) : (
-                                <span className="text-[15px]">{getInitials(c.other_user?.display_name ?? null)}</span>
+                                <span className="text-[13px]">{getInitials(c.other_user?.display_name ?? null)}</span>
                               )}
                             </div>
                             {/* Online indicator dots */}
                             <span className="absolute bottom-0 left-0 flex gap-[2px]">
-                              <span className="w-[9px] h-[9px] rounded-full bg-foreground border-[1.5px] border-background" />
-                              <span className="w-[9px] h-[9px] rounded-full bg-foreground border-[1.5px] border-background" />
+                              <span className="w-2 h-2 rounded-full bg-foreground border border-background" />
+                              <span className="w-2 h-2 rounded-full bg-foreground border border-background" />
                             </span>
                           </div>
 
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="text-[14px] font-bold text-foreground truncate">
+                              <span className="text-[13px] font-bold text-foreground truncate">
                                 {c.other_user?.display_name || "Użytkownik"}
                               </span>
                               {verifiedUsers.has(c.user1_id === user?.id ? c.user2_id : c.user1_id) && (
-                                <img src={verifiedBadge} alt="Zweryfikowany" className="w-4 h-4 shrink-0" />
+                                <img src={verifiedBadge} alt="Zweryfikowany" className="w-[15px] h-[15px] shrink-0" />
                               )}
                             </div>
-                            <p className="text-[11px] text-muted-foreground/60 mb-1.5">
+                            <p className="text-[10px] text-muted-foreground/60 mb-1">
                               Aktywny: {formatTimeAgo(c.last_message_at)}
                             </p>
                             {c.last_message && (
                               <>
-                                <p className="text-[12px] font-bold text-foreground truncate leading-snug">
-                                  {c.last_message.length > 40 ? "Re: " + c.last_message.slice(0, 32) + "..." : c.last_message}
+                                <p className="text-[11px] font-bold text-foreground truncate leading-snug">
+                                  {c.last_message.length > 34 ? "Re: " + c.last_message.slice(0, 28) + "..." : c.last_message}
                                 </p>
-                                <p className="text-[11px] text-muted-foreground/40 truncate mt-0.5 leading-relaxed">
+                                <p className="text-[10px] text-muted-foreground/40 truncate mt-0.5 leading-relaxed">
                                   {c.last_message}
                                 </p>
                               </>
