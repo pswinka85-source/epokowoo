@@ -60,9 +60,32 @@ const Exams = () => {
   const [confirmSlot, setConfirmSlot] = useState<(ExamAvailability & { examiner_name?: string; examiner_avatar?: string | null }) | null>(null);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [datesWithSlots, setDatesWithSlots] = useState<Set<string>>(new Set());
+
   useEffect(() => {
     if (!authLoading && !user) navigate("/");
   }, [user, authLoading, navigate]);
+
+  // Load dates that have available slots for current month
+  useEffect(() => {
+    const loadDatesWithSlots = async () => {
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+      const firstDay = `${year}-${String(month + 1).padStart(2, "0")}-01`;
+      const lastDay = `${year}-${String(month + 1).padStart(2, "0")}-${new Date(year, month + 1, 0).getDate()}`;
+      
+      const { data } = await supabase
+        .from("exam_availability")
+        .select("slot_date")
+        .eq("status", "available")
+        .gte("slot_date", firstDay)
+        .lte("slot_date", lastDay);
+      
+      if (data) {
+        setDatesWithSlots(new Set(data.map((d: any) => d.slot_date)));
+      }
+    };
+    loadDatesWithSlots();
+  }, [currentMonth]);
 
   // Load user bookings
   useEffect(() => {
