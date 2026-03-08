@@ -111,7 +111,7 @@ const Index = () => {
 
       {/* Epochs grid */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <img src={epokiTitle} alt="Epoki" className="h-10 md:h-14 w-auto mb-6" />
+        <img src={epokiTitle} alt="Epoki" className="h-5 md:h-7 w-auto mb-6" />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {epochs.map((epoch, index) => (
             <EpochCard key={epoch.id} epoch={epoch} index={index} />
