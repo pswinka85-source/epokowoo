@@ -5,6 +5,7 @@ import sredniowieczeIcon from "@/assets/sredniowiecze-icon.png";
 import renesansIcon from "@/assets/renesans-icon.png";
 import barokIcon from "@/assets/barok-icon.png";
 import oswiececenieIcon from "@/assets/oswiecenie-icon.png";
+import wspolczesnoscIcon from "@/assets/wspolczesnosc-icon.png";
 
 interface EpochCardProps {
   epoch: EpochData;
