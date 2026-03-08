@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import type { EpochData } from "@/data/epochs";
 import antykIcon from "@/assets/antyk-icon.png";
+import sredniowieczeIcon from "@/assets/sredniowiecze-icon.png";
 
 interface EpochCardProps {
   epoch: EpochData;
@@ -34,6 +35,8 @@ const EpochCard = ({ epoch, index }: EpochCardProps) => {
           <div className="flex items-center gap-3 mb-3">
             {epoch.id === "antyk" ? (
               <img src={antykIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
+            ) : epoch.id === "sredniowiecze" ? (
+              <img src={sredniowieczeIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
             ) : (
               <span className="text-3xl" role="img" aria-label={epoch.name}>
                 {epoch.icon}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import antykIcon from "@/assets/antyk-icon.png";
+import sredniowieczeIcon from "@/assets/sredniowiecze-icon.png";
 import { useParams, Link } from "react-router-dom";
 import { epochs } from "@/data/epochs";
 import type { Lesson, LessonBlock } from "@/data/lessons";
@@ -214,6 +215,8 @@ const EpochDetail = () => {
             <div className="flex items-center gap-5">
               {epoch.id === "antyk" ? (
                 <img src={antykIcon} alt={epoch.name} className="w-12 h-12 object-contain" />
+              ) : epoch.id === "sredniowiecze" ? (
+                <img src={sredniowieczeIcon} alt={epoch.name} className="w-12 h-12 object-contain" />
               ) : (
                 <span className="text-5xl">{epoch.icon}</span>
               )}
