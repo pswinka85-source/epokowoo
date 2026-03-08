@@ -422,11 +422,6 @@ const Contact = () => {
                               <span className="text-[15px]">{getInitials(c.other_user?.display_name ?? null)}</span>
                             )}
                           </div>
-                          {/* Online indicator dots */}
-                          <span className="absolute -left-[26px] bottom-auto top-[18px] flex gap-[2px] z-10">
-                            <span className="w-2 h-2 rounded-full bg-foreground border border-background" />
-                            <span className="w-2 h-2 rounded-full bg-foreground border border-background" />
-                          </span>
 
                           {/* Card */}
                           <button
@@ -467,8 +462,8 @@ const Contact = () => {
                       return (
                         <div key={`notif-${n.id}`} className="relative">
                           {/* Avatar overlapping top-left corner with notification badge */}
-                          <div className="absolute -left-[26px] -top-[26px] w-[52px] h-[52px] rounded-full bg-muted/40 flex items-center justify-center text-[14px] font-bold text-muted-foreground z-10">
-                            ES
+                          <div className="absolute -left-[26px] -top-[26px] w-[52px] h-[52px] rounded-full bg-primary/10 flex items-center justify-center z-10">
+                            <Bell size={22} className="text-primary" />
                             <span className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center border-2 border-background ${
                               n.type === 'warning' || n.type === 'exam_cancelled' ? 'bg-warning' : n.type === 'success' ? 'bg-success' : 'bg-info'
                             }`}>
