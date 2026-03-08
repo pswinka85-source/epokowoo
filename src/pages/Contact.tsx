@@ -110,6 +110,16 @@ const Contact = () => {
       .select("user_id, display_name, avatar_url")
       .in("user_id", otherIds);
 
+    // Fetch roles for other users to show verified badge for admins/examiners
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("user_id, role")
+      .in("user_id", otherIds)
+      .in("role", ["admin", "examiner"]);
+
+    const verifiedSet = new Set((roles || []).map((r) => r.user_id));
+    setVerifiedUsers(verifiedSet);
+
     const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
 
     const enriched = await Promise.all(
