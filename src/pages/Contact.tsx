@@ -347,7 +347,7 @@ const Contact = () => {
         <div className="flex gap-0 overflow-hidden" style={{ height: "calc(100vh - 260px)", minHeight: 480 }}>
 
           {/* LEFT PANEL — Unified list */}
-          <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full flex-col`}>
+          <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full md:w-[480px] flex-col shrink-0 border-r border-border/40`}>
 
             {/* Search toggle */}
             {showSearch && (
