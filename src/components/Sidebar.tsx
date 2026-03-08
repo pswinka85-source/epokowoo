@@ -2,7 +2,6 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { Lightbulb, Inbox, Clock, PenLine, Settings, ShieldCheck } from "lucide-react";
-import logo from "@/assets/logo.png";
 
 const Sidebar = () => {
   const location = useLocation();
