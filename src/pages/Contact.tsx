@@ -361,7 +361,7 @@ const Contact = () => {
             {/* Zakładki */}
             <div className="flex border-b border-gray-200">
               <button
-                onClick={() => setActiveTab('messages')}
+                onClick={() => handleTabChange('messages')}
                 className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                   activeTab === 'messages'
                     ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
@@ -379,7 +379,7 @@ const Contact = () => {
                 </div>
               </button>
               <button
-                onClick={() => setActiveTab('notifications')}
+                onClick={() => handleTabChange('notifications')}
                 className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                   activeTab === 'notifications'
                     ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
