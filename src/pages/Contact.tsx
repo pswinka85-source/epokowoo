@@ -497,42 +497,55 @@ const Contact = () => {
                     ))}
                   </div>
                 )
+              ) : notifications.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                    <Bell size={32} className="text-gray-400" />
+                  </div>
+                  <p className="text-sm font-medium text-gray-900 mb-1">Brak powiadomień</p>
+                  <p className="text-xs text-gray-500">Tutaj pojawią się powiadomienia o egzaminach</p>
+                </div>
               ) : (
                 <div className="px-2">
-                  {systemMessages.map((msg) => (
+                  {notifications.map((n) => (
                     <button
-                      key={msg.id}
+                      key={n.id}
+                      onClick={() => !n.read && markNotificationAsRead(n.id)}
                       className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left mb-1 ${
-                        !msg.read
+                        !n.read
                           ? 'bg-blue-50 border border-blue-200'
                           : 'hover:bg-gray-50 border border-transparent'
                       }`}
                     >
                       <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                        {msg.type === 'system' ? (
-                          <Bell size={18} className="text-gray-600" />
+                        {n.type === 'exam_cancelled' ? (
+                          <Bell size={18} className="text-amber-500" />
                         ) : (
-                          <Mail size={18} className="text-gray-600" />
+                          <Bell size={18} className="text-gray-600" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
                           <span className={`text-sm font-semibold truncate ${
-                            !msg.read ? 'text-gray-900' : 'text-gray-700'
+                            !n.read ? 'text-gray-900' : 'text-gray-700'
                           }`}>
-                            {msg.title}
+                            {n.title}
                           </span>
                           <span className="text-xs text-gray-500 shrink-0">
-                            {formatDate(msg.date)}
+                            {formatDate(n.created_at)}
                           </span>
                         </div>
-                        <p className={`text-xs truncate mt-1 ${
-                          !msg.read ? 'text-gray-900 font-medium' : 'text-gray-500'
-                        }`}>
-                          {msg.content}
-                        </p>
+                        {n.message && (
+                          <p className={`text-xs truncate mt-1 ${
+                            !n.read ? 'text-gray-900 font-medium' : 'text-gray-500'
+                          }`}>
+                            {n.message}
+                          </p>
+                        )}
                       </div>
                     </button>
+                  ))}
+                </div>
                   ))}
                 </div>
               )}
