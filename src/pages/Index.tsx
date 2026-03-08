@@ -130,7 +130,7 @@ const Index = () => {
                 <div className="flex items-center gap-3 mb-3">
                   <img src={rozprawkaIcon} alt="Rozprawka" className="w-8 h-8 object-contain" />
                   <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground font-body px-2 py-0.5 rounded-full bg-secondary">
-                    Matura
+                    Tekst argumentacyjny
                   </span>
                 </div>
                 <h3 className="font-display text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
