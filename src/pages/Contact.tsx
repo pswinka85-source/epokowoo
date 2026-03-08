@@ -411,7 +411,7 @@ const Contact = () => {
                       const c = item.data;
                       const isActive = activeConvo?.id === c.id;
                       return (
-                        <div key={`conv-${c.id}`} className="relative ml-5">
+                        <div key={`conv-${c.id}`} className="relative ml-0">
                           {/* Avatar on left edge, overlapping left and bottom */}
                           <div className="absolute -left-[26px] -top-[26px] z-10">
                             <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
