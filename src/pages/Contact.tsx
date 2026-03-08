@@ -440,7 +440,7 @@ const Contact = () => {
                             }`}
                           >
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="text-[15px] font-bold text-foreground truncate">
+                              <span className="text-[17px] font-bold text-foreground truncate">
                                 {c.other_user?.display_name || "Użytkownik"}
                               </span>
                               {verifiedUsers.has(c.user1_id === user?.id ? c.user2_id : c.user1_id) && (
