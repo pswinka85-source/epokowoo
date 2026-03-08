@@ -150,13 +150,14 @@ const Exams = () => {
     now.setHours(0, 0, 0, 0);
     const slot = new Date(slotDate + "T00:00:00");
     const diffDays = Math.ceil((slot.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    return diffDays >= 0 && diffDays <= MAX_DAYS_BEFORE_BOOKING;
+    // Musi być minimum MIN_DAYS_BEFORE_BOOKING dni przed terminem
+    return diffDays >= MIN_DAYS_BEFORE_BOOKING;
   };
 
   const handleSlotSelect = async (slot: ExamAvailability & { examiner_name?: string; examiner_avatar?: string | null }) => {
     if (!user) return;
     if (!isWithinBookingWindow(slot.slot_date)) {
-      toast.error(`Zapisy możliwe max ${MAX_DAYS_BEFORE_BOOKING} dni przed terminem`);
+      toast.error(`Zapisy możliwe minimum ${MIN_DAYS_BEFORE_BOOKING} dni przed terminem`);
       return;
     }
 
