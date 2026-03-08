@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Search, Send, ArrowLeft, MessageSquare, Bell, Mail, AlertTriangle, Info, Calendar, Check } from "lucide-react";
 import { toast } from "sonner";
 import verifiedBadge from "@/assets/verified-badge.png";
+import envelopeIllustration from "@/assets/envelope-illustration.png";
 
 interface Profile {
   user_id: string;
