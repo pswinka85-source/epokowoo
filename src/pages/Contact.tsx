@@ -507,7 +507,7 @@ const Contact = () => {
           </div>
 
           {/* RIGHT PANEL */}
-          <div className={`${isDetailOpen ? 'flex' : 'hidden md:flex'} flex-1 flex-col border-l border-border/30 bg-card rounded-3xl shadow-[var(--shadow-card)] ml-4 overflow-hidden`}>
+          <div className={`${isDetailOpen ? 'flex' : 'hidden md:flex'} flex-1 flex-col bg-card rounded-3xl shadow-[var(--shadow-card)] ml-5 overflow-hidden`}>
             {activeConvo ? (
               <>
                 {/* Chat header */}
