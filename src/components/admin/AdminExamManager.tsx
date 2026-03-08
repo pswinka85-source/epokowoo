@@ -361,12 +361,45 @@ const AdminExamManager = () => {
     loadData();
   };
 
-  const handleCancelBooking = async (bookingId: string, availabilityId: string) => {
-    setCancelling(bookingId);
-    await supabase.from("exam_bookings").update({ status: "refunded" }).eq("id", bookingId);
-    await supabase.from("exam_availability").update({ status: "available" }).eq("id", availabilityId);
-    toast.success("Egzamin anulowany. Zwrot 19,99 zł.");
+  const openCancelDialog = (booking: BookingRow) => {
+    setCancelDialog({
+      bookingId: booking.id,
+      availabilityId: booking.availability_id,
+      userId: booking.user_id,
+      slotDate: booking.exam_availability?.slot_date || "",
+      slotTime: booking.exam_availability?.slot_time || "",
+    });
+    setCancelReason(CANCEL_REASONS[0]);
+    setCustomReason("");
+  };
+
+  const handleCancelBooking = async () => {
+    if (!cancelDialog) return;
+    setCancelling(cancelDialog.bookingId);
+
+    const reason = cancelReason === "Inne" ? customReason : cancelReason;
+    const formattedDate = new Date(cancelDialog.slotDate + "T12:00:00").toLocaleDateString("pl-PL", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+    const formattedTime = cancelDialog.slotTime.slice(0, 5);
+
+    // Cancel booking and free slot
+    await supabase.from("exam_bookings").update({ status: "refunded" }).eq("id", cancelDialog.bookingId);
+    await supabase.from("exam_availability").update({ status: "available" }).eq("id", cancelDialog.availabilityId);
+
+    // Create notification for the user
+    await supabase.from("notifications").insert({
+      user_id: cancelDialog.userId,
+      type: "exam_cancelled",
+      title: "Egzamin został anulowany",
+      message: `Twój egzamin zaplanowany na ${formattedDate} o ${formattedTime} został anulowany. Powód: ${reason}. Kwota 19,99 zł została zwrócona.`,
+    });
+
+    toast.success("Egzamin anulowany. Powiadomienie wysłane.");
     setCancelling(null);
+    setCancelDialog(null);
     loadData();
   };
 
