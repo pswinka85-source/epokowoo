@@ -32,9 +32,13 @@ const EpochCard = ({ epoch, index }: EpochCardProps) => {
       >
         <div className="flex flex-col h-full">
           <div className="flex items-center gap-3 mb-3">
-            <span className="text-3xl" role="img" aria-label={epoch.name}>
-              {epoch.icon}
-            </span>
+            {epoch.id === "antyk" ? (
+              <img src={antykIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
+            ) : (
+              <span className="text-3xl" role="img" aria-label={epoch.name}>
+                {epoch.icon}
+              </span>
+            )}
             <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground font-body px-2 py-0.5 rounded-full bg-secondary">
               {epoch.period}
             </span>

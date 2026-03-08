@@ -212,7 +212,11 @@ const EpochDetail = () => {
               {epoch.period}
             </span>
             <div className="flex items-center gap-5">
-              <span className="text-5xl">{epoch.icon}</span>
+              {epoch.id === "antyk" ? (
+                <img src={antykIcon} alt={epoch.name} className="w-12 h-12 object-contain" />
+              ) : (
+                <span className="text-5xl">{epoch.icon}</span>
+              )}
               <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground">{epoch.name}</h1>
             </div>
           </div>
