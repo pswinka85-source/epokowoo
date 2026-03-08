@@ -413,14 +413,14 @@ const Contact = () => {
                       return (
                         <div key={`conv-${c.id}`} className="relative ml-5">
                           {/* Avatar on left edge, overlapping left and bottom */}
-                          <div className="absolute -left-[21px] -top-[21px] z-10">
-                            <div className={`w-[42px] h-[42px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
+                          <div className="absolute -left-[26px] -top-[26px] z-10">
+                            <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
                               c.unread_count > 0 ? 'ring-2 ring-primary/50' : ''
                             } bg-muted/60 text-muted-foreground`}>
                               {c.other_user?.avatar_url ? (
                                 <img src={c.other_user.avatar_url} className="w-full h-full object-cover" alt="" />
                               ) : (
-                                <span className="text-[13px]">{getInitials(c.other_user?.display_name ?? null)}</span>
+                                <span className="text-[15px]">{getInitials(c.other_user?.display_name ?? null)}</span>
                               )}
                             </div>
                             <span className="absolute bottom-0 left-0 flex gap-[2px]">
