@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Clock, CreditCard, CheckCircle, ChevronLeft, ChevronRight, AlertTriangle, XCircle, ShieldCheck, Loader2 } from "lucide-react";
+import { Calendar, Clock, CreditCard, CheckCircle, ChevronLeft, ChevronRight, AlertTriangle, XCircle, ShieldCheck, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -65,7 +65,6 @@ const Exams = () => {
     if (!authLoading && !user) navigate("/");
   }, [user, authLoading, navigate]);
 
-  // Load dates that have available slots for current month
   useEffect(() => {
     const loadDatesWithSlots = async () => {
       const year = currentMonth.getFullYear();
@@ -87,7 +86,6 @@ const Exams = () => {
     loadDatesWithSlots();
   }, [currentMonth]);
 
-  // Load user bookings
   useEffect(() => {
     if (!user) return;
     const loadBookings = async () => {
@@ -124,12 +122,10 @@ const Exams = () => {
     loadBookings();
   }, [user]);
 
-  // Load available slots for selected date
   useEffect(() => {
     if (!selectedDate) return;
     const loadSlots = async () => {
       setLoadingSlots(true);
-      // Use local date format to avoid timezone issues
       const year = selectedDate.getFullYear();
       const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
       const day = String(selectedDate.getDate()).padStart(2, "0");
@@ -173,7 +169,6 @@ const Exams = () => {
     now.setHours(0, 0, 0, 0);
     const slot = new Date(slotDate + "T00:00:00");
     const diffDays = Math.ceil((slot.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    // Musi być minimum MIN_DAYS_BEFORE_BOOKING dni przed terminem
     return diffDays >= MIN_DAYS_BEFORE_BOOKING;
   };
 
@@ -184,7 +179,6 @@ const Exams = () => {
       return;
     }
 
-    // Check if user already has an exam on this day
     const { data: existingBookingOnDay } = await supabase
       .from("exam_bookings")
       .select("id, exam_availability!inner(slot_date)")
@@ -205,7 +199,6 @@ const Exams = () => {
     if (!user || !confirmSlot) return;
     setPaymentProcessing(true);
 
-    // Check if user already has an exam on this specific day
     const { data: existingBookingOnDay } = await supabase
       .from("exam_bookings")
       .select("id, exam_availability!inner(slot_date)")
@@ -221,7 +214,6 @@ const Exams = () => {
       return;
     }
 
-    // Simulate payment processing
     await new Promise((r) => setTimeout(r, 1500));
 
     const { error: insertErr } = await supabase.from("exam_bookings").insert({
@@ -256,14 +248,15 @@ const Exams = () => {
     setBookings((prev) => prev.filter((b) => b.id !== booking.id));
   };
 
-  // Calendar helpers
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const days: (Date | null)[] = [];
-    for (let i = 0; i < firstDay.getDay(); i++) days.push(null);
+    // Monday-start: getDay() returns 0=Sun, we want Mon=0
+    const startDay = (firstDay.getDay() + 6) % 7;
+    for (let i = 0; i < startDay; i++) days.push(null);
     for (let i = 1; i <= lastDay.getDate(); i++) days.push(new Date(year, month, i));
     return days;
   };
@@ -291,207 +284,236 @@ const Exams = () => {
   const days = getDaysInMonth(currentMonth);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const isToday = (date: Date) => date.toDateString() === new Date().toDateString();
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Hero — matching Index.tsx */}
       <header className="relative overflow-hidden">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 md:pt-20 md:pb-14">
-          <div className="text-center mb-8">
-            <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-4">
-              Zapisz się! ✨
-            </h1>
-            <p className="text-lg text-muted-foreground font-body leading-relaxed">
-              Egzamin z egzaminatorem – 20 minut, {EXAM_PRICE} zł
-            </p>
-            <div className="flex items-center justify-center gap-8 mt-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2"><Clock size={16} /><span>20 minut</span></div>
-              <div className="flex items-center gap-2"><CreditCard size={16} /><span>{EXAM_PRICE} zł</span></div>
-            </div>
-            <p className="text-xs text-muted-foreground mt-3">
-              Zapisy możliwe minimum {MIN_DAYS_BEFORE_BOOKING} dni przed terminem
-            </p>
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2">
+            Egzaminy
+          </h1>
+          <p className="text-lg text-muted-foreground font-body leading-relaxed mb-4">
+            Egzamin z egzaminatorem – 20 minut, {EXAM_PRICE} zł
+          </p>
+          <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2"><Clock size={16} /><span>20 minut</span></div>
+            <div className="flex items-center gap-2"><CreditCard size={16} /><span>{EXAM_PRICE} zł</span></div>
+            <div className="flex items-center gap-2"><Calendar size={16} /><span>Min. {MIN_DAYS_BEFORE_BOOKING} dni wcześniej</span></div>
           </div>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Calendar */}
-          <div className="lg:col-span-2">
-            <div className="rounded-2xl border border-border/60 bg-card shadow-[var(--shadow-card)] overflow-hidden">
-              <div className="px-6 py-4 border-b border-border/60 bg-secondary/20">
-                <div className="flex items-center justify-between">
-                  <h2 className="font-display font-semibold text-foreground">Wybierz termin</h2>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => changeMonth(-1)} className="p-1 rounded-lg hover:bg-secondary transition-colors"><ChevronLeft size={20} /></button>
-                    <span className="font-medium text-sm min-w-[120px] text-center">{monthYear}</span>
-                    <button onClick={() => changeMonth(1)} className="p-1 rounded-lg hover:bg-secondary transition-colors"><ChevronRight size={20} /></button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-6">
-                <div className="grid grid-cols-7 gap-1 mb-2">
-                  {["N", "P", "W", "Ś", "C", "P", "S"].map((day, i) => (
-                    <div key={i} className="text-center text-xs font-medium text-muted-foreground py-2">{day}</div>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-7 gap-1 mb-8">
-                  {days.map((day, index) => {
-                    if (!day) return <div key={index} className="aspect-square" />;
-                    
-                    const dateStr = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;
-                    const hasSlots = datesWithSlots.has(dateStr);
-                    const isPast = day < today;
-                    const isSelected = selectedDate?.toDateString() === day.toDateString();
-                    
-                    return (
-                      <div key={index} className="aspect-square">
-                        <button
-                          onClick={() => handleDateSelect(day)}
-                          disabled={isPast}
-                          className={`w-full h-full rounded-lg flex flex-col items-center justify-center text-sm font-medium transition-colors relative ${
-                            isPast
-                              ? "text-muted-foreground/30 cursor-not-allowed"
-                              : isSelected
-                              ? "bg-primary text-primary-foreground"
-                              : hasSlots
-                              ? "hover:bg-secondary bg-accent/20"
-                              : "hover:bg-secondary"
-                          }`}
-                        >
-                          {day.getDate()}
-                          {hasSlots && !isPast && (
-                            <span className={`absolute bottom-1 w-1.5 h-1.5 rounded-full ${isSelected ? "bg-primary-foreground" : "bg-primary"}`} />
-                          )}
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {selectedDate && (
-                  <div className="mt-6 pt-6 border-t border-border/60">
-                    <h3 className="font-medium text-foreground mb-4">
-                      Dostępne godziny – {selectedDate.toLocaleDateString("pl-PL")}
-                    </h3>
-                    {loadingSlots ? (
-                      <div className="flex items-center justify-center py-8">
-                        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                      </div>
-                    ) : availableSlots.length === 0 ? (
-                      <p className="text-muted-foreground text-center py-8">Brak dostępnych terminów w tym dniu</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {availableSlots.map((slot) => {
-                          const canBook = isWithinBookingWindow(slot.slot_date);
-                          return (
-                            <button
-                              key={slot.id}
-                              onClick={() => handleSlotSelect(slot)}
-                              disabled={!canBook}
-                              title={!canBook ? `Zapisy otwierają się minimum ${MIN_DAYS_BEFORE_BOOKING} dni przed terminem` : undefined}
-                              className={`w-full p-3 rounded-xl border border-border/60 text-sm font-medium transition-colors flex items-center gap-3 ${
-                                canBook
-                                  ? "bg-card hover:bg-secondary/50 disabled:opacity-50"
-                                  : "bg-muted/50 text-muted-foreground cursor-not-allowed opacity-50"
-                              }`}
-                            >
-                              {slot.examiner_avatar ? (
-                                <img src={slot.examiner_avatar} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
-                              ) : (
-                                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
-                                  {(slot.examiner_name || "E")[0].toUpperCase()}
-                                </div>
-                              )}
-                              <div className="flex-1 text-left">
-                                <span className="text-foreground font-medium">{formatTime(slot.slot_time)}</span>
-                                <span className="text-muted-foreground ml-2 font-normal">· {slot.examiner_name}</span>
-                              </div>
-                              <Clock size={14} className="text-muted-foreground" />
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+        {/* Calendar — modern design */}
+        <div className="rounded-3xl border border-border/40 bg-card shadow-[var(--shadow-elevated)] overflow-hidden">
+          {/* Calendar header */}
+          <div className="px-6 sm:px-8 py-5 flex items-center justify-between">
+            <div>
+              <h2 className="font-display text-xl font-bold text-foreground capitalize">{monthYear}</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">Wybierz dzień, aby zobaczyć dostępne terminy</p>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => changeMonth(-1)}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button
+                onClick={() => changeMonth(1)}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+              >
+                <ChevronRight size={20} />
+              </button>
             </div>
           </div>
 
-          {/* My exams */}
-          <div className="lg:col-span-1">
-            <div className="rounded-2xl border border-border/60 bg-card shadow-[var(--shadow-card)] overflow-hidden">
-              <div className="px-6 py-4 border-b border-border/60 bg-secondary/20">
-                <h2 className="font-display font-semibold text-foreground">Moje egzaminy</h2>
-              </div>
-              <div className="p-6">
-                {bookings.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center mb-4">
-                      <Calendar size={28} className="text-muted-foreground/50" />
+          <div className="px-4 sm:px-6 pb-6">
+            {/* Day names — Monday first */}
+            <div className="grid grid-cols-7 mb-2">
+              {["Pn", "Wt", "Śr", "Cz", "Pt", "Sb", "Nd"].map((day, i) => (
+                <div key={i} className="text-center text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider py-3">
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            {/* Calendar grid */}
+            <div className="grid grid-cols-7 gap-1.5">
+              {days.map((day, index) => {
+                if (!day) return <div key={index} />;
+                
+                const dateStr = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;
+                const hasSlots = datesWithSlots.has(dateStr);
+                const isPast = day < today;
+                const isSelected = selectedDate?.toDateString() === day.toDateString();
+                const isTodayDate = isToday(day);
+                
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleDateSelect(day)}
+                    disabled={isPast}
+                    className={`
+                      relative aspect-square rounded-2xl flex flex-col items-center justify-center text-sm font-medium transition-all duration-200
+                      ${isPast
+                        ? "text-muted-foreground/25 cursor-not-allowed"
+                        : isSelected
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-105"
+                        : isTodayDate
+                        ? "bg-secondary ring-2 ring-primary/20 text-foreground hover:bg-primary/10"
+                        : hasSlots
+                        ? "bg-accent/10 text-foreground hover:bg-accent/20 hover:scale-105"
+                        : "text-foreground hover:bg-secondary hover:scale-105"
+                      }
+                    `}
+                  >
+                    <span className="relative z-10">{day.getDate()}</span>
+                    {hasSlots && !isPast && (
+                      <span className={`absolute bottom-1.5 flex gap-0.5`}>
+                        <span className={`w-1 h-1 rounded-full ${isSelected ? "bg-primary-foreground" : "bg-accent"}`} />
+                        <span className={`w-1 h-1 rounded-full ${isSelected ? "bg-primary-foreground/60" : "bg-accent/50"}`} />
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Available slots for selected date */}
+            {selectedDate && (
+              <div className="mt-8 pt-6 border-t border-border/40">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Sparkles size={18} className="text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-foreground">
+                      {selectedDate.toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long" })}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">Dostępne godziny</p>
+                  </div>
+                </div>
+                {loadingSlots ? (
+                  <div className="flex items-center justify-center py-10">
+                    <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                  </div>
+                ) : availableSlots.length === 0 ? (
+                  <div className="text-center py-10">
+                    <div className="w-14 h-14 rounded-2xl bg-secondary/50 flex items-center justify-center mx-auto mb-3">
+                      <Calendar size={24} className="text-muted-foreground/40" />
                     </div>
-                    <p className="text-sm text-muted-foreground">Brak wykupionych egzaminów</p>
-                    <p className="text-xs text-muted-foreground/70 mt-1">Wybierz termin w kalendarzu</p>
+                    <p className="text-sm text-muted-foreground">Brak dostępnych terminów w tym dniu</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {bookings.map((b) => (
-                      <div key={b.id} className="p-4 rounded-xl border border-border/60 bg-secondary/10">
-                        <div className="flex items-start gap-3">
-                          {/* Examiner avatar */}
-                          {b.examiner_avatar ? (
-                            <img src={b.examiner_avatar} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 font-display font-bold text-sm">
-                              {(b.examiner_name || "E")[0].toUpperCase()}
-                            </div>
-                          )}
-                          <div className="flex-1">
-                            <p className="font-medium text-foreground">
-                              {b.exam_availability && formatDate(b.exam_availability.slot_date)}
-                            </p>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Godzina: {b.exam_availability && formatTime(b.exam_availability.slot_time)}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Egzaminator: {b.examiner_name}
-                            </p>
-
-                            {/* Rescheduled info + cancel button */}
-                            {b.rescheduled && (
-                              <div className="mt-2 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
-                                <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
-                                  <AlertTriangle size={14} />
-                                  <span className="text-xs font-medium">Termin został zmieniony</span>
-                                </div>
-                                {b.original_slot_time && (
-                                  <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">
-                                    Poprzednia godzina: {formatTime(b.original_slot_time)}
-                                  </p>
-                                )}
-                                <button
-                                  onClick={() => handleCancelBooking(b)}
-                                  disabled={cancellingId === b.id}
-                                  className="mt-2 h-8 px-3 rounded-lg bg-destructive/10 text-destructive text-xs font-medium hover:bg-destructive/20 disabled:opacity-50 flex items-center gap-1.5 transition-colors"
-                                >
-                                  <XCircle size={13} />
-                                  {cancellingId === b.id ? "Anuluję..." : "Wypisz się (zwrot 19,99 zł)"}
-                                </button>
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {availableSlots.map((slot) => {
+                      const canBook = isWithinBookingWindow(slot.slot_date);
+                      return (
+                        <button
+                          key={slot.id}
+                          onClick={() => handleSlotSelect(slot)}
+                          disabled={!canBook}
+                          title={!canBook ? `Zapisy otwierają się minimum ${MIN_DAYS_BEFORE_BOOKING} dni przed terminem` : undefined}
+                          className={`group p-4 rounded-2xl border text-left transition-all duration-200 ${
+                            canBook
+                              ? "border-border/40 bg-secondary/30 hover:bg-primary/5 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5"
+                              : "border-border/20 bg-muted/30 text-muted-foreground cursor-not-allowed opacity-50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            {slot.examiner_avatar ? (
+                              <img src={slot.examiner_avatar} alt="" className="w-9 h-9 rounded-xl object-cover shrink-0" />
+                            ) : (
+                              <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                                {(slot.examiner_name || "E")[0].toUpperCase()}
                               </div>
                             )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-base font-bold text-foreground">{formatTime(slot.slot_time)}</p>
+                              <p className="text-xs text-muted-foreground truncate">{slot.examiner_name}</p>
+                            </div>
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${canBook ? "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground" : ""}`}>
+                              <Clock size={14} />
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    ))}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>
-            </div>
+            )}
+          </div>
+        </div>
+
+        {/* Moje egzaminy — full width below calendar */}
+        <div className="mt-8 rounded-3xl border border-border/40 bg-card shadow-[var(--shadow-card)] overflow-hidden">
+          <div className="px-6 sm:px-8 py-5 border-b border-border/30">
+            <h2 className="font-display text-lg font-bold text-foreground">Moje egzaminy</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">Twoje zaplanowane i zakończone egzaminy</p>
+          </div>
+          <div className="p-6 sm:p-8">
+            {bookings.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-14 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center mb-4">
+                  <Calendar size={28} className="text-muted-foreground/40" />
+                </div>
+                <p className="text-sm font-medium text-muted-foreground">Brak wykupionych egzaminów</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">Wybierz termin w kalendarzu powyżej</p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {bookings.map((b) => (
+                  <div key={b.id} className="p-5 rounded-2xl border border-border/40 bg-secondary/20 hover:bg-secondary/30 transition-colors">
+                    <div className="flex items-start gap-3">
+                      {b.examiner_avatar ? (
+                        <img src={b.examiner_avatar} alt="" className="w-11 h-11 rounded-xl object-cover shrink-0" />
+                      ) : (
+                        <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 font-display font-bold text-sm">
+                          {(b.examiner_name || "E")[0].toUpperCase()}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-display font-bold text-foreground truncate">
+                          {b.exam_availability && formatDate(b.exam_availability.slot_date)}
+                        </p>
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                          <span className="flex items-center gap-1"><Clock size={12} /> {b.exam_availability && formatTime(b.exam_availability.slot_time)}</span>
+                          <span className="truncate">{b.examiner_name}</span>
+                        </div>
+
+                        {b.rescheduled && (
+                          <div className="mt-3 p-3 rounded-xl bg-warning/10 border border-warning/20">
+                            <div className="flex items-center gap-1.5 text-warning">
+                              <AlertTriangle size={14} />
+                              <span className="text-xs font-semibold">Termin zmieniony</span>
+                            </div>
+                            {b.original_slot_time && (
+                              <p className="text-xs text-warning/80 mt-1">
+                                Poprzednia godzina: {formatTime(b.original_slot_time)}
+                              </p>
+                            )}
+                            <button
+                              onClick={() => handleCancelBooking(b)}
+                              disabled={cancellingId === b.id}
+                              className="mt-2 h-8 px-3 rounded-lg bg-destructive/10 text-destructive text-xs font-medium hover:bg-destructive/20 disabled:opacity-50 flex items-center gap-1.5 transition-colors"
+                            >
+                              <XCircle size={13} />
+                              {cancellingId === b.id ? "Anuluję..." : "Wypisz się (zwrot 19,99 zł)"}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </main>
@@ -511,7 +533,6 @@ const Exams = () => {
 
           {confirmSlot && (
             <div className="space-y-4 py-2">
-              {/* Slot details */}
               <div className="rounded-xl border border-border/60 bg-secondary/20 p-4 space-y-3">
                 <div className="flex items-center gap-3">
                   {confirmSlot.examiner_avatar ? (
@@ -538,7 +559,6 @@ const Exams = () => {
                 </div>
               </div>
 
-              {/* Payment summary */}
               <div className="rounded-xl border border-border/60 bg-card p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Egzamin ustny (20 min)</span>
