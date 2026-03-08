@@ -532,7 +532,7 @@ const Contact = () => {
                         {activeConvo.other_user?.display_name || "Użytkownik"}
                       </span>
                       <div className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
                         <span className="text-xs text-muted-foreground/70">Online</span>
                       </div>
                     </div>
