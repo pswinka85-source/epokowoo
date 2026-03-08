@@ -395,7 +395,7 @@ const Contact = () => {
             )}
 
             {/* Unified list */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border/50 scrollbar-track-transparent hover:scrollbar-thumb-border/80">
               {unifiedItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
                   <div className="w-16 h-16 rounded-full bg-muted/40 flex items-center justify-center mb-4">
@@ -413,14 +413,14 @@ const Contact = () => {
                       return (
                         <div key={`conv-${c.id}`} className="relative ml-5">
                           {/* Avatar on left edge, overlapping left and bottom */}
-                          <div className="absolute -left-[21px] -top-[21px] z-10">
-                            <div className={`w-[42px] h-[42px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
+                          <div className="absolute -left-[26px] -top-[26px] z-10">
+                            <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
                               c.unread_count > 0 ? 'ring-2 ring-primary/50' : ''
                             } bg-muted/60 text-muted-foreground`}>
                               {c.other_user?.avatar_url ? (
                                 <img src={c.other_user.avatar_url} className="w-full h-full object-cover" alt="" />
                               ) : (
-                                <span className="text-[13px]">{getInitials(c.other_user?.display_name ?? null)}</span>
+                                <span className="text-[15px]">{getInitials(c.other_user?.display_name ?? null)}</span>
                               )}
                             </div>
                             <span className="absolute bottom-0 left-0 flex gap-[2px]">
@@ -468,12 +468,9 @@ const Contact = () => {
                       return (
                         <div key={`notif-${n.id}`} className="relative ml-5">
                           {/* Avatar on left edge */}
-                          <div className="absolute -left-[21px] -top-[21px] z-10">
-                            <div className="w-[42px] h-[42px] rounded-full bg-muted/40 flex items-center justify-center text-[12px] font-bold text-muted-foreground">
+                          <div className="absolute -left-[26px] -top-[26px] z-10">
+                            <div className="w-[52px] h-[52px] rounded-full bg-muted/40 flex items-center justify-center text-[14px] font-bold text-muted-foreground">
                               ES
-                            </div>
-                            <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-card border border-background flex items-center justify-center shadow-sm">
-                              {getNotificationIcon(n.type)}
                             </div>
                           </div>
 
