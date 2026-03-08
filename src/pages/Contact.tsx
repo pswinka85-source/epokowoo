@@ -344,10 +344,10 @@ const Contact = () => {
 
       {/* Main container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-8">
-        <div className="flex gap-0 overflow-hidden" style={{ height: "calc(100vh - 220px)", minHeight: 480 }}>
+        <div className="flex gap-0 overflow-hidden rounded-xl border border-border/20" style={{ height: "calc(100vh - 240px)", minHeight: 420 }}>
 
-          {/* LEFT PANEL — ~55% width like reference */}
-          <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full md:w-[55%] flex-col shrink-0 border-r border-border/30`}>
+          {/* LEFT PANEL */}
+          <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full md:w-[420px] flex-col shrink-0 border-r border-border/30 overflow-hidden`}>
 
             {/* Search toggle */}
             {showSearch && (
