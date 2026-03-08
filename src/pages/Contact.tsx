@@ -405,7 +405,7 @@ const Contact = () => {
                   <p className="text-xs text-muted-foreground/50">Wyszukaj użytkownika, aby rozpocząć rozmowę</p>
                 </div>
               ) : (
-                <div className="space-y-6 pt-6 pl-0 pr-2">
+                <div className="space-y-8 pt-8 pl-8 pr-2">
                   {unifiedItems.map((item) => {
                     if (item.kind === "conversation") {
                       const c = item.data;
