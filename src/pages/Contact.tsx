@@ -318,15 +318,15 @@ const Contact = () => {
     <main className="min-h-screen bg-background">
       {/* Header */}
       <div className="relative overflow-hidden">
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-6 md:pt-20 md:pb-10">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 md:pt-20 md:pb-14">
           <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2">
             Centrum Wiadomości
           </h1>
           <p className="text-lg text-muted-foreground font-body leading-relaxed">
             Bądź na bieżąco z najnowszymi wiadomościami!
           </p>
-          {/* Decorative line under header */}
-          <div className="mt-6 h-px bg-border/60" />
         </div>
       </div>
 
