@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Search, Send, ArrowLeft, MessageSquare, Bell, Mail, AlertTriangle, Info, Calendar, Check } from "lucide-react";
 import { toast } from "sonner";
 import verifiedBadge from "@/assets/verified-badge.png";
+import envelopeIllustration from "@/assets/envelope-illustration.png";
 
 interface Profile {
   user_id: string;
@@ -330,15 +331,14 @@ const Contact = () => {
     <main className="min-h-screen bg-background">
       {/* Header */}
       <div className="relative overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 md:pt-20 md:pb-14">
-          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-6 md:pt-20 md:pb-8">
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-1">
             Centrum Wiadomości
           </h1>
-          <p className="text-lg text-muted-foreground font-body leading-relaxed">
+          <p className="text-base text-muted-foreground font-body leading-relaxed">
             Bądź na bieżąco z najnowszymi wiadomościami!
           </p>
+          <div className="mt-5 h-px bg-border/60" />
         </div>
       </div>
 
@@ -650,18 +650,10 @@ const Contact = () => {
                 </div>
               </>
             ) : (
-              /* Empty state */
+              /* Empty state — envelope illustration like reference */
               <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-                <div className="mb-6">
-                  <svg width="120" height="100" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-40">
-                    <rect x="10" y="20" width="100" height="65" rx="8" className="stroke-muted-foreground" strokeWidth="2" fill="none" />
-                    <path d="M10 28L60 58L110 28" className="stroke-muted-foreground" strokeWidth="2" fill="none" />
-                    <rect x="35" y="45" width="50" height="3" rx="1.5" className="fill-primary/30" />
-                    <rect x="40" y="52" width="40" height="3" rx="1.5" className="fill-primary/20" />
-                    <rect x="45" y="59" width="30" height="3" rx="1.5" className="fill-primary/10" />
-                  </svg>
-                </div>
-                <p className="text-base text-muted-foreground/50 max-w-xs leading-relaxed">
+                <img src={envelopeIllustration} alt="" className="w-36 h-36 object-contain mb-5 opacity-80" />
+                <p className="text-[15px] text-muted-foreground/60 max-w-xs leading-relaxed font-medium">
                   Naciśnij na wiadomość/powiadomienie,<br />aby zobaczyć całość.
                 </p>
               </div>
