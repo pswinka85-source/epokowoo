@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Send, ArrowLeft, MessageSquare, Bell, Mail, AlertTriangle, Info, Calendar, Check, BadgeCheck } from "lucide-react";
+import { Search, Send, ArrowLeft, MessageSquare, Bell, Mail, AlertTriangle, Info, Calendar, Check } from "lucide-react";
 import { toast } from "sonner";
+import verifiedBadge from "@/assets/verified-badge.png";
 
 interface Profile {
   user_id: string;
@@ -49,6 +50,7 @@ const Contact = () => {
   const [searchParams] = useSearchParams();
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [verifiedUsers, setVerifiedUsers] = useState<Set<string>>(new Set());
   const [activeConvo, setActiveConvo] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -107,6 +109,16 @@ const Contact = () => {
       .from("profiles")
       .select("user_id, display_name, avatar_url")
       .in("user_id", otherIds);
+
+    // Fetch roles for other users to show verified badge for admins/examiners
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("user_id, role")
+      .in("user_id", otherIds)
+      .in("role", ["admin", "examiner"]);
+
+    const verifiedSet = new Set((roles || []).map((r) => r.user_id));
+    setVerifiedUsers(verifiedSet);
 
     const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
 
@@ -434,7 +446,9 @@ const Contact = () => {
                               <span className="text-[15px] font-bold text-foreground truncate">
                                 {c.other_user?.display_name || "Użytkownik"}
                               </span>
-                              <BadgeCheck size={17} className="text-primary shrink-0" />
+                              {verifiedUsers.has(c.user1_id === user?.id ? c.user2_id : c.user1_id) && (
+                                <img src={verifiedBadge} alt="Zweryfikowany" className="w-[18px] h-[18px] shrink-0" />
+                              )}
                             </div>
                             <p className="text-[12px] text-muted-foreground mb-2">
                               Aktywny: {formatTimeAgo(c.last_message_at)}
