@@ -6,6 +6,7 @@ import { Search, Send, ArrowLeft, MessageSquare, Bell, Mail, AlertTriangle, Info
 import { toast } from "sonner";
 import verifiedBadge from "@/assets/verified-badge.png";
 import envelopeIllustration from "@/assets/envelope-illustration.png";
+import notificationIcon from "@/assets/notification-icon.png";
 
 interface Profile {
   user_id: string;
