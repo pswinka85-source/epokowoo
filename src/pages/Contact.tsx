@@ -446,7 +446,7 @@ const Contact = () => {
                             </p>
                             {c.last_message && (
                               <>
-                                <p className="text-[11px] font-bold text-foreground truncate leading-snug">
+                                <p className="text-[12px] font-bold text-foreground truncate leading-snug">
                                   {c.last_message.length > 34 ? "Re: " + c.last_message.slice(0, 28) + "..." : c.last_message}
                                 </p>
                                 <p className="text-[10px] text-muted-foreground/40 truncate mt-0.5 leading-relaxed">
