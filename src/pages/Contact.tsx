@@ -425,9 +425,9 @@ const Contact = () => {
                           </div>
                           {/* Status dots */}
                           <div className="absolute -left-[18px] top-[34px] flex gap-[3px] z-10">
-                            <span className="w-[5px] h-[5px] rounded-full bg-muted-foreground/30" />
-                            <span className="w-[5px] h-[5px] rounded-full bg-muted-foreground/20" />
-                            <span className="w-[5px] h-[5px] rounded-full bg-muted-foreground/10" />
+                            <span className="w-[5px] h-[5px] rounded-full bg-foreground/70" />
+                            <span className="w-[5px] h-[5px] rounded-full bg-foreground/50" />
+                            <span className="w-[5px] h-[5px] rounded-full bg-foreground/30" />
                           </div>
 
                           {/* Card */}
