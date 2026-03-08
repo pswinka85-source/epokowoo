@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import antykIcon from "@/assets/antyk-icon.png";
+import sredniowieczeIcon from "@/assets/sredniowiecze-icon.png";
 import { useParams, Link } from "react-router-dom";
 import { epochs } from "@/data/epochs";
 import type { Lesson, LessonBlock } from "@/data/lessons";
