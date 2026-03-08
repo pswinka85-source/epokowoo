@@ -51,7 +51,8 @@ const Contact = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Profile[]>([]);
   const [searching, setSearching] = useState(false);
-  const [activeTab, setActiveTab] = useState<'messages' | 'notifications'>('messages');
+  const initialTab = searchParams.get('tab') === 'notifications' ? 'notifications' : 'messages';
+  const [activeTab, setActiveTab] = useState<'messages' | 'notifications'>(initialTab);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
