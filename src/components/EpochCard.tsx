@@ -3,6 +3,7 @@ import type { EpochData } from "@/data/epochs";
 import antykIcon from "@/assets/antyk-icon.png";
 import sredniowieczeIcon from "@/assets/sredniowiecze-icon.png";
 import renesansIcon from "@/assets/renesans-icon.png";
+import barokIcon from "@/assets/barok-icon.png";
 
 interface EpochCardProps {
   epoch: EpochData;
@@ -40,6 +41,8 @@ const EpochCard = ({ epoch, index }: EpochCardProps) => {
               <img src={sredniowieczeIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
             ) : epoch.id === "renesans" ? (
               <img src={renesansIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
+            ) : epoch.id === "barok" ? (
+              <img src={barokIcon} alt={epoch.name} className="w-8 h-8 object-contain" />
             ) : (
               <span className="text-3xl" role="img" aria-label={epoch.name}>
                 {epoch.icon}
