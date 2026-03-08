@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Clock, CreditCard, ChevronLeft, ChevronRight, AlertTriangle, XCircle, ShieldCheck, Loader2, GraduationCap, BookOpen, Timer, Wallet, ArrowRight, Zap } from "lucide-react";
+import { Calendar, Clock, CreditCard, ChevronLeft, ChevronRight, AlertTriangle, XCircle, ShieldCheck, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
