@@ -334,6 +334,17 @@ const Contact = () => {
     }
   };
 
+  const handleTabChange = (tab: 'messages' | 'notifications') => {
+    setActiveTab(tab);
+    if (tab === 'messages') {
+      setActiveNotification(null);
+    } else {
+      setActiveConvo(null);
+    }
+  };
+
+  const isDetailOpen = Boolean(activeConvo || activeNotification);
+
   if (authLoading) return null;
 
   return (
@@ -346,11 +357,11 @@ const Contact = () => {
 
         <div className="flex flex-1 overflow-hidden">
           {/* ŚRODKOWA KOLUMNA - LISTA WIADOMOŚCI */}
-          <div className="w-full md:w-96 bg-white border-r border-gray-200 flex flex-col">
+          <div className={`${isDetailOpen ? 'hidden md:flex' : 'flex'} w-full md:w-96 bg-white border-r border-gray-200 flex-col`}>
             {/* Zakładki */}
             <div className="flex border-b border-gray-200">
               <button
-                onClick={() => setActiveTab('messages')}
+                onClick={() => handleTabChange('messages')}
                 className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                   activeTab === 'messages'
                     ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
@@ -368,7 +379,7 @@ const Contact = () => {
                 </div>
               </button>
               <button
-                onClick={() => setActiveTab('notifications')}
+                onClick={() => handleTabChange('notifications')}
                 className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                   activeTab === 'notifications'
                     ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
@@ -465,7 +476,10 @@ const Contact = () => {
                     {conversations.map((c) => (
                       <button
                         key={c.id}
-                        onClick={() => setActiveConvo(c)}
+                        onClick={() => {
+                          setActiveConvo(c);
+                          setActiveNotification(null);
+                        }}
                         className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left mb-1 ${
                           activeConvo?.id === c.id
                             ? 'bg-blue-50 border border-blue-200'
@@ -569,7 +583,7 @@ const Contact = () => {
           </div>
 
           {/* PRAWA KOLUMNA - PANEL PODGLĄDU */}
-          <div className="flex-1 bg-white flex flex-col">
+          <div className={`${isDetailOpen ? 'flex' : 'hidden md:flex'} flex-1 bg-white flex-col`}>
             {activeConvo ? (
               <>
                 {/* Chat header */}
@@ -717,11 +731,9 @@ const Contact = () => {
                       {activeNotification.title}
                     </h2>
                     
-                    {activeNotification.message && (
-                      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                        {activeNotification.message}
-                      </p>
-                    )}
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                      {activeNotification.message?.trim() || 'To powiadomienie nie zawiera dodatkowej treści.'}
+                    </p>
                   </div>
                 </div>
               </>
