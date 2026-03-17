@@ -13,12 +13,6 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [profileImage, setProfileImage] = useState<File | null>(null);
-  const [profileImagePreview, setProfileImagePreview] = useState<string>("");
-  const [platform, setPlatform] = useState("");
-  const [instagramHandle, setInstagramHandle] = useState("");
-  const [linkedinHandle, setLinkedinHandle] = useState("");
-  const [facebookHandle, setFacebookHandle] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
