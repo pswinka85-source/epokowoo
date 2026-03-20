@@ -53,6 +53,7 @@ const AppLayout = () => {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/kontakt" element={<Contact />} />
             <Route path="/egzaminy" element={<Exams />} />
+            <Route path="/testy" element={<QuizzesTests />} />
             
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="*" element={<NotFound />} />
