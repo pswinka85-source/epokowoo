@@ -410,6 +410,47 @@ export type Database = {
           },
         ]
       }
+      quiz_rankings: {
+        Row: {
+          correct_answers: number
+          created_at: string
+          id: string
+          quiz_id: string
+          score: number
+          time_ms: number
+          total_questions: number
+          user_id: string
+        }
+        Insert: {
+          correct_answers?: number
+          created_at?: string
+          id?: string
+          quiz_id: string
+          score?: number
+          time_ms?: number
+          total_questions?: number
+          user_id: string
+        }
+        Update: {
+          correct_answers?: number
+          created_at?: string
+          id?: string
+          quiz_id?: string
+          score?: number
+          time_ms?: number
+          total_questions?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_rankings_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quizzes: {
         Row: {
           created_at: string
