@@ -18,7 +18,7 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
 import Exams from "./pages/Exams";
-
+import QuizzesTests from "./pages/QuizzesTests";
 
 const queryClient = new QueryClient();
 
