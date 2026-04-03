@@ -174,3 +174,9 @@
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
 }
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}

@@ -27,6 +27,13 @@ const Auth = () => {
 
   useEffect(() => {
     setMounted(true);
+    // Clear any stale session that causes "Failed to fetch" loops
+    supabase.auth.getSession().then(({ error }) => {
+      if (error) {
+        console.warn("Clearing stale session:", error.message);
+        supabase.auth.signOut();
+      }
+    });
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,28 +42,35 @@ const Auth = () => {
     setMessage("");
     setSubmitting(true);
 
-    if (isForgot) {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      if (error) setError(error.message);
-      else setMessage("Sprawdź swoją skrzynkę e-mail — wysłaliśmy link do resetu hasła.");
-      setSubmitting(false);
-      return;
-    }
-
-    if (isLogin) {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setError(error.message);
-      else navigate("/epoki");
-    } else {
-      if (!firstName.trim() || !lastName.trim()) {
-        setError("Podaj imię i nazwisko.");
+    try {
+      if (isForgot) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) setError(error.message);
+        else setMessage("Sprawdź swoją skrzynkę e-mail — wysłaliśmy link do resetu hasła.");
         setSubmitting(false);
         return;
       }
 
-      try {
+      if (isLogin) {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          if (error.message === "Failed to fetch") {
+            setError("Nie udało się połączyć z serwerem. Sprawdź połączenie internetowe i spróbuj ponownie.");
+          } else {
+            setError(error.message);
+          }
+        } else {
+          navigate("/epoki");
+        }
+      } else {
+        if (!firstName.trim() || !lastName.trim()) {
+          setError("Podaj imię i nazwisko.");
+          setSubmitting(false);
+          return;
+        }
+
         const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -69,16 +83,18 @@ const Auth = () => {
         });
 
         if (signUpError) {
-          setError(signUpError.message);
-          setSubmitting(false);
-          return;
+          if (signUpError.message === "Failed to fetch") {
+            setError("Nie udało się połączyć z serwerem. Sprawdź połączenie internetowe i spróbuj ponownie.");
+          } else {
+            setError(signUpError.message);
+          }
+        } else {
+          setMessage("Sprawdź swoją skrzynkę e-mail, aby potwierdzić rejestrację.");
         }
-
-        setMessage("Sprawdź swoją skrzynkę e-mail, aby potwierdzić rejestrację.");
-      } catch (error) {
-        console.error("Registration error:", error);
-        setError("Wystąpił błąd podczas rejestracji. Spróbuj ponownie.");
       }
+    } catch (err) {
+      console.error("Auth error:", err);
+      setError("Wystąpił nieoczekiwany błąd. Spróbuj ponownie.");
     }
     setSubmitting(false);
   };
