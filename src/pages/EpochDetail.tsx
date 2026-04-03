@@ -259,9 +259,31 @@ const EpochDetail = () => {
         </header>
 
         {loading ? (
-          <div className="text-center py-16">
-            <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-muted-foreground font-body text-sm">Ładowanie treści…</p>
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-3">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="rounded-2xl border border-border bg-card p-5 flex items-center gap-4">
+                  <Skeleton className="w-10 h-10 rounded-xl shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-5 w-3/4 rounded-lg" />
+                    <Skeleton className="h-3 w-1/2 rounded-lg" />
+                  </div>
+                  <Skeleton className="w-8 h-8 rounded-lg shrink-0" />
+                </div>
+              ))}
+            </div>
+            <aside className="space-y-5">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="rounded-2xl border border-border bg-card p-5 space-y-3">
+                  <Skeleton className="h-4 w-1/3 rounded-lg" />
+                  <div className="flex flex-wrap gap-1.5">
+                    {[...Array(4)].map((_, j) => (
+                      <Skeleton key={j} className="h-6 w-16 rounded-lg" />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </aside>
           </div>
         ) : (
           <div className="grid lg:grid-cols-3 gap-8">
