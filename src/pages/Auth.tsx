@@ -27,6 +27,13 @@ const Auth = () => {
 
   useEffect(() => {
     setMounted(true);
+    // Clear any stale session that causes "Failed to fetch" loops
+    supabase.auth.getSession().then(({ error }) => {
+      if (error) {
+        console.warn("Clearing stale session:", error.message);
+        supabase.auth.signOut();
+      }
+    });
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
