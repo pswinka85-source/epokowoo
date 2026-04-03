@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import antykIcon from "@/assets/antyk-icon.png";
 import sredniowieczeIcon from "@/assets/sredniowiecze-icon.png";
 import renesansIcon from "@/assets/renesans-icon.png";
