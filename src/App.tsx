@@ -25,6 +25,7 @@ const queryClient = new QueryClient();
 const AppLayout = () => {
   const location = useLocation();
   const isAuthPage = location.pathname === "/";
+  const isNaukaPage = location.pathname === "/epoki" || location.pathname.startsWith("/epoka/");
 
   if (isAuthPage) {
     return (
@@ -38,12 +39,14 @@ const AppLayout = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header – full width */}
       <Header />
 
-      {/* Middle: sidebar + content */}
+      {/* Horizontal sidebar for non-Nauka pages */}
+      {!isNaukaPage && <Sidebar />}
+
       <div className="flex-1 flex">
-        <Sidebar />
+        {/* Vertical sidebar only on Nauka pages */}
+        {isNaukaPage && <Sidebar />}
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Auth />} />
@@ -61,7 +64,6 @@ const AppLayout = () => {
         </main>
       </div>
 
-      {/* Footer – full width */}
       <Footer />
     </div>
   );
