@@ -23,44 +23,8 @@ const Sidebar = () => {
   if (location.pathname === "/") return null;
 
   const isActive = (path: string) => location.pathname === path;
-  const isNaukaPage = location.pathname === "/epoki" || location.pathname.startsWith("/epoka/");
-  const isHorizontal = !isNaukaPage;
 
-  if (isHorizontal) {
-    return (
-      <div className="hidden md:block px-4 sm:px-6 pt-3 pb-1">
-        <div className="bg-card rounded-2xl shadow-[var(--shadow-card)] border border-border/50 px-2 py-1.5 animate-slide-in-sidebar">
-          <nav>
-            <ul className="flex items-center gap-1">
-              {navItems.map((item, index) => {
-                const Icon = item.icon;
-                return (
-                  <li key={item.name} className="animate-fade-in-item" style={{ animationDelay: `${index * 40}ms` }}>
-                    <Link
-                      to={item.path}
-                      className={`group flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all duration-300 whitespace-nowrap ${
-                        isActive(item.path)
-                          ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
-                          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                      }`}
-                    >
-                      <Icon size={16} strokeWidth={2} />
-                      <span>{item.name}</span>
-                      {"badge" in item && (item as any).badge > 0 && (
-                        <span className="w-5 h-5 rounded-full bg-accent text-accent-foreground text-[10px] font-bold flex items-center justify-center animate-pulse">
-                          {(item as any).badge}
-                        </span>
-                      )}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
-        </div>
-      </div>
-    );
-  }
+  const isHome = location.pathname === "/epoki" || location.pathname === "/";
 
   return (
     <aside className="hidden md:flex flex-col w-[300px] shrink-0 px-6 pt-6 pb-6 self-start sticky top-0">
@@ -123,7 +87,7 @@ const Sidebar = () => {
       </div>
 
       {/* Upcoming Exams Widget — only on home page */}
-      <UpcomingExamsWidget />
+      {isHome && <UpcomingExamsWidget />}
     </aside>
   );
 };
