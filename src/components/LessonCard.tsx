@@ -20,9 +20,13 @@ const LessonCard = ({ lesson, index, onClick, epochId, bestScore }: LessonCardPr
       className="w-full text-left rounded-2xl border border-border bg-card p-5 hover:shadow-[var(--shadow-card-hover)] hover:border-primary/30 transition-all duration-200 group"
     >
       <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary font-display shrink-0">
-          {index + 1}
-        </div>
+        {lesson.image_url ? (
+          <img src={lesson.image_url} alt={lesson.title} className="w-10 h-10 rounded-xl object-cover shrink-0" />
+        ) : (
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary font-display shrink-0">
+            {index + 1}
+          </div>
+        )}
 
         <div className="flex-1 min-w-0">
           <h3 className="font-display text-base font-bold text-foreground group-hover:text-primary transition-colors truncate leading-tight">
