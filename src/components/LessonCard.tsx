@@ -49,11 +49,16 @@ const LessonCard = ({ lesson, index, onClick, epochId, bestScore }: LessonCardPr
       </div>
 
       {lesson.image_url && (
-        <img
-          src={lesson.image_url}
-          alt={lesson.title}
-          className="absolute right-0 top-0 h-full w-28 md:w-36 object-cover rounded-l-3xl opacity-90 group-hover:opacity-100 transition-opacity pointer-events-none"
-        />
+        <div
+          className="absolute right-0 top-0 h-full w-32 md:w-40 overflow-hidden pointer-events-none"
+          style={{ clipPath: 'ellipse(85% 100% at 70% 50%)' }}
+        >
+          <img
+            src={lesson.image_url}
+            alt={lesson.title}
+            className="h-full w-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+          />
+        </div>
       )}
     </button>
   );
