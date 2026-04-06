@@ -36,7 +36,7 @@ const EpochCard = ({ epoch, index }: EpochCardProps) => {
       style={{ animationDelay: `${index * 60}ms` }}
     >
       <article 
-        className="relative h-full overflow-hidden rounded-2xl border border-border p-6 transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1 hover:border-primary/30"
+        className="relative h-full overflow-hidden rounded-2xl border border-border p-6 transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1 hover:border-foreground/20"
         style={getCardStyle()}
       >
         <div className="flex flex-col h-full">
