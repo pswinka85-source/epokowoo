@@ -83,7 +83,7 @@ const EpochDetail = () => {
 
       const { data: lessonsData } = await supabase
         .from("lessons")
-        .select("id, title, description, blocks, sort_order, test_quiz_id")
+        .select("id, title, description, blocks, sort_order, test_quiz_id, image_url")
         .eq("epoch_id", id)
         .eq("published", true)
         .order("sort_order");
@@ -94,6 +94,7 @@ const EpochDetail = () => {
         description: l.description || "",
         blocks: (l.blocks as unknown as LessonBlock[]) || [],
         testQuizId: l.test_quiz_id,
+        image_url: l.image_url || null,
       }));
       setLessons(mappedLessons);
 
