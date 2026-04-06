@@ -35,6 +35,7 @@ interface LessonRow {
   epoch_id: string;
   requires_auth: boolean;
   test_quiz_id: string | null;
+  image_url: string | null;
 }
 
 const BLOCK_TYPES = [
@@ -65,6 +66,7 @@ export default function AdminLessonEditor({ epochId, epochName, initialEditId, o
   const [editPublished, setEditPublished] = useState(false);
   const [editRequiresAuth, setEditRequiresAuth] = useState(false);
   const [editTestQuizId, setEditTestQuizId] = useState<string | null>(null);
+  const [editImageUrl, setEditImageUrl] = useState("");
   const [saving, setSaving] = useState(false);
 
   const fetchLessons = async () => {
@@ -92,6 +94,7 @@ export default function AdminLessonEditor({ epochId, epochName, initialEditId, o
     setEditPublished(lesson.published);
     setEditRequiresAuth(lesson.requires_auth);
     setEditTestQuizId(lesson.test_quiz_id);
+    setEditImageUrl(lesson.image_url || "");
   };
 
   const createNew = async () => {
@@ -119,6 +122,7 @@ export default function AdminLessonEditor({ epochId, epochName, initialEditId, o
       published: editPublished,
       requires_auth: editRequiresAuth,
       test_quiz_id: editTestQuizId,
+      image_url: editImageUrl || null,
     }).eq("id", editingId);
     setSaving(false);
     if (error) toast.error(error.message);
