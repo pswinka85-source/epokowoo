@@ -222,6 +222,7 @@ export type Database = {
           description: string | null
           epoch_id: string
           id: string
+          image_url: string | null
           published: boolean
           requires_auth: boolean
           sort_order: number
@@ -235,6 +236,7 @@ export type Database = {
           description?: string | null
           epoch_id: string
           id?: string
+          image_url?: string | null
           published?: boolean
           requires_auth?: boolean
           sort_order?: number
@@ -248,6 +250,7 @@ export type Database = {
           description?: string | null
           epoch_id?: string
           id?: string
+          image_url?: string | null
           published?: boolean
           requires_auth?: boolean
           sort_order?: number
