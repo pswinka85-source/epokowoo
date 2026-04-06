@@ -17,16 +17,12 @@ const LessonCard = ({ lesson, index, onClick, epochId, bestScore }: LessonCardPr
   return (
     <button
       onClick={onClick}
-      className="w-full text-left rounded-2xl border border-border bg-card p-5 hover:shadow-[var(--shadow-card-hover)] hover:border-primary/30 transition-all duration-200 group"
+      className="w-full text-left rounded-2xl border border-border bg-card p-5 hover:shadow-[var(--shadow-card-hover)] hover:border-primary/30 transition-all duration-200 group overflow-hidden relative"
     >
       <div className="flex items-center gap-4">
-        {lesson.image_url ? (
-          <img src={lesson.image_url} alt={lesson.title} className="w-10 h-10 rounded-xl object-cover shrink-0" />
-        ) : (
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary font-display shrink-0">
-            {index + 1}
-          </div>
-        )}
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary font-display shrink-0">
+          {index + 1}
+        </div>
 
         <div className="flex-1 min-w-0">
           <h3 className="font-display text-base font-bold text-foreground group-hover:text-primary transition-colors truncate leading-tight">
@@ -51,6 +47,14 @@ const LessonCard = ({ lesson, index, onClick, epochId, bestScore }: LessonCardPr
           <ChevronRight size={18} className="text-muted-foreground/40 group-hover:text-primary transition-colors" />
         </div>
       </div>
+
+      {lesson.image_url && (
+        <img
+          src={lesson.image_url}
+          alt={lesson.title}
+          className="absolute right-0 top-0 h-full w-28 md:w-36 object-cover rounded-l-3xl opacity-90 group-hover:opacity-100 transition-opacity pointer-events-none"
+        />
+      )}
     </button>
   );
 };
