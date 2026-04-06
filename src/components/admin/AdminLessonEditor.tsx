@@ -35,6 +35,7 @@ interface LessonRow {
   epoch_id: string;
   requires_auth: boolean;
   test_quiz_id: string | null;
+  image_url: string | null;
 }
 
 const BLOCK_TYPES = [
@@ -65,6 +66,7 @@ export default function AdminLessonEditor({ epochId, epochName, initialEditId, o
   const [editPublished, setEditPublished] = useState(false);
   const [editRequiresAuth, setEditRequiresAuth] = useState(false);
   const [editTestQuizId, setEditTestQuizId] = useState<string | null>(null);
+  const [editImageUrl, setEditImageUrl] = useState("");
   const [saving, setSaving] = useState(false);
 
   const fetchLessons = async () => {
@@ -92,6 +94,7 @@ export default function AdminLessonEditor({ epochId, epochName, initialEditId, o
     setEditPublished(lesson.published);
     setEditRequiresAuth(lesson.requires_auth);
     setEditTestQuizId(lesson.test_quiz_id);
+    setEditImageUrl(lesson.image_url || "");
   };
 
   const createNew = async () => {
@@ -119,6 +122,7 @@ export default function AdminLessonEditor({ epochId, epochName, initialEditId, o
       published: editPublished,
       requires_auth: editRequiresAuth,
       test_quiz_id: editTestQuizId,
+      image_url: editImageUrl || null,
     }).eq("id", editingId);
     setSaving(false);
     if (error) toast.error(error.message);
@@ -197,6 +201,13 @@ export default function AdminLessonEditor({ epochId, epochName, initialEditId, o
         <div className="space-y-4 mb-6">
           <input value={editTitle} onChange={e => setEditTitle(e.target.value)} placeholder="Tytuł lekcji" className="w-full h-10 px-3 rounded-md border border-input bg-background text-foreground font-display text-lg font-bold focus:outline-none focus:ring-2 focus:ring-ring" />
           <textarea value={editDesc} onChange={e => setEditDesc(e.target.value)} placeholder="Opis lekcji" rows={2} className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+          <div>
+            <label className="text-xs text-muted-foreground font-body block mb-1">Miniaturka lekcji (URL obrazu)</label>
+            <div className="flex items-center gap-3">
+              <input value={editImageUrl} onChange={e => setEditImageUrl(e.target.value)} placeholder="https://example.com/image.jpg" className="flex-1 h-9 px-3 rounded-md border border-input bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring" />
+              {editImageUrl && <img src={editImageUrl} alt="Miniaturka" className="w-10 h-10 rounded-xl object-cover shrink-0" />}
+            </div>
+          </div>
           
           {/* E-test editor */}
           <AdminETestEditor

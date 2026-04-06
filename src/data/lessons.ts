@@ -70,4 +70,5 @@ export interface Lesson {
   title: string;
   description: string;
   blocks: LessonBlock[];
+  image_url?: string | null;
 }
