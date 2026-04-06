@@ -252,19 +252,13 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-8 pb-2 md:pt-12">
-        <button
-          onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-muted/50 transition-colors mb-4"
-        >
-          <ArrowLeft size={22} className="text-foreground" />
-        </button>
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 md:pt-20 md:pb-14">
         <h1
-          className={`font-display text-3xl sm:text-4xl font-extrabold text-foreground leading-tight transition-all duration-700 ${
+          className={`font-display text-3xl md:text-4xl font-extrabold text-foreground leading-[1.1] mb-2 transition-all duration-700 ${
             mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          Ustawienia i profil
+          Twoje Ustawienia
         </h1>
       </div>
 
