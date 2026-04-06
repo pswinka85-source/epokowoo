@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Camera, Save, KeyRound, ChevronRight, ChevronDown, Trash2, User, Bell,
-  Mail, MessageSquare, Smartphone, Monitor, LogOut, Lock, Palette, ArrowLeft
+  Mail, MessageSquare, Smartphone, Monitor, LogOut, Lock, Palette
 } from "lucide-react";
 import { toast } from "sonner";
 
