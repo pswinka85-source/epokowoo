@@ -484,16 +484,18 @@ const Profile = () => {
               Powrót do ustawień
             </button>
 
-            <div className="flex items-center gap-3 mb-6">
-              <img
-                src={categories.find((c) => c.id === activeCategory)?.icon}
-                alt=""
-                className="w-8 h-8 object-contain"
-              />
-              <h2 className="text-xl font-display font-bold text-foreground">
-                {categories.find((c) => c.id === activeCategory)?.label}
-              </h2>
-            </div>
+            {(() => {
+              const activeCat = categories.find((c) => c.id === activeCategory);
+              const Icon = activeCat?.icon;
+              return (
+                <div className="flex items-center gap-3 mb-6">
+                  {Icon && <Icon size={24} className={activeCat?.color} />}
+                  <h2 className="text-xl font-display font-bold text-foreground">
+                    {activeCat?.label}
+                  </h2>
+                </div>
+              );
+            })()}
 
             {renderCategoryContent()}
           </div>
