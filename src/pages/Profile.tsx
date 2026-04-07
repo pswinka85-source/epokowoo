@@ -177,10 +177,10 @@ const Profile = () => {
     "flex h-12 w-full rounded-xl border border-border/60 bg-background px-4 text-sm font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all duration-200";
 
   const categories = [
-    { id: "konto" as const, label: "Konto", icon: iconKonto },
-    { id: "haslo" as const, label: "Hasło i Zabezpieczenia", icon: iconHaslo },
-    { id: "powiadomienia" as const, label: "Powiadomienia", icon: iconPowiadomienia },
-    { id: "preferencje" as const, label: "Preferencje Wyglądu", icon: iconPreferencje },
+    { id: "konto" as const, label: "Konto", icon: UserCircle, color: "text-blue-500" },
+    { id: "haslo" as const, label: "Hasło i Zabezpieczenia", icon: ShieldCheck, color: "text-amber-500" },
+    { id: "powiadomienia" as const, label: "Powiadomienia", icon: Bell, color: "text-orange-500" },
+    { id: "preferencje" as const, label: "Preferencje Wyglądu", icon: Palette, color: "text-purple-500" },
   ];
 
   const toggleSection = (section: OpenSection) =>
