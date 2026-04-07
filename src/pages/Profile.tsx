@@ -456,17 +456,22 @@ const Profile = () => {
         {activeCategory === null ? (
           /* Main categories grid */
           <div className="space-y-2">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => { setActiveCategory(cat.id); setOpenSection(null); }}
-                className="flex items-center w-full rounded-2xl border border-border/60 bg-card px-4 py-3.5 text-left hover:bg-muted/40 hover:border-border transition-all duration-200 group"
-              >
-                <img src={cat.icon} alt={cat.label} className="w-8 h-8 rounded-lg object-contain mr-3 shrink-0" />
-                <span className="flex-1 text-[15px] font-display font-semibold text-foreground">{cat.label}</span>
-                <ChevronRight size={18} className="text-muted-foreground/60 group-hover:translate-x-0.5 transition-transform" />
-              </button>
-            ))}
+            {categories.map((cat) => {
+              const Icon = cat.icon;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => { setActiveCategory(cat.id); setOpenSection(null); }}
+                  className="flex items-center w-full rounded-2xl border border-border/60 bg-card px-4 py-3.5 text-left hover:bg-muted/40 hover:border-border transition-all duration-200 group"
+                >
+                  <span className="w-8 h-8 rounded-lg flex items-center justify-center mr-3 shrink-0">
+                    <Icon size={22} className={cat.color} />
+                  </span>
+                  <span className="flex-1 text-[15px] font-display font-semibold text-foreground">{cat.label}</span>
+                  <ChevronRight size={18} className="text-muted-foreground/60 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              );
+            })}
           </div>
         ) : (
           /* Category detail view */
