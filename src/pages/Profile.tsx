@@ -459,31 +459,18 @@ const Profile = () => {
       <div className={`max-w-2xl mx-auto px-4 sm:px-6 pb-16 transition-all duration-700 delay-100 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
         {activeCategory === null ? (
           /* Main categories grid */
-          <div className="space-y-3">
+          <div className="space-y-2">
             {categories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => { setActiveCategory(cat.id); setOpenSection(null); }}
-                className="flex items-center w-full rounded-2xl border border-border/60 bg-card px-5 py-5 text-left hover:bg-muted/40 hover:border-border transition-all duration-200 group"
+                className="flex items-center w-full rounded-2xl border border-border/60 bg-card px-4 py-3.5 text-left hover:bg-muted/40 hover:border-border transition-all duration-200 group"
               >
-                <img src={cat.icon} alt={cat.label} className="w-10 h-10 rounded-xl object-contain mr-4 shrink-0" />
-                <span className="flex-1 text-lg font-display font-semibold text-foreground">{cat.label}</span>
-                <ChevronRight size={20} className="text-muted-foreground/60 group-hover:translate-x-0.5 transition-transform" />
+                <img src={cat.icon} alt={cat.label} className="w-8 h-8 rounded-lg object-contain mr-3 shrink-0" />
+                <span className="flex-1 text-[15px] font-display font-semibold text-foreground">{cat.label}</span>
+                <ChevronRight size={18} className="text-muted-foreground/60 group-hover:translate-x-0.5 transition-transform" />
               </button>
             ))}
-
-            {/* Wyloguj */}
-            <div className="pt-4">
-              <button
-                onClick={handleLogout}
-                className="flex items-center w-full rounded-2xl border border-border/60 bg-card px-5 py-4 text-left hover:bg-muted/40 transition-all duration-200"
-              >
-                <span className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center mr-4 shrink-0">
-                  <LogOut size={18} className="text-destructive" />
-                </span>
-                <span className="flex-1 text-[15px] font-body font-medium text-destructive">Wyloguj się</span>
-              </button>
-            </div>
           </div>
         ) : (
           /* Category detail view */
