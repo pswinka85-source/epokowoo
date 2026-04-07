@@ -3,14 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Camera, Save, KeyRound, ChevronRight, Trash2, Mail, Smartphone, Monitor, LogOut, Moon, Sun, AlertTriangle
+  Camera, Save, KeyRound, ChevronRight, Trash2, Mail, Smartphone, Monitor, Moon, Sun, AlertTriangle,
+  UserCircle, ShieldCheck, Bell, Palette
 } from "lucide-react";
 import { toast } from "sonner";
-
-import iconKonto from "@/assets/settings-konto.png";
-import iconHaslo from "@/assets/settings-haslo.png";
-import iconPowiadomienia from "@/assets/settings-powiadomienia.png";
-import iconPreferencje from "@/assets/settings-preferencje.png";
 
 type UiScale = "small" | "medium" | "large";
 type TextSize = "small" | "medium" | "large";
