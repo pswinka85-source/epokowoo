@@ -3,14 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Camera, Save, KeyRound, ChevronRight, Trash2, Mail, Smartphone, Monitor, LogOut, Moon, Sun, AlertTriangle
+  Camera, Save, KeyRound, ChevronRight, Trash2, Mail, Smartphone, Monitor, Moon, Sun, AlertTriangle,
+  UserCircle, ShieldCheck, Bell, Palette
 } from "lucide-react";
 import { toast } from "sonner";
-
-import iconKonto from "@/assets/settings-konto.png";
-import iconHaslo from "@/assets/settings-haslo.png";
-import iconPowiadomienia from "@/assets/settings-powiadomienia.png";
-import iconPreferencje from "@/assets/settings-preferencje.png";
 
 type UiScale = "small" | "medium" | "large";
 type TextSize = "small" | "medium" | "large";
@@ -181,10 +177,10 @@ const Profile = () => {
     "flex h-12 w-full rounded-xl border border-border/60 bg-background px-4 text-sm font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all duration-200";
 
   const categories = [
-    { id: "konto" as const, label: "Konto", icon: iconKonto },
-    { id: "haslo" as const, label: "Hasło i Zabezpieczenia", icon: iconHaslo },
-    { id: "powiadomienia" as const, label: "Powiadomienia", icon: iconPowiadomienia },
-    { id: "preferencje" as const, label: "Preferencje Wyglądu", icon: iconPreferencje },
+    { id: "konto" as const, label: "Konto", icon: UserCircle, color: "text-blue-500" },
+    { id: "haslo" as const, label: "Hasło i Zabezpieczenia", icon: ShieldCheck, color: "text-amber-500" },
+    { id: "powiadomienia" as const, label: "Powiadomienia", icon: Bell, color: "text-orange-500" },
+    { id: "preferencje" as const, label: "Preferencje Wyglądu", icon: Palette, color: "text-purple-500" },
   ];
 
   const toggleSection = (section: OpenSection) =>
@@ -460,17 +456,22 @@ const Profile = () => {
         {activeCategory === null ? (
           /* Main categories grid */
           <div className="space-y-2">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => { setActiveCategory(cat.id); setOpenSection(null); }}
-                className="flex items-center w-full rounded-2xl border border-border/60 bg-card px-4 py-3.5 text-left hover:bg-muted/40 hover:border-border transition-all duration-200 group"
-              >
-                <img src={cat.icon} alt={cat.label} className="w-8 h-8 rounded-lg object-contain mr-3 shrink-0" />
-                <span className="flex-1 text-[15px] font-display font-semibold text-foreground">{cat.label}</span>
-                <ChevronRight size={18} className="text-muted-foreground/60 group-hover:translate-x-0.5 transition-transform" />
-              </button>
-            ))}
+            {categories.map((cat) => {
+              const Icon = cat.icon;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => { setActiveCategory(cat.id); setOpenSection(null); }}
+                  className="flex items-center w-full rounded-2xl border border-border/60 bg-card px-4 py-3.5 text-left hover:bg-muted/40 hover:border-border transition-all duration-200 group"
+                >
+                  <span className="w-8 h-8 rounded-lg flex items-center justify-center mr-3 shrink-0">
+                    <Icon size={22} className={cat.color} />
+                  </span>
+                  <span className="flex-1 text-[15px] font-display font-semibold text-foreground">{cat.label}</span>
+                  <ChevronRight size={18} className="text-muted-foreground/60 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              );
+            })}
           </div>
         ) : (
           /* Category detail view */
@@ -483,16 +484,18 @@ const Profile = () => {
               Powrót do ustawień
             </button>
 
-            <div className="flex items-center gap-3 mb-6">
-              <img
-                src={categories.find((c) => c.id === activeCategory)?.icon}
-                alt=""
-                className="w-8 h-8 object-contain"
-              />
-              <h2 className="text-xl font-display font-bold text-foreground">
-                {categories.find((c) => c.id === activeCategory)?.label}
-              </h2>
-            </div>
+            {(() => {
+              const activeCat = categories.find((c) => c.id === activeCategory);
+              const Icon = activeCat?.icon;
+              return (
+                <div className="flex items-center gap-3 mb-6">
+                  {Icon && <Icon size={24} className={activeCat?.color} />}
+                  <h2 className="text-xl font-display font-bold text-foreground">
+                    {activeCat?.label}
+                  </h2>
+                </div>
+              );
+            })()}
 
             {renderCategoryContent()}
           </div>
