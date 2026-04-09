@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Figtree', 'system-ui', 'sans-serif'],
-        body: ['Figtree', 'system-ui', 'sans-serif'],
+        display: ['TikTok Sans', 'system-ui', 'sans-serif'],
+        body: ['TikTok Sans', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
