@@ -31,7 +31,7 @@ const Sidebar = () => {
       <div className="w-full flex flex-col bg-card rounded-3xl shadow-[var(--shadow-elevated)] border border-border/50 overflow-hidden animate-slide-in-sidebar">
         {/* Title */}
         <div className="px-6 pt-6 pb-2">
-          <p className="text-[10px] font-bold tracking-[0.25em] text-muted-foreground/60">
+          <p className="text-[10px] font-bold tracking-normal text-muted-foreground">
             Kokpit
           </p>
         </div>
