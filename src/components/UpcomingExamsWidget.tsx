@@ -80,20 +80,22 @@ const UpcomingExamsWidget = () => {
       {/* Content */}
       <div className="px-4 pb-4">
         {exams.length === 0 ? (
-          <div className="text-center py-6">
-            <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center mx-auto mb-2">
-              <Calendar size={18} className="text-muted-foreground/50" />
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/40">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <Calendar size={16} className="text-primary/60" />
             </div>
-            <p className="text-xs text-muted-foreground/70 font-body">
-              Brak zaplanowanych egzaminów
-            </p>
-            <Link
-              to="/egzaminy"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 mt-2 transition-colors"
-            >
-              Umów egzamin
-              <ChevronRight size={12} />
-            </Link>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-muted-foreground/80">
+                Brak zaplanowanych egzaminów
+              </p>
+              <Link
+                to="/egzaminy"
+                className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-primary hover:text-primary/80 transition-colors mt-0.5"
+              >
+                Umów termin
+                <ChevronRight size={10} />
+              </Link>
+            </div>
           </div>
         ) : (
           <ul className="space-y-2">
