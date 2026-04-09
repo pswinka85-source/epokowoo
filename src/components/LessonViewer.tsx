@@ -30,26 +30,26 @@ function LessonRating({ lessonId }: { lessonId: string }) {
   };
 
   return (
-    <div className="mt-10 pt-8 border-t border-border">
-      <div className="rounded-2xl border border-border bg-card p-6 text-center shadow-[var(--shadow-card)]">
-        <p className="font-display text-lg font-bold text-foreground mb-1">
+    <div className="mt-8 pt-6 border-t border-border">
+      <div className="rounded-2xl bg-secondary/40 p-5 text-center">
+        <p className="font-display text-base font-bold text-foreground mb-0.5">
           Jak podoba Ci się ta lekcja?
         </p>
-        <p className="text-sm text-muted-foreground font-body mb-5">
+        <p className="text-xs text-muted-foreground font-body mb-4">
           Twoja opinia pomoże nam ulepszać materiały
         </p>
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex items-center justify-center gap-2.5">
           {ratingEmojis.map((emoji, i) => (
             <button
               key={i}
               onClick={() => handleSelect(i)}
               onMouseEnter={() => setHoveredIdx(i)}
               onMouseLeave={() => setHoveredIdx(null)}
-              className={`relative w-11 h-11 rounded-full transition-all duration-200 ${
+              className={`relative w-10 h-10 rounded-full transition-all duration-200 ${
                 selected === i
-                  ? "scale-125 ring-2 ring-primary ring-offset-2 ring-offset-card"
+                  ? "scale-[1.25] ring-2 ring-primary ring-offset-2 ring-offset-secondary/40"
                   : hoveredIdx === i
-                    ? "scale-115"
+                    ? "scale-110"
                     : selected !== null
                       ? "opacity-40 grayscale"
                       : "hover:scale-110"
@@ -61,7 +61,7 @@ function LessonRating({ lessonId }: { lessonId: string }) {
           ))}
         </div>
         {selected !== null && (
-          <p className="mt-3 text-sm font-medium text-primary font-body animate-fade-in">
+          <p className="mt-2.5 text-xs font-semibold text-primary font-body animate-fade-in">
             {ratingEmojis[selected].label}
           </p>
         )}
@@ -581,28 +581,28 @@ const LessonViewer = ({ lesson, onBack, lessonIndex, testQuizId, onTestCompleted
 
         {/* E-test button */}
         {testQuizId && testQuestions && testQuestions.length > 0 && (
-          <div className="mt-12 pt-8 border-t border-border">
-            <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-[var(--shadow-card)]">
-              <p className="text-[11px] font-body font-semibold text-muted-foreground uppercase tracking-widest mb-3">
+          <div className="mt-8 pt-6 border-t border-border">
+            <div className="rounded-2xl bg-secondary/40 p-6 text-center">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <ClipboardCheck size={20} className="text-primary" />
+              </div>
+              <h3 className="font-display text-lg font-bold text-foreground mb-1">Sprawdź swoją wiedzę</h3>
+              <p className="text-xs text-muted-foreground font-body mb-1">
                 E-test · {testQuestions.length} pytań
               </p>
-              <h3 className="font-display text-xl font-bold text-foreground mb-2">Sprawdź swoją wiedzę</h3>
-              <p className="text-sm text-muted-foreground font-body mb-5 max-w-sm mx-auto">
-                Rozwiąż krótki test i sprawdź, ile zapamiętałeś z tej lekcji.
-              </p>
               {bestScore && (
-                <p className="text-sm font-body text-primary font-semibold mb-5">
+                <p className="text-xs font-body text-primary font-semibold mb-3">
                   Najlepszy wynik: {bestScore.best_score}/{bestScore.total_questions} ({Math.round((bestScore.best_score / bestScore.total_questions) * 100)}%)
                 </p>
               )}
               <button
                 onClick={() => { setShowTest(true); setTestFinished(false); }}
-                className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-body font-semibold text-sm hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg"
+                className="mt-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-body font-semibold text-sm hover:bg-primary/90 active:scale-[0.98] transition-all duration-200"
               >
                 Rozpocznij test
               </button>
             </div>
-           </div>
+          </div>
         )}
 
         {/* Lesson rating */}
