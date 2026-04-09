@@ -4,6 +4,71 @@ import { ArrowLeft, CheckCircle2, XCircle, Play, ClipboardCheck, Trophy, RotateC
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import emoji1 from "@/assets/emoji-1.png";
+import emoji2 from "@/assets/emoji-2.png";
+import emoji3 from "@/assets/emoji-3.png";
+import emoji4 from "@/assets/emoji-4.png";
+import emoji5 from "@/assets/emoji-5.png";
+import emoji6 from "@/assets/emoji-6.png";
+
+const ratingEmojis = [
+  { src: emoji1, label: "Świetna!" },
+  { src: emoji2, label: "Dobra" },
+  { src: emoji3, label: "OK" },
+  { src: emoji4, label: "Średnia" },
+  { src: emoji5, label: "Słaba" },
+  { src: emoji6, label: "Kiepska" },
+];
+
+function LessonRating({ lessonId }: { lessonId: string }) {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+
+  const handleSelect = (idx: number) => {
+    setSelected(idx);
+    toast.success("Dziękujemy za ocenę!");
+  };
+
+  return (
+    <div className="mt-10 pt-8 border-t border-border">
+      <div className="rounded-2xl border border-border bg-card p-6 text-center shadow-[var(--shadow-card)]">
+        <p className="font-display text-lg font-bold text-foreground mb-1">
+          Jak podoba Ci się ta lekcja?
+        </p>
+        <p className="text-sm text-muted-foreground font-body mb-5">
+          Twoja opinia pomoże nam ulepszać materiały
+        </p>
+        <div className="flex items-center justify-center gap-3">
+          {ratingEmojis.map((emoji, i) => (
+            <button
+              key={i}
+              onClick={() => handleSelect(i)}
+              onMouseEnter={() => setHoveredIdx(i)}
+              onMouseLeave={() => setHoveredIdx(null)}
+              className={`relative w-11 h-11 rounded-full transition-all duration-200 ${
+                selected === i
+                  ? "scale-125 ring-2 ring-primary ring-offset-2 ring-offset-card"
+                  : hoveredIdx === i
+                    ? "scale-115"
+                    : selected !== null
+                      ? "opacity-40 grayscale"
+                      : "hover:scale-110"
+              }`}
+              disabled={selected !== null}
+            >
+              <img src={emoji.src} alt={emoji.label} className="w-full h-full object-contain" />
+            </button>
+          ))}
+        </div>
+        {selected !== null && (
+          <p className="mt-3 text-sm font-medium text-primary font-body animate-fade-in">
+            {ratingEmojis[selected].label}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
 
 
 function HorizontalTimeline({ events }: { events: { date: string; title: string; description?: string }[] }) {
@@ -537,8 +602,11 @@ const LessonViewer = ({ lesson, onBack, lessonIndex, testQuizId, onTestCompleted
                 Rozpocznij test
               </button>
             </div>
-          </div>
+           </div>
         )}
+
+        {/* Lesson rating */}
+        <LessonRating lessonId={lesson.id} />
       </div>
     </div>
   );
