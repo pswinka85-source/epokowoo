@@ -575,9 +575,7 @@ const LessonViewer = ({ lesson, onBack, lessonIndex, testQuizId, onTestCompleted
       </div>
 
       <div className="max-w-3xl">
-        {lesson.blocks.map((block, i) => (
-          <BlockRenderer key={i} block={block} />
-        ))}
+        <LessonBlocks blocks={lesson.blocks} />
 
         {/* E-test button */}
         {testQuizId && testQuestions && testQuestions.length > 0 && (
