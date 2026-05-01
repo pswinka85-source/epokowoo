@@ -121,13 +121,7 @@ function RichText({ content }: { content: string }) {
   );
 }
 
-function BlockRenderer({
-  block,
-  onAnswered,
-}: {
-  block: LessonBlock;
-  onAnswered?: () => void;
-}) {
+function BlockRenderer({ block }: { block: LessonBlock }) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [showVideo, setShowVideo] = useState(false);
 
@@ -232,16 +226,7 @@ function BlockRenderer({
               cls += "border-border opacity-50";
             }
             return (
-              <button
-                key={i}
-                onClick={() => {
-                  if (answered) return;
-                  setSelectedIdx(i);
-                  onAnswered?.();
-                }}
-                className={cls}
-                disabled={answered}
-              >
+              <button key={i} onClick={() => !answered && setSelectedIdx(i)} className={cls} disabled={answered}>
                 <span className="flex items-center gap-2">
                   {answered && isCorrect && <CheckCircle2 size={16} className="text-green-500 flex-shrink-0" />}
                   {answered && isSelected && !isCorrect && <XCircle size={16} className="text-red-500 flex-shrink-0" />}
