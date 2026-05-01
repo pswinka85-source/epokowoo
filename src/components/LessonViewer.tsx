@@ -121,6 +121,64 @@ function RichText({ content }: { content: string }) {
   );
 }
 
+function LessonBlocks({ blocks }: { blocks: LessonBlock[] }) {
+  const isQuizBlock = (b: LessonBlock) =>
+    b.type === "quiz" || b.type === "advanced_quiz";
+
+  // Track which quiz indices have been answered
+  const [answeredQuizzes, setAnsweredQuizzes] = useState<Set<number>>(new Set());
+
+  // Find the first unanswered quiz index — everything after it is locked/blurred
+  const firstUnansweredQuizIdx = blocks.findIndex(
+    (b, i) => isQuizBlock(b) && !answeredQuizzes.has(i)
+  );
+
+  return (
+    <>
+      {blocks.map((block, i) => {
+        const isLockedAfterQuiz =
+          firstUnansweredQuizIdx !== -1 && i > firstUnansweredQuizIdx;
+
+        if (isQuizBlock(block) && !answeredQuizzes.has(i)) {
+          // Quiz itself stays interactive; capture first click to mark answered
+          return (
+            <div
+              key={i}
+              onClickCapture={(e) => {
+                const target = e.target as HTMLElement;
+                if (target.closest("button")) {
+                  setAnsweredQuizzes((prev) => {
+                    const next = new Set(prev);
+                    next.add(i);
+                    return next;
+                  });
+                }
+              }}
+            >
+              <BlockRenderer block={block} />
+            </div>
+          );
+        }
+
+        if (isLockedAfterQuiz) {
+          return (
+            <div
+              key={i}
+              aria-hidden="true"
+              className="relative pointer-events-none select-none"
+              style={{ filter: "blur(8px)" }}
+            >
+              <BlockRenderer block={block} />
+            </div>
+          );
+        }
+
+        return <BlockRenderer key={i} block={block} />;
+      })}
+    </>
+  );
+}
+
 function BlockRenderer({ block }: { block: LessonBlock }) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [showVideo, setShowVideo] = useState(false);
