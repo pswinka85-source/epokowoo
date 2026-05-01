@@ -1,9 +1,52 @@
 @import url('https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap');
-@import url('https://cdn.jsdelivr.net/npm/@fontsource/tiktok-sans@5.2.4/latin.css');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Spotify Mix font family */
+@font-face {
+  font-family: 'Spotify Mix';
+  src: url('/fonts/SpotifyMix-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Spotify Mix';
+  src: url('/fonts/SpotifyMix-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Spotify Mix';
+  src: url('/fonts/SpotifyMix-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Spotify Mix';
+  src: url('/fonts/SpotifyMix-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Spotify Mix';
+  src: url('/fonts/SpotifyMix-Extrabold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Spotify Mix';
+  src: url('/fonts/SpotifyMix-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
 
 @layer base {
   :root {
@@ -54,8 +97,8 @@
     --info: 199 89% 48%;
     --info-foreground: 0 0% 100%;
 
-    --font-display: 'TikTok Sans', system-ui, sans-serif;
-    --font-body: 'TikTok Sans', system-ui, sans-serif;
+    --font-display: 'Spotify Mix', system-ui, sans-serif;
+    --font-body: 'Spotify Mix', system-ui, sans-serif;
 
     --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
     --shadow-card-hover: 0 10px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04);
