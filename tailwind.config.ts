@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['TikTok Sans', 'system-ui', 'sans-serif'],
-        body: ['TikTok Sans', 'system-ui', 'sans-serif'],
+        display: ['Spotify Mix', 'system-ui', 'sans-serif'],
+        body: ['Spotify Mix', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

@@ -452,7 +452,7 @@ const Profile = () => {
         </h1>
       </div>
 
-      <div className={`max-w-2xl mx-auto px-4 sm:px-6 pb-16 transition-all duration-700 delay-100 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+      <div className={`max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 transition-all duration-700 delay-100 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
         {activeCategory === null ? (
           /* Main categories grid */
           <div className="space-y-2">
