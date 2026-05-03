@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Camera, Save, KeyRound, ChevronRight, Trash2, Mail, Smartphone, Monitor, Moon, Sun, AlertTriangle,
-  UserCircle, ShieldCheck, Bell, Palette
+  UserCircle, ShieldCheck, Bell, Palette, User
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -177,10 +177,10 @@ const Profile = () => {
     "flex h-12 w-full rounded-xl border border-border/60 bg-background px-4 text-sm font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all duration-200";
 
   const categories = [
-    { id: "konto" as const, label: "Konto", icon: UserCircle, color: "text-foreground" },
-    { id: "haslo" as const, label: "Hasło i Zabezpieczenia", icon: ShieldCheck, color: "text-foreground" },
-    { id: "powiadomienia" as const, label: "Powiadomienia", icon: Bell, color: "text-foreground" },
-    { id: "preferencje" as const, label: "Preferencje Wyglądu", icon: Palette, color: "text-foreground" },
+    { id: "konto" as const, label: "Konto", icon: User, color: "text-gray-700" },
+    { id: "haslo" as const, label: "Hasło i Zabezpieczenia", icon: ShieldCheck, color: "text-gray-700" },
+    { id: "powiadomienia" as const, label: "Powiadomienia", icon: Bell, color: "text-gray-700" },
+    { id: "preferencje" as const, label: "Preferencje Wyglądu", icon: Palette, color: "text-gray-700" },
   ];
 
   const toggleSection = (section: OpenSection) =>
