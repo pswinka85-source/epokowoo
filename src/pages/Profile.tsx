@@ -177,10 +177,10 @@ const Profile = () => {
     "flex h-12 w-full rounded-xl border border-border/60 bg-background px-4 text-sm font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all duration-200";
 
   const categories = [
-    { id: "konto" as const, label: "Konto", icon: UserCircle, color: "text-blue-500" },
-    { id: "haslo" as const, label: "Hasło i Zabezpieczenia", icon: ShieldCheck, color: "text-amber-500" },
-    { id: "powiadomienia" as const, label: "Powiadomienia", icon: Bell, color: "text-orange-500" },
-    { id: "preferencje" as const, label: "Preferencje Wyglądu", icon: Palette, color: "text-purple-500" },
+    { id: "konto" as const, label: "Konto", icon: UserCircle, color: "text-foreground" },
+    { id: "haslo" as const, label: "Hasło i Zabezpieczenia", icon: ShieldCheck, color: "text-foreground" },
+    { id: "powiadomienia" as const, label: "Powiadomienia", icon: Bell, color: "text-foreground" },
+    { id: "preferencje" as const, label: "Preferencje Wyglądu", icon: Palette, color: "text-foreground" },
   ];
 
   const toggleSection = (section: OpenSection) =>
@@ -465,7 +465,7 @@ const Profile = () => {
                   className="flex items-center w-full rounded-2xl border border-border/60 bg-card px-4 py-3.5 text-left hover:bg-muted/40 hover:border-border transition-all duration-200 group"
                 >
                   <span className="w-8 h-8 rounded-lg flex items-center justify-center mr-3 shrink-0">
-                    <Icon size={22} className={cat.color} />
+                    <Icon size={22} strokeWidth={2} fill="currentColor" className={cat.color} />
                   </span>
                   <span className="flex-1 text-[15px] font-display font-semibold text-foreground">{cat.label}</span>
                   <ChevronRight size={18} className="text-muted-foreground/60 group-hover:translate-x-0.5 transition-transform" />
@@ -489,7 +489,7 @@ const Profile = () => {
               const Icon = activeCat?.icon;
               return (
                 <div className="flex items-center gap-3 mb-6">
-                  {Icon && <Icon size={24} className={activeCat?.color} />}
+                  {Icon && <Icon size={24} strokeWidth={2} fill="currentColor" className={activeCat?.color} />}
                   <h2 className="text-xl font-display font-bold text-foreground">
                     {activeCat?.label}
                   </h2>
