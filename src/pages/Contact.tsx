@@ -2,12 +2,10 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Send, ArrowLeft, MessageSquare, Mail, AlertTriangle, Info, Calendar, Check, Plus } from "lucide-react";
+import { Search, Send, ArrowLeft, MessageSquare, Mail, AlertTriangle, Info, Calendar, Check, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
-import verifiedBadge from "@/assets/verified-badge.png";
 import envelopeIllustration from "@/assets/envelope-illustration.png";
-import notificationIcon from "@/assets/notification-icon.png";
 
 interface Profile {
   user_id: string;
@@ -468,9 +466,9 @@ const Contact = () => {
                           }`}
                         >
                           {/* Avatar */}
-                          <div className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold shrink-0 overflow-hidden ${
-                            c.unread_count > 0 ? 'ring-2 ring-primary/40' : ''
-                          } bg-secondary text-muted-foreground`}>
+                          <div className={`relative w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold shrink-0 overflow-hidden ${
+                            c.unread_count > 0 ? 'ring-2 ring-primary/50 ring-offset-2 ring-offset-card' : ''
+                          } bg-gradient-to-br from-primary/20 to-accent/20 text-primary`}>
                             {c.other_user?.avatar_url ? (
                               <img src={c.other_user.avatar_url} className="w-full h-full object-cover" alt="" />
                             ) : (
@@ -486,7 +484,9 @@ const Contact = () => {
                                   {c.other_user?.display_name || "Użytkownik"}
                                 </span>
                                 {verifiedUsers.has(c.user1_id === user?.id ? c.user2_id : c.user1_id) && (
-                                  <img src={verifiedBadge} alt="Zweryfikowany" className="w-3.5 h-3.5 shrink-0" />
+                                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary shrink-0" title="Zweryfikowany">
+                                    <Check size={10} strokeWidth={3.5} className="text-primary-foreground" />
+                                  </span>
                                 )}
                               </div>
                               <span className="text-[11px] text-muted-foreground/50 shrink-0 ml-2">
@@ -524,15 +524,18 @@ const Contact = () => {
                           }`}
                         >
                           {/* Notification icon */}
-                          <div className="w-11 h-11 rounded-full overflow-hidden shrink-0">
-                            <img src={notificationIcon} className="w-full h-full object-cover" alt="Powiadomienie" />
+                          <div className="relative w-11 h-11 rounded-full shrink-0 bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-[0_4px_12px_-2px_hsl(var(--primary)/0.4)]">
+                            <Sparkles size={18} className="text-primary-foreground" strokeWidth={2.5} />
                           </div>
 
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-0.5">
-                              <span className={`text-sm truncate ${!n.read ? 'font-bold text-foreground' : 'font-semibold text-foreground'}`}>
+                              <span className={`flex items-center gap-1.5 text-sm truncate ${!n.read ? 'font-bold text-foreground' : 'font-semibold text-foreground'}`}>
                                 Epokowo
+                                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary shrink-0">
+                                  <Check size={10} strokeWidth={3.5} className="text-primary-foreground" />
+                                </span>
                               </span>
                               <span className="text-[11px] text-muted-foreground/50 shrink-0 ml-2">
                                 {formatTimeAgo(n.created_at)}
