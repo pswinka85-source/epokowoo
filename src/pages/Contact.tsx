@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Send, ArrowLeft, MessageSquare, Mail, AlertTriangle, Info, Calendar, Check, Plus, Sparkles, CheckCheck } from "lucide-react";
+import { Search, Send, ArrowLeft, MessageSquare, Mail, AlertTriangle, Info, Calendar, Check, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import envelopeIllustration from "@/assets/envelope-illustration.png";
