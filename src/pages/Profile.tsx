@@ -192,7 +192,7 @@ const Profile = () => {
         return (
           <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
             {/* Dane osobowe */}
-            <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+            <div className="rounded-3xl border border-border/60 bg-card overflow-hidden">
               <button
                 onClick={() => toggleSection("dane")}
                 className="flex items-center w-full px-5 py-4 text-left hover:bg-muted/40 transition-colors"
@@ -250,7 +250,7 @@ const Profile = () => {
             </div>
 
             {/* Plany i subskrypcje */}
-            <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+            <div className="rounded-3xl border border-border/60 bg-card overflow-hidden">
               <button
                 onClick={() => toggleSection("plany")}
                 className="flex items-center w-full px-5 py-4 text-left hover:bg-muted/40 transition-colors"
@@ -271,7 +271,7 @@ const Profile = () => {
         return (
           <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
             {/* Zmień hasło */}
-            <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+            <div className="rounded-3xl border border-border/60 bg-card overflow-hidden">
               <button
                 onClick={() => toggleSection("password")}
                 className="flex items-center w-full px-5 py-4 text-left hover:bg-muted/40 transition-colors"
@@ -294,7 +294,7 @@ const Profile = () => {
             </div>
 
             {/* Usuń konto */}
-            <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+            <div className="rounded-3xl border border-border/60 bg-card overflow-hidden">
               {!showDeleteConfirm ? (
                 <button onClick={() => setShowDeleteConfirm(true)} className="flex items-center w-full px-5 py-4 text-left hover:bg-destructive/5 transition-colors">
                   <Trash2 size={18} className="text-destructive mr-3" />
@@ -314,7 +314,7 @@ const Profile = () => {
             </div>
 
             {/* Zgłoś problem */}
-            <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+            <div className="rounded-3xl border border-border/60 bg-card overflow-hidden">
               <button onClick={() => navigate("/kontakt")} className="flex items-center w-full px-5 py-4 text-left hover:bg-muted/40 transition-colors">
                 <AlertTriangle size={18} className="text-muted-foreground mr-3" />
                 <span className="flex-1 text-[15px] font-body font-medium text-foreground">Zgłoś problem</span>
@@ -327,7 +327,7 @@ const Profile = () => {
       case "powiadomienia":
         return (
           <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-            <div className="rounded-2xl border border-border/60 bg-card overflow-hidden divide-y divide-border/40">
+            <div className="rounded-3xl border border-border/60 bg-card overflow-hidden divide-y divide-border/40">
               {[
                 { key: "notifications_web" as const, label: "Zezwalaj na wysyłanie powiadomień przez platformę", icon: Monitor, locked: true },
                 { key: "notifications_email" as const, label: "Zezwalaj na wysyłanie powiadomień na adres e-mail", icon: Mail, locked: false },
@@ -362,7 +362,7 @@ const Profile = () => {
       case "preferencje":
         return (
           <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-            <div className="rounded-2xl border border-border/60 bg-card overflow-hidden divide-y divide-border/40">
+            <div className="rounded-3xl border border-border/60 bg-card overflow-hidden divide-y divide-border/40">
               {/* Motyw */}
               <div className="px-5 py-4">
                 <p className="text-sm font-body font-medium text-foreground mb-3">Motyw</p>
@@ -462,7 +462,7 @@ const Profile = () => {
                 <button
                   key={cat.id}
                   onClick={() => { setActiveCategory(cat.id); setOpenSection(null); }}
-                  className="flex items-center w-full rounded-2xl border border-border/60 bg-card px-4 py-3.5 text-left hover:bg-muted/40 hover:border-border transition-all duration-200 group"
+                  className="flex items-center w-full rounded-3xl border border-border/60 bg-card px-4 py-3.5 text-left hover:bg-muted/40 hover:border-border transition-all duration-200 group"
                 >
                   <span className="w-8 h-8 rounded-lg flex items-center justify-center mr-3 shrink-0">
                     <Icon size={22} strokeWidth={2} fill="currentColor" className={cat.color} />
