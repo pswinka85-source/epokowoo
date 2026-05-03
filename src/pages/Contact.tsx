@@ -6,7 +6,6 @@ import { Search, Send, ArrowLeft, MessageSquare, Mail, AlertTriangle, Info, Cale
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import envelopeIllustration from "@/assets/envelope-illustration.png";
-import notificationIcon from "@/assets/notification-icon.png";
 
 interface Profile {
   user_id: string;
