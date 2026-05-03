@@ -525,15 +525,18 @@ const Contact = () => {
                           }`}
                         >
                           {/* Notification icon */}
-                          <div className="w-11 h-11 rounded-full overflow-hidden shrink-0">
-                            <img src={notificationIcon} className="w-full h-full object-cover" alt="Powiadomienie" />
+                          <div className="relative w-11 h-11 rounded-full shrink-0 bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-[0_4px_12px_-2px_hsl(var(--primary)/0.4)]">
+                            <Sparkles size={18} className="text-primary-foreground" strokeWidth={2.5} />
                           </div>
 
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-0.5">
-                              <span className={`text-sm truncate ${!n.read ? 'font-bold text-foreground' : 'font-semibold text-foreground'}`}>
+                              <span className={`flex items-center gap-1.5 text-sm truncate ${!n.read ? 'font-bold text-foreground' : 'font-semibold text-foreground'}`}>
                                 Epokowo
+                                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary shrink-0">
+                                  <Check size={10} strokeWidth={3.5} className="text-primary-foreground" />
+                                </span>
                               </span>
                               <span className="text-[11px] text-muted-foreground/50 shrink-0 ml-2">
                                 {formatTimeAgo(n.created_at)}
